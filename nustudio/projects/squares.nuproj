@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+    <MetaData name="Squares" author="David Ragazzi" description="This example has the purpose of verify how the neural network predict the next image(s) of a square and its mirror image."/>
+    <Net>
+        <Node name="Top Region" type="Region" width="15" height="10" inputMapType="Grouped" enableSpatialPooling="True" potentialRadius="8" potentialPct="1.0" globalInhibition="False" localAreaDensity="-1.0" numActiveColumnsPerInhArea="4" stimulusThreshold="0" proximalSynConnectedPerm="0.15" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.04" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="99" maxBoost="10.0" enableTemporalPooling="True" numCellsPerColumn="5" learningRadius="10" distalSynInitialPerm="0.15" distalSynConnectedPerm="0.1" distalSynPermIncrement="0.05" distalSynPermDecrement="0.05" minThreshold="1" activationThreshold="3" maxNumNewSynapses="3">
+            <Node name="Left Sensor" type="Sensor" width="16" height="6" inputFormat="Htm" dataSourceType="File" fileName="square_left.txt"/>
+            <Node name="Right Sensor" type="Sensor" width="16" height="6" inputFormat="Htm" dataSourceType="File" fileName="square_right.txt"/>
+        </Node>
+    </Net>
+</Project>

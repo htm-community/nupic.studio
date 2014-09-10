@@ -303,7 +303,7 @@ class NodeSelectorForm(QtGui.QWidget):
 			Global.mainForm.markProjectChanges(True)
 
 			# Add new region bellow highlighted region
-			self.underMouseNode.addChild(Region(self, enteredText))
+			self.underMouseNode.addChild(Region(self.underMouseNode, enteredText))
 
 			# Redraw the tree to show the updates.
 			self.repaint()
@@ -319,7 +319,7 @@ class NodeSelectorForm(QtGui.QWidget):
 			Global.mainForm.markProjectChanges(True)
 
 			# Add new sensor bellow highlighted region
-			self.underMouseNode.addChild(Sensor(self, enteredText))
+			self.underMouseNode.addChild(Sensor(self.underMouseNode, enteredText))
 
 			# Redraw the tree to show the updates.
 			self.repaint()

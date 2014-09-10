@@ -1,0 +1,8 @@
+PyOpenGL==3.1.0
+PyOpenGL-accelerate==3.1.0
+numpy==1.9.0
+nupic==0.1.15
+nustudio==1.0.0
+pyqtgraph==0.9.8
+scipy==0.14.0
+wsgiref==0.1.2

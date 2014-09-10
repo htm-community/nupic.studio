@@ -21,6 +21,14 @@ Dependencies:
  * Python (2.7 or later) (with development headers)
  * PIP
  * Nupic
+ * NumPy
+ * SciPy
+ * PyOpenGL
+ * PyOpenGL-accelerate
+ * PyQt4
+ * PyQtGraph
+
+_Note_: Except Python, PIP and NuPIC, all dependencies above already are automatically installed by PIP package. However some errors might happen due to package conflicts specific of each system environment. In this case, you will have install manually these packages using a package manager like `apt`, `yum`, `brew`, etc.
 
 ## User instructions
 
@@ -29,8 +37,6 @@ If you want only use it, simply do this:
     pip install nustudio
 
 _Note_: If you get a "permission denied" error when using pip, you may add the --user flag to install to a location in your home directory, which should resolve any permissions issues. Doing this, you may need to add this location to your PATH and PYTHONPATH. Alternatively, you can run pip with 'sudo'.
-
-_Note_: If you are using an Ubuntu-like system and find instalation issues related to BLAS libraries, probably you will have to first install scipy manually with apt-get (`apt-get install python-scipy`) and then try again.
 
 Once it is installed, you can execute the app using:
 

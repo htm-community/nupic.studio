@@ -477,13 +477,13 @@ class MainForm(QtGui.QMainWindow):
 		if initialized:
 			Global.outputForm.addText("Initialization: " + "{0:.3f}".format(endTime - startTime) + " secs")
 			Global.outputForm.addText("")
-			Global.outputForm.addText("Step\tTime (secs)")
+			Global.outputForm.addText("Step\tTime (secs)\tAccuracy (%)")
 
 			# Perfoms actions related to time step progression.
 			startTime = time.time()
 			Global.project.topRegion.nextStep()
 			endTime = time.time()
-			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime))
+			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
 
 			# Disable relevant buttons:
 			self.__enableSteeringButtons(True)
@@ -514,7 +514,7 @@ class MainForm(QtGui.QMainWindow):
 		startTime = time.time()
 		Global.project.topRegion.nextStep()
 		endTime = time.time()
-		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime))
+		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
 
 		# Update controls
 		if self.sliderStep.value() != self.sliderStep.maximum():

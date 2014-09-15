@@ -289,19 +289,6 @@ class NodeInformationForm(QtGui.QWidget):
 		if selectedNode.type == NodeType.region:
 			self.selectedRegion = selectedNode
 
-			"""TODO:# Update node controls
-			self.textBoxRegionStepCounter.setText("")
-			self.textBoxRegionActivityRate.setText("")
-			self.textBoxRegionPredictionPrecision.setText("")
-			self.textBoxRegionPredictionCounter.setText("")
-			self.textBoxRegionCorrectPredictionCounter.setText("")
-			if selectedRegion != None:
-				self.textBoxRegionStepCounter.setText(selectedRegion.Statistics.StepCounter.ToString())
-				self.textBoxRegionActivityRate.setText(selectedRegion.Statistics.ActivityRate.ToString())
-				self.textBoxRegionPredictionPrecision.setText(selectedRegion.Statistics.PredictPrecision.ToString())
-				self.textBoxRegionPredictionCounter.setText(selectedRegion.Statistics.PredictionCounter.ToString())
-				self.textBoxRegionCorrectPredictionCounter.setText(selectedRegion.Statistics.CorrectPredictionCounter.ToString())"""
-
 			# Bind the columns from this region
 			header, data = self.getColumnsData(self.selectedRegion)
 			self.dataGridColumns.model().update(header, data)
@@ -324,8 +311,8 @@ class NodeInformationForm(QtGui.QWidget):
 			pos = str(bit.x) + ", " + str(bit.y)
 			wasPredicted = bit.isPredicted[Global.selStep - 1]
 			isActive = bit.isActive[Global.selStep]
-			activationRate = bit.statsActivationRate
-			precisionRate = bit.statsPrecisionRate
+			activationRate = "{0:.3f}".format(bit.statsActivationRate)
+			precisionRate = "{0:.3f}".format(bit.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
 
 		return header, data
@@ -337,8 +324,8 @@ class NodeInformationForm(QtGui.QWidget):
 			pos = str(column.x) + ", " + str(column.y)
 			wasPredicted = column.segment.isPredicted[Global.selStep - 1]
 			isActive = column.segment.isActive[Global.selStep]
-			activationRate = column.segment.statsActivationRate
-			precisionRate = column.segment.statsPrecisionRate
+			activationRate = "{0:.3f}".format(column.segment.statsActivationRate)
+			precisionRate = "{0:.3f}".format(column.segment.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
 
 		return header, data
@@ -350,8 +337,8 @@ class NodeInformationForm(QtGui.QWidget):
 		for synapse in selectedSegment.synapses:
 			permanence = "{0:.3f}".format(synapse.permanence[Global.selStep])
 			isConnected = synapse.isConnected[Global.selStep]
-			connectionRate = synapse.statsConnectionRate
-			precisionRate = synapse.statsPrecisionRate
+			connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
+			precisionRate = "{0:.3f}".format(synapse.statsPrecisionRate)
 			data.append([permanence, isConnected, connectionRate, precisionRate])
 
 		return header, data
@@ -363,8 +350,8 @@ class NodeInformationForm(QtGui.QWidget):
 			pos = str(cell.z)
 			wasPredicted = cell.isPredicted[Global.selStep - 1]
 			isActive = cell.isActive[Global.selStep]
-			activationRate = cell.statsActivationRate
-			precisionRate = cell.statsPrecisionRate
+			activationRate = "{0:.3f}".format(cell.statsActivationRate)
+			precisionRate = "{0:.3f}".format(cell.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
 
 		return header, data
@@ -374,7 +361,7 @@ class NodeInformationForm(QtGui.QWidget):
 		data = []
 		for segment in selectedCell.segments:
 			isActive = segment.isActive[Global.selStep]
-			activationRate = segment.statsActivationRate
+			activationRate = "{0:.3f}".format(segment.statsActivationRate)
 			data.append([isActive, activationRate, activationRate])
 
 		return header, data
@@ -386,7 +373,7 @@ class NodeInformationForm(QtGui.QWidget):
 		for synapse in selectedSegment.synapses:
 			permanence = "{0:.3f}".format(synapse.permanence[Global.selStep])
 			isConnected = synapse.isConnected[Global.selStep]
-			connectionRate = synapse.statsConnectionRate
+			connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
 			data.append([permanence, isConnected, connectionRate])
 
 		return header, data

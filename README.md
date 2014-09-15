@@ -4,7 +4,7 @@ NuPIC Studio is an all­-in-­one tool that allows users create a HTM neural net
  * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.
  * The HTM engine is the own original NuPIC libray (Python distribution). This means no port, no bindings, no re-implementation, etc. So any changes in the original nupic source can be immediatedly viewed. This helps users that wish test improvements like new encoders or even hierarchy, attention, and motor integration.
 
-![Screenshot](https://github.com/DavidRagazzi/nupic.studio/blob/master/doc/screenshot.png)
+![Screenshot](https://github.com/DavidRagazzi/nupic.studio/blob/master/doc/main_form.png)
  
 
 For more information, see [numenta.org](http://numenta.org) or the [NuPIC Studio wiki](https://github.com/DavidRagazzi/nupic.studio/wiki).

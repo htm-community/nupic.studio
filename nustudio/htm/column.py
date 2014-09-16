@@ -58,4 +58,13 @@ class Column:
 		for cell in self.cells:
 			cell.nextStep()
 
+	def calculateStatistics(self):
+		"""
+		Calculate statistics after an iteration.
+		"""
+
+		self.segment.calculateStatistics()
+		for cell in self.cells:
+			cell.calculateStatistics()
+
 	#endregion

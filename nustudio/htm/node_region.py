@@ -327,6 +327,16 @@ class Region(Node):
 
 		#TODO: self._output = self.temporalPooler.getPredictedState()
 
+	def calculateStatistics(self):
+		"""
+		Calculate statistics after an iteration.
+		"""
+
+		for child in self.children:
+			child.calculateStatistics()
+		for column in self.columns:
+			column.calculateStatistics()
+
 	def getInput(self):
 		"""
 		Get input from sensors or lower regions and put into a single input map.

@@ -482,6 +482,7 @@ class MainForm(QtGui.QMainWindow):
 			# Perfoms actions related to time step progression.
 			startTime = time.time()
 			Global.project.topRegion.nextStep()
+			Global.project.topRegion.calculateStatistics()
 			endTime = time.time()
 			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
 
@@ -513,6 +514,7 @@ class MainForm(QtGui.QMainWindow):
 		# Perfoms actions related to time step progression.
 		startTime = time.time()
 		Global.project.topRegion.nextStep()
+		Global.project.topRegion.calculateStatistics()
 		endTime = time.time()
 		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
 

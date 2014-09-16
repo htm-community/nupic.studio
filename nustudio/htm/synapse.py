@@ -71,14 +71,19 @@ class Synapse:
 		self.isPredicted.append(False)
 		self.isRemoved.append(False)
 
+	def calculateStatistics(self):
+		"""
+		Calculate statistics after an iteration.
+		"""
+
 		# Calculate statistics
 		if self.isConnected[maxStoredSteps - 1]:
 			self.statsConnectionCount += 1
 		if self.isPredicted[maxStoredSteps - 1]:
 			self.statsPreditionCount += 1
 		if Global.currStep > 0:
-			self.statsConnectionRate = self.statsConnectionCount / Global.currStep
+			self.statsConnectionRate = self.statsConnectionCount / float(Global.currStep)
 		if self.statsConnectionCount > 0:
-			self.statsPrecisionRate = self.statsPreditionCount / self.statsConnectionCount
+			self.statsPrecisionRate = self.statsPreditionCount / float(self.statsConnectionCount)
 
 	#endregion

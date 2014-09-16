@@ -95,14 +95,22 @@ class Segment:
 		for synapse in self.synapses:
 			synapse.nextStep()
 
+	def calculateStatistics(self):
+		"""
+		Calculate statistics after an iteration.
+		"""
+
 		# Calculate statistics
 		if self.isActive[maxStoredSteps - 1]:
 			self.statsActivationCount += 1
 		if self.isPredicted[maxStoredSteps - 1]:
 			self.statsPreditionCount += 1
 		if Global.currStep > 0:
-			self.statsActivationRate = self.statsActivationCount / Global.currStep
+			self.statsActivationRate = self.statsActivationCount / float(Global.currStep)
 		if self.statsActivationCount > 0:
-			self.statsPrecisionRate = self.statsPreditionCount / self.statsActivationCount
+			self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
+
+		for synapse in self.synapses:
+			synapse.calculateStatistics()
 
 	#endregion

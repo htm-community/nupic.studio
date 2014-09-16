@@ -164,6 +164,14 @@ class Sensor(Node):
 		elif self.dataSourceType == DataSourceType.database:
 			pass
 
+	def calculateStatistics(self):
+		"""
+		Calculate statistics after an iteration.
+		"""
+
+		for bit in self.bits:
+			bit.calculateStatistics()
+
 	def __getNextFileRecord(self):
 		"""
 		Get the next record from file.

@@ -29,9 +29,18 @@ class SimulationLegendForm(QtGui.QDialog):
 		self.labelInactiveElement = QtGui.QLabel()
 		self.labelInactiveElement.setText("Inactive")
 
+		# buttonFalselyPredictedElement
+		self.buttonFalselyPredictedElement = QtGui.QPushButton()
+		self.buttonFalselyPredictedElement.setStyleSheet("background-color: rgb(255, 0, 0)")
+		self.buttonFalselyPredictedElement.setEnabled(False)
+
+		# labelFalselyPredictedElement
+		self.labelFalselyPredictedElement = QtGui.QLabel()
+		self.labelFalselyPredictedElement.setText("Falsely Predicted")
+
 		# buttonPredictedElement
 		self.buttonPredictedElement = QtGui.QPushButton()
-		self.buttonPredictedElement.setStyleSheet("background-color: rgb(0, 200, 100)")
+		self.buttonPredictedElement.setStyleSheet("background-color: rgb(255, 215, 80)")
 		self.buttonPredictedElement.setEnabled(False)
 
 		# labelPredictedElement
@@ -40,7 +49,7 @@ class SimulationLegendForm(QtGui.QDialog):
 
 		# buttonActiveElement
 		self.buttonActiveElement = QtGui.QPushButton()
-		self.buttonActiveElement.setStyleSheet("background-color: rgb(255, 255, 50)")
+		self.buttonActiveElement.setStyleSheet("background-color: rgb(50, 205, 50)")
 		self.buttonActiveElement.setEnabled(False)
 
 		# labelActiveElement
@@ -49,7 +58,7 @@ class SimulationLegendForm(QtGui.QDialog):
 
 		# buttonLearningElement
 		self.buttonLearningElement = QtGui.QPushButton()
-		self.buttonLearningElement.setStyleSheet("background-color: rgb(255, 180, 100)")
+		self.buttonLearningElement.setStyleSheet("background-color: rgb(125, 255, 0)")
 		self.buttonLearningElement.setEnabled(False)
 
 		# labelLearningElement
@@ -69,14 +78,16 @@ class SimulationLegendForm(QtGui.QDialog):
 		layout = QtGui.QGridLayout()
 		layout.addWidget(self.buttonInactiveElement, 0, 0)
 		layout.addWidget(self.labelInactiveElement, 0, 1)
-		layout.addWidget(self.buttonPredictedElement, 1, 0)
-		layout.addWidget(self.labelPredictedElement, 1, 1)
-		layout.addWidget(self.buttonActiveElement, 2, 0)
-		layout.addWidget(self.labelActiveElement, 2, 1)
-		layout.addWidget(self.buttonLearningElement, 3, 0)
-		layout.addWidget(self.labelLearningElement, 3, 1)
-		layout.addWidget(self.buttonSelectedElement, 4, 0)
-		layout.addWidget(self.labelSelectedElement, 4, 1)
+		layout.addWidget(self.buttonFalselyPredictedElement, 1, 0)
+		layout.addWidget(self.labelFalselyPredictedElement, 1, 1)
+		layout.addWidget(self.buttonPredictedElement, 2, 0)
+		layout.addWidget(self.labelPredictedElement, 2, 1)
+		layout.addWidget(self.buttonActiveElement, 3, 0)
+		layout.addWidget(self.labelActiveElement, 3, 1)
+		layout.addWidget(self.buttonLearningElement, 4, 0)
+		layout.addWidget(self.labelLearningElement, 4, 1)
+		layout.addWidget(self.buttonSelectedElement, 5, 0)
+		layout.addWidget(self.labelSelectedElement, 5, 1)
 		layout.setRowStretch(1, 100)
 
 		# SimulationLegendForm

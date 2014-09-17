@@ -20,17 +20,21 @@ class View:
 		self.showBitsNone = False
 		self.showBitsActive = True
 		self.showBitsPredicted = True
+		self.showBitsFalselyPredicted = True
 		self.showCellsNone = False
 		self.showCellsLearning = True
 		self.showCellsActive = True
 		self.showCellsPredicted = True
+		self.showCellsFalselyPredicted = True
 		self.showProximalSegmentsNone = False
 		self.showProximalSegmentsActive = True
 		self.showProximalSegmentsPredicted = True
+		self.showProximalSegmentsFalselyPredicted = True
 		self.showProximalSynapsesNone = False
 		self.showProximalSynapsesConnected = True
 		self.showProximalSynapsesActive = True
 		self.showProximalSynapsesPredicted = True
+		self.showProximalSynapsesFalselyPredicted = True
 		self.showDistalSegmentsNone = False
 		self.showDistalSegmentsActive = True
 		self.showDistalSynapsesNone = False
@@ -78,17 +82,21 @@ class Global:
 						view.showBitsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsNone')
 						view.showBitsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsActive')
 						view.showBitsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsPredicted')
+						view.showBitsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsFalselyPredicted')
 						view.showCellsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsNone')
 						view.showCellsLearning = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsLearning')
 						view.showCellsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsActive')
 						view.showCellsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsPredicted')
+						view.showCellsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsFalselyPredicted')
 						view.showProximalSegmentsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsNone')
 						view.showProximalSegmentsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsActive')
 						view.showProximalSegmentsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsPredicted')
+						view.showProximalSegmentsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsFalselyPredicted')
 						view.showProximalSynapsesNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesNone')
 						view.showProximalSynapsesConnected = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesConnected')
 						view.showProximalSynapsesActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesActive')
 						view.showProximalSynapsesPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesPredicted')
+						view.showProximalSynapsesFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesFalselyPredicted')
 						view.showDistalSegmentsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSegmentsNone')
 						view.showDistalSegmentsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSegmentsActive')
 						view.showDistalSynapsesNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSynapsesNone')
@@ -150,17 +158,21 @@ class Global:
 			xmlWriter.writeAttribute('showBitsNone',  str(view.showBitsNone))
 			xmlWriter.writeAttribute('showBitsActive',  str(view.showBitsActive))
 			xmlWriter.writeAttribute('showBitsPredicted',  str(view.showBitsPredicted))
+			xmlWriter.writeAttribute('showBitsFalselyPredicted',  str(view.showBitsFalselyPredicted))
 			xmlWriter.writeAttribute('showCellsNone',  str(view.showCellsNone))
 			xmlWriter.writeAttribute('showCellsLearning',  str(view.showCellsLearning))
 			xmlWriter.writeAttribute('showCellsActive',  str(view.showCellsActive))
 			xmlWriter.writeAttribute('showCellsPredicted',  str(view.showCellsPredicted))
+			xmlWriter.writeAttribute('showCellsFalselyPredicted',  str(view.showCellsFalselyPredicted))
 			xmlWriter.writeAttribute('showProximalSegmentsNone',  str(view.showProximalSegmentsNone))
 			xmlWriter.writeAttribute('showProximalSegmentsActive',  str(view.showProximalSegmentsActive))
 			xmlWriter.writeAttribute('showProximalSegmentsPredicted',  str(view.showProximalSegmentsPredicted))
+			xmlWriter.writeAttribute('showProximalSegmentsFalselyPredicted',  str(view.showProximalSegmentsFalselyPredicted))
 			xmlWriter.writeAttribute('showProximalSynapsesNone',  str(view.showProximalSynapsesNone))
 			xmlWriter.writeAttribute('showProximalSynapsesConnected',  str(view.showProximalSynapsesConnected))
 			xmlWriter.writeAttribute('showProximalSynapsesActive',  str(view.showProximalSynapsesActive))
 			xmlWriter.writeAttribute('showProximalSynapsesPredicted',  str(view.showProximalSynapsesPredicted))
+			xmlWriter.writeAttribute('showProximalSynapsesFalselyPredicted',  str(view.showProximalSynapsesFalselyPredicted))
 			xmlWriter.writeAttribute('showDistalSegmentsNone',  str(view.showDistalSegmentsNone))
 			xmlWriter.writeAttribute('showDistalSegmentsActive',  str(view.showDistalSegmentsActive))
 			xmlWriter.writeAttribute('showDistalSynapsesNone',  str(view.showDistalSynapsesNone))

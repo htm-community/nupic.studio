@@ -43,30 +43,35 @@ class SimulationForm(QtGui.QWidget):
 		# Colors
 		colorGray = QtGui.QColor.fromRgb(190, 190, 190)
 		colorBlue = QtGui.QColor.fromRgb(0, 0, 255)
-		colorGreen = QtGui.QColor.fromRgb(0, 200, 100)
-		colorYellow = QtGui.QColor.fromRgb(255, 255, 50)
-		colorCopper = QtGui.QColor.fromRgb(255, 180, 100)
+		colorGreen = QtGui.QColor.fromRgb(50, 205, 50)
+		colorLightGreen = QtGui.QColor.fromRgb(125, 255, 0)
+		colorYellow = QtGui.QColor.fromRgb(255, 215, 80)
+		colorRed = QtGui.QColor.fromRgb(255, 0, 0)
 
 		# General color scheme
 		self.colorInactive = colorGray
 		self.colorSelected = colorBlue
 
 		# Sensor bit color scheme
-		self.colorBitActive = colorYellow
-		self.colorBitPredicted = colorGreen
+		self.colorBitActive = colorGreen
+		self.colorBitPredicted = colorYellow
+		self.colorBitFalselyPredicted = colorRed
 
 		# Cell color scheme
-		self.colorCellLearning = colorCopper
-		self.colorCellActive = colorYellow
-		self.colorCellPredicted = colorGreen
+		self.colorCellLearning = colorLightGreen
+		self.colorCellActive = colorGreen
+		self.colorCellPredicted = colorYellow
+		self.colorCellFalselyPredicted = colorRed
 
 		# Segment color scheme
-		self.colorSegmentActive = colorYellow
-		self.colorSegmentPredicted = colorGreen
+		self.colorSegmentActive = colorGreen
+		self.colorSegmentPredicted = colorYellow
+		self.colorSegmentFalselyPredicted = colorRed
 
 		# Synapse color scheme
-		self.colorSynapseConnected = colorYellow
-		self.colorSynapsePredicted = colorGreen
+		self.colorSynapseConnected = colorGreen
+		self.colorSynapsePredicted = colorYellow
+		self.colorSynapseFalselyPredicted = colorRed
 
 		#endregion
 
@@ -171,11 +176,18 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowBitsPredicted.setCheckable(True)
 		self.menuShowBitsPredicted.triggered.connect(self.menuShowBits_Click)
 
+		# menuShowBitsFalselyPredicted
+		self.menuShowBitsFalselyPredicted = QtGui.QAction(self)
+		self.menuShowBitsFalselyPredicted.setText("&Falsely Predicted")
+		self.menuShowBitsFalselyPredicted.setCheckable(True)
+		self.menuShowBitsFalselyPredicted.triggered.connect(self.menuShowBits_Click)
+
 		# menuShowBits
 		self.menuShowBits = QtGui.QMenu()
 		self.menuShowBits.addAction(self.menuShowBitsNone)
 		self.menuShowBits.addAction(self.menuShowBitsActive)
 		self.menuShowBits.addAction(self.menuShowBitsPredicted)
+		self.menuShowBits.addAction(self.menuShowBitsFalselyPredicted)
 		self.menuShowBits.setTitle("&Sensor bits")
 
 		# menuShowCellsNone
@@ -202,12 +214,19 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowCellsPredicted.setCheckable(True)
 		self.menuShowCellsPredicted.triggered.connect(self.menuShowCells_Click)
 
+		# menuShowCellsFalselyPredicted
+		self.menuShowCellsFalselyPredicted = QtGui.QAction(self)
+		self.menuShowCellsFalselyPredicted.setText("&Falsely Predicted")
+		self.menuShowCellsFalselyPredicted.setCheckable(True)
+		self.menuShowCellsFalselyPredicted.triggered.connect(self.menuShowCells_Click)
+
 		# menuShowCells
 		self.menuShowCells = QtGui.QMenu()
 		self.menuShowCells.addAction(self.menuShowCellsNone)
 		self.menuShowCells.addAction(self.menuShowCellsLearning)
 		self.menuShowCells.addAction(self.menuShowCellsActive)
 		self.menuShowCells.addAction(self.menuShowCellsPredicted)
+		self.menuShowCells.addAction(self.menuShowCellsFalselyPredicted)
 		self.menuShowCells.setTitle("C&ells")
 
 		# menuShowProximalSegmentsNone
@@ -228,11 +247,18 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowProximalSegmentsPredicted.setCheckable(True)
 		self.menuShowProximalSegmentsPredicted.triggered.connect(self.menuShowProximalSegments_Click)
 
+		# menuShowProximalSegmentsFalselyPredicted
+		self.menuShowProximalSegmentsFalselyPredicted = QtGui.QAction(self)
+		self.menuShowProximalSegmentsFalselyPredicted.setText("&Falsely Predicted")
+		self.menuShowProximalSegmentsFalselyPredicted.setCheckable(True)
+		self.menuShowProximalSegmentsFalselyPredicted.triggered.connect(self.menuShowProximalSegments_Click)
+
 		# menuShowProximalSegments
 		self.menuShowProximalSegments = QtGui.QMenu()
 		self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsNone)
 		self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsActive)
 		self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsPredicted)
+		self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsFalselyPredicted)
 		self.menuShowProximalSegments.setTitle("&Segments")
 
 		# menuShowProximalSynapsesNone
@@ -259,12 +285,19 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowProximalSynapsesPredicted.setCheckable(True)
 		self.menuShowProximalSynapsesPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
 
+		# menuShowProximalSynapsesFalselyPredicted
+		self.menuShowProximalSynapsesFalselyPredicted = QtGui.QAction(self)
+		self.menuShowProximalSynapsesFalselyPredicted.setText("&Falsely Predicted")
+		self.menuShowProximalSynapsesFalselyPredicted.setCheckable(True)
+		self.menuShowProximalSynapsesFalselyPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
+
 		# menuShowProximalSynapses
 		self.menuShowProximalSynapses = QtGui.QMenu()
 		self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesNone)
 		self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesConnected)
 		self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesActive)
 		self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesPredicted)
+		self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesFalselyPredicted)
 		self.menuShowProximalSynapses.setTitle("&Synapses")
 
 		# menuShowProximal
@@ -617,6 +650,8 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowBitsNone.isChecked():
 			isVisible = False
+		elif (bit.isPredicted[Global.selStep - 1] and not bit.isActive[Global.selStep]) and self.menuShowBitsFalselyPredicted.isChecked():
+			color = self.colorBitFalselyPredicted
 		elif bit.isPredicted[Global.selStep] and self.menuShowBitsPredicted.isChecked():
 			color = self.colorBitPredicted
 		elif bit.isActive[Global.selStep] and self.menuShowBitsActive.isChecked():
@@ -654,6 +689,8 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowCellsNone.isChecked():
 			isVisible = False
+		elif (cell.isPredicted[Global.selStep - 1] and not cell.isActive[Global.selStep]) and self.menuShowCellsFalselyPredicted.isChecked():
+			color = self.colorCellFalselyPredicted
 		elif cell.isPredicted[Global.selStep] and self.menuShowCellsPredicted.isChecked():
 			color = self.colorCellPredicted
 		elif cell.isLearning[Global.selStep] and self.menuShowCellsLearning.isChecked():
@@ -753,6 +790,11 @@ class SimulationForm(QtGui.QWidget):
 			# Update properties according to state
 			if (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
 				isVisible = False
+			elif segment.isPredicted[Global.selStep - 1] and not segment.isActive[Global.selStep]:
+				if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsFalselyPredicted.isChecked():
+					color = self.colorSegmentFalselyPredicted
+				else:
+					isVisible = False
 			elif segment.isPredicted[Global.selStep]:
 				if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsPredicted.isChecked():
 					color = self.colorSegmentPredicted
@@ -797,6 +839,11 @@ class SimulationForm(QtGui.QWidget):
 			isVisible = True
 			if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
 				isVisible = False
+			elif synapse.isPredicted[Global.selStep - 1] and not synapse.isConnected[Global.selStep]:
+				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesFalselyPredicted.isChecked()):
+					color = self.colorSynapseFalselyPredicted
+				else:
+					isVisible = False
 			elif synapse.isPredicted[Global.selStep]:
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesPredicted.isChecked()):
 					color = self.colorSynapsePredicted
@@ -848,17 +895,21 @@ class SimulationForm(QtGui.QWidget):
 				self.menuShowBitsNone.setChecked(view.showBitsNone)
 				self.menuShowBitsActive.setChecked(view.showBitsActive)
 				self.menuShowBitsPredicted.setChecked(view.showBitsPredicted)
+				self.menuShowBitsFalselyPredicted.setChecked(view.showBitsFalselyPredicted)
 				self.menuShowCellsNone.setChecked(view.showCellsNone)
 				self.menuShowCellsLearning.setChecked(view.showCellsLearning)
 				self.menuShowCellsActive.setChecked(view.showCellsActive)
 				self.menuShowCellsPredicted.setChecked(view.showCellsPredicted)
+				self.menuShowCellsFalselyPredicted.setChecked(view.showCellsFalselyPredicted)
 				self.menuShowProximalSegmentsNone.setChecked(view.showProximalSegmentsNone)
 				self.menuShowProximalSegmentsActive.setChecked(view.showProximalSegmentsActive)
 				self.menuShowProximalSegmentsPredicted.setChecked(view.showProximalSegmentsPredicted)
+				self.menuShowProximalSegmentsFalselyPredicted.setChecked(view.showProximalSegmentsFalselyPredicted)
 				self.menuShowProximalSynapsesNone.setChecked(view.showProximalSynapsesNone)
 				self.menuShowProximalSynapsesConnected.setChecked(view.showProximalSynapsesConnected)
 				self.menuShowProximalSynapsesActive.setChecked(view.showProximalSynapsesActive)
 				self.menuShowProximalSynapsesPredicted.setChecked(view.showProximalSynapsesPredicted)
+				self.menuShowProximalSynapsesFalselyPredicted.setChecked(view.showProximalSynapsesFalselyPredicted)
 				self.menuShowDistalSegmentsNone.setChecked(view.showDistalSegmentsNone)
 				self.menuShowDistalSegmentsActive.setChecked(view.showDistalSegmentsActive)
 				self.menuShowDistalSynapsesNone.setChecked(view.showDistalSynapsesNone)
@@ -892,6 +943,7 @@ class SimulationForm(QtGui.QWidget):
 			if self.menuShowBitsNone.isChecked():
 				self.menuShowBitsActive.setChecked(False)
 				self.menuShowBitsPredicted.setChecked(False)
+				self.menuShowBitsFalselyPredicted.setChecked(False)
 		else:
 			self.menuShowBitsNone.setChecked(False)
 
@@ -905,6 +957,7 @@ class SimulationForm(QtGui.QWidget):
 				self.menuShowCellsLearning.setChecked(False)
 				self.menuShowCellsActive.setChecked(False)
 				self.menuShowCellsPredicted.setChecked(False)
+				self.menuShowCellsFalselyPredicted.setChecked(False)
 		else:
 			self.menuShowCellsNone.setChecked(False)
 
@@ -917,6 +970,7 @@ class SimulationForm(QtGui.QWidget):
 			if self.menuShowProximalSegmentsNone.isChecked():
 				self.menuShowProximalSegmentsActive.setChecked(False)
 				self.menuShowProximalSegmentsPredicted.setChecked(False)
+				self.menuShowProximalSegmentsFalselyPredicted.setChecked(False)
 		else:
 			self.menuShowProximalSegmentsNone.setChecked(False)
 
@@ -930,6 +984,7 @@ class SimulationForm(QtGui.QWidget):
 				self.menuShowProximalSynapsesConnected.setChecked(False)
 				self.menuShowProximalSynapsesActive.setChecked(False)
 				self.menuShowProximalSynapsesPredicted.setChecked(False)
+				self.menuShowProximalSynapsesFalselyPredicted.setChecked(False)
 		else:
 			self.menuShowProximalSynapsesNone.setChecked(False)
 
@@ -987,17 +1042,21 @@ class SimulationForm(QtGui.QWidget):
 				view.showBitsNone = self.menuShowBitsNone.isChecked()
 				view.showBitsActive = self.menuShowBitsActive.isChecked()
 				view.showBitsPredicted = self.menuShowBitsPredicted.isChecked()
+				view.showBitsFalselyPredicted = self.menuShowBitsFalselyPredicted.isChecked()
 				view.showCellsNone = self.menuShowCellsNone.isChecked()
 				view.showCellsLearning = self.menuShowCellsLearning.isChecked()
 				view.showCellsActive = self.menuShowCellsActive.isChecked()
 				view.showCellsPredicted = self.menuShowCellsPredicted.isChecked()
+				view.showCellsFalselyPredicted = self.menuShowCellsFalselyPredicted.isChecked()
 				view.showProximalSegmentsNone = self.menuShowProximalSegmentsNone.isChecked()
 				view.showProximalSegmentsActive = self.menuShowProximalSegmentsActive.isChecked()
 				view.showProximalSegmentsPredicted = self.menuShowProximalSegmentsPredicted.isChecked()
+				view.showProximalSegmentsFalselyPredicted = self.menuShowProximalSegmentsFalselyPredicted.isChecked()
 				view.showProximalSynapsesNone = self.menuShowProximalSynapsesNone.isChecked()
 				view.showProximalSynapsesConnected = self.menuShowProximalSynapsesConnected.isChecked()
 				view.showProximalSynapsesActive = self.menuShowProximalSynapsesActive.isChecked()
 				view.showProximalSynapsesPredicted = self.menuShowProximalSynapsesPredicted.isChecked()
+				view.showProximalSynapsesFalselyPredicted = self.menuShowProximalSynapsesFalselyPredicted.isChecked()
 				view.showDistalSegmentsNone = self.menuShowDistalSegmentsNone.isChecked()
 				view.showDistalSegmentsActive = self.menuShowDistalSegmentsActive.isChecked()
 				view.showDistalSynapsesNone = self.menuShowDistalSynapsesNone.isChecked()

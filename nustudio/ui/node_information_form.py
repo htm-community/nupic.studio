@@ -1,49 +1,7 @@
 ﻿from PyQt4 import Qt, QtGui, QtCore
+from nustudio import ArrayTableModel
 from nustudio.ui import Global
 from nustudio.htm.node import NodeType, Node
-
-class ArrayTableModel(QtGui.QStandardItemModel):
-
-	def __init__(self, parent=None):
-		QtGui.QStandardItemModel.__init__(self)
-
-		self.header = []
-		self.data = []
-
-	def update(self, header, data):
-		self.header = header
-		self.data = data
-
-		numCols = len(self.header)
-		self.setColumnCount(numCols)
-		numRows = len(self.data)
-		self.setRowCount(numRows)
-
-		for col in range(numCols):
-			self.setHeaderData(col, QtCore.Qt.Horizontal, self.header[col])
-
-		for row in range(numRows):
-			for col in range(numCols):
-				data = self.data[row][col]
-				self.setData(self.index(row, col, QtCore.QModelIndex()), data)
-
-	def data(self, index, role=QtCore.Qt.DisplayRole):
-		column, row = index.column(), index.row()
-		if role == QtCore.Qt.TextAlignmentRole:
-			if column > 0:
-				return QtCore.Qt.AlignLeft
-			else:
-				return QtCore.Qt.AlignRight
-		elif role == QtCore.Qt.DisplayRole:
-			return self.data[row][column]
-		return 
-
-	def columnCount(self, parent=QtCore.QModelIndex()):
-		return len(self.header)
-
-	def rowCount(self, parent=QtCore.QModelIndex()):
-		return len(self.data)
-
 
 class NodeInformationForm(QtGui.QWidget):
 
@@ -125,7 +83,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridBits
 		self.dataGridBits = QtGui.QTableView()
-		self.dataGridBits.setModel(ArrayTableModel())
+		self.dataGridBits.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridBits.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridBits.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridBits.setToolTip("Click on a row to see more details")
@@ -162,7 +120,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridColumns
 		self.dataGridColumns = QtGui.QTableView()
-		self.dataGridColumns.setModel(ArrayTableModel())
+		self.dataGridColumns.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridColumns.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridColumns.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridColumns.setToolTip("Click on a row to see more details")
@@ -179,7 +137,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridProximalSynapses
 		self.dataGridProximalSynapses = QtGui.QTableView()
-		self.dataGridProximalSynapses.setModel(ArrayTableModel())
+		self.dataGridProximalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridProximalSynapses.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridProximalSynapses.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridProximalSynapses.setToolTip("Click on a row to see more details")
@@ -196,7 +154,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridCells
 		self.dataGridCells = QtGui.QTableView()
-		self.dataGridCells.setModel(ArrayTableModel())
+		self.dataGridCells.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridCells.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridCells.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridCells.setToolTip("Click on a row to see more details")
@@ -213,7 +171,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridDistalSegments
 		self.dataGridDistalSegments = QtGui.QTableView()
-		self.dataGridDistalSegments.setModel(ArrayTableModel())
+		self.dataGridDistalSegments.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridDistalSegments.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridDistalSegments.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridDistalSegments.setToolTip("Click on a row to see more details")
@@ -230,7 +188,7 @@ class NodeInformationForm(QtGui.QWidget):
 
 		# dataGridDistalSynapses
 		self.dataGridDistalSynapses = QtGui.QTableView()
-		self.dataGridDistalSynapses.setModel(ArrayTableModel())
+		self.dataGridDistalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
 		self.dataGridDistalSynapses.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 		self.dataGridDistalSynapses.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.dataGridDistalSynapses.setToolTip("Click on a row to see more details")

@@ -1,6 +1,7 @@
 import os
 import numpy
 from PyQt4 import QtGui, QtCore
+from nustudio import getInstantiatedClass
 from nustudio.ui import Global
 from nustudio.htm import maxStoredSteps
 from nustudio.htm.node import Node, NodeType
@@ -41,12 +42,6 @@ class Sensor(Node):
 		self.bits = []
 		"""An array of the bit objects that compose the current output of this node."""
 
-		self.inputFormat = InputFormat.htm
-		"""Format of the node (HTM or raw data)"""
-
-		self.encoder = None
-		"""Optional encoder to convert raw data to htm input and vice-versa."""
-
 		self.dataSourceType = DataSourceType.file
 		"""Type of the data source (File or Database)"""
 
@@ -64,6 +59,23 @@ class Sensor(Node):
 
 		self.databaseField = ''
 		"""Target field of the database table."""
+
+		self.inputFormat = InputFormat.htm
+		"""Format of the node (HTM or raw data)"""
+
+		self.encoder = None
+		"""Optional encoder to convert raw data to htm input and vice-versa."""
+
+		self.encoderModule = ""
+		"""Module name which encoder class is imported."""
+
+		self.encoderClass = ""
+		"""Class name which encode or decode values."""
+
+		self.encoderParams = ""
+		"""Parameters passed to the encoder class constructor."""
+
+		self.encoderParams = ""
 
 		#endregion
 
@@ -140,7 +152,8 @@ class Sensor(Node):
 					# Increments height
 					height += 1
 			elif self.inputFormat == InputFormat.raw:
-				pass
+				# Create an instance class for an encoder given its module, class and constructor params
+				self.encoder = getInstantiatedClass(self.encoderModule, self.encoderClass, self.encoderParams)
 
 		elif self.dataSourceType == DataSourceType.database:
 			pass
@@ -207,7 +220,7 @@ class Sensor(Node):
 				if character != '\n':
 					raise Exception("Invalid file format.")
 
-			# Check if next char is a 'return', i.e. the record end
+			# Check if next char is a 'return' character, i.e. the record end
 			character = self._file.read(1)
 			if character == '\r':
 				character = self._file.read(1)

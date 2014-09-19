@@ -300,6 +300,11 @@ class NodeSelectorForm(QtGui.QWidget):
 		# Ask for region's name
 		enteredText, ok = QtGui.QInputDialog.getText(self, "Input Dialog", "Enter region's name:")
 		if ok:
+			validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
+			if not validExpr.exactMatch(enteredText):
+				QtGui.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+				return
+
 			Global.mainForm.markProjectChanges(True)
 
 			# Add new region bellow highlighted region
@@ -316,6 +321,11 @@ class NodeSelectorForm(QtGui.QWidget):
 		# Ask for sensor's name
 		enteredText, ok = QtGui.QInputDialog.getText(self, "Input Dialog", "Enter sensor's name:")
 		if ok:
+			validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
+			if not validExpr.exactMatch(enteredText):
+				QtGui.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+				return
+
 			Global.mainForm.markProjectChanges(True)
 
 			# Add new sensor bellow highlighted region

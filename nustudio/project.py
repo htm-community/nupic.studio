@@ -35,7 +35,7 @@ class Project:
 		self.description = ""
 		"""Description of the project."""
 
-		self.topRegion = Region(None, "Top Region")
+		self.topRegion = Region(None, "TopRegion")
 		"""Parameters for the regions."""
 
 		#endregion
@@ -56,7 +56,7 @@ class Project:
 		self.description = ""
 
 		# Initialize top region params
-		self.topRegion = Region(None, "Top Region")
+		self.topRegion = Region(None, "TopRegion")
 
 	def open(self, fileName):
 		"""
@@ -163,7 +163,9 @@ class Project:
 				node.inputFormat = InputFormat.htm
 			elif inputFormat == "Raw":
 				node.inputFormat = InputFormat.raw
-				node.encoder = self.__getStringAttribute(xmlReader.attributes(), 'encoder')
+				node.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
+				node.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
+				node.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
 			dataSourceType = self.__getStringAttribute(xmlReader.attributes(), 'dataSourceType')
 			if dataSourceType == "File":
 				node.dataSourceType = DataSourceType.file
@@ -257,7 +259,9 @@ class Project:
 				xmlWriter.writeAttribute('inputFormat', "Htm")
 			elif node.inputFormat == InputFormat.raw:
 				xmlWriter.writeAttribute('inputFormat', "Raw")
-				xmlWriter.writeAttribute('encoder', node.encoder)
+				xmlWriter.writeAttribute('encoderModule', node.encoderModule)
+				xmlWriter.writeAttribute('encoderClass', node.encoderClass)
+				xmlWriter.writeAttribute('encoderParams', node.encoderParams)
 			if node.dataSourceType == DataSourceType.file:
 				xmlWriter.writeAttribute('dataSourceType', "File")
 				xmlWriter.writeAttribute('fileName', node.fileName)

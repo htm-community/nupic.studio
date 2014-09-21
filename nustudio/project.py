@@ -1,7 +1,7 @@
 ﻿from PyQt4 import QtGui, QtCore
 from nustudio.htm.node import NodeType, Node
 from nustudio.htm.node_region import Region, InputMapType
-from nustudio.htm.node_sensor import Sensor, InputFormat, DataSourceType
+from nustudio.htm.node_sensor import Sensor, DataSourceType, InputFormat, InputRawDataType
 
 """
 Loads and saves the Elements of the .nuproj file, that contains user entries for project properties
@@ -158,14 +158,6 @@ class Project:
 			node.activationThreshold = self.__getIntegerAttribute(xmlReader.attributes(), 'activationThreshold')
 			node.maxNumNewSynapses = self.__getIntegerAttribute(xmlReader.attributes(), 'maxNumNewSynapses')
 		elif type == 'Sensor':
-			inputFormat = self.__getStringAttribute(xmlReader.attributes(), 'inputFormat')
-			if inputFormat == "Htm":
-				node.inputFormat = InputFormat.htm
-			elif inputFormat == "Raw":
-				node.inputFormat = InputFormat.raw
-				node.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
-				node.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
-				node.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
 			dataSourceType = self.__getStringAttribute(xmlReader.attributes(), 'dataSourceType')
 			if dataSourceType == "File":
 				node.dataSourceType = DataSourceType.file
@@ -175,6 +167,25 @@ class Project:
 				node.databaseConnectionString = self.__getStringAttribute(xmlReader.attributes(), 'databaseConnectionString')
 				node.databaseTable = self.__getStringAttribute(xmlReader.attributes(), 'databaseTable')
 				node.databaseField = self.__getStringAttribute(xmlReader.attributes(), 'databaseField')
+			inputFormat = self.__getStringAttribute(xmlReader.attributes(), 'inputFormat')
+			if inputFormat == "Htm":
+				node.inputFormat = InputFormat.htm
+			elif inputFormat == "Raw":
+				node.inputFormat = InputFormat.raw
+				inputRawDataType = self.__getStringAttribute(xmlReader.attributes(), 'inputRawDataType')
+				if inputRawDataType == "Boolean":
+					node.inputRawDataType = InputRawDataType.boolean
+				if inputRawDataType == "Integer":
+					node.inputRawDataType = InputRawDataType.integer
+				if inputRawDataType == "Decimal":
+					node.inputRawDataType = InputRawDataType.decimal
+				if inputRawDataType == "DateTime":
+					node.inputRawDataType = InputRawDataType.dateTime
+				if inputRawDataType == "String":
+					node.inputRawDataType = InputRawDataType.string
+				node.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
+				node.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
+				node.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
 
 		# If still is not end of element it's because this node has children
 		token = xmlReader.readNext()
@@ -255,13 +266,6 @@ class Project:
 			xmlWriter.writeAttribute('type', 'Sensor')
 			xmlWriter.writeAttribute('width', str(node.width))
 			xmlWriter.writeAttribute('height', str(node.height))
-			if node.inputFormat == InputFormat.htm:
-				xmlWriter.writeAttribute('inputFormat', "Htm")
-			elif node.inputFormat == InputFormat.raw:
-				xmlWriter.writeAttribute('inputFormat', "Raw")
-				xmlWriter.writeAttribute('encoderModule', node.encoderModule)
-				xmlWriter.writeAttribute('encoderClass', node.encoderClass)
-				xmlWriter.writeAttribute('encoderParams', node.encoderParams)
 			if node.dataSourceType == DataSourceType.file:
 				xmlWriter.writeAttribute('dataSourceType', "File")
 				xmlWriter.writeAttribute('fileName', node.fileName)
@@ -270,6 +274,23 @@ class Project:
 				xmlWriter.writeAttribute('databaseConnectionString', node.databaseConnectionString)
 				xmlWriter.writeAttribute('databaseTable', node.databaseTable)
 				xmlWriter.writeAttribute('databaseField', node.databaseField)
+			if node.inputFormat == InputFormat.htm:
+				xmlWriter.writeAttribute('inputFormat', "Htm")
+			elif node.inputFormat == InputFormat.raw:
+				xmlWriter.writeAttribute('inputFormat', "Raw")
+				if node.inputRawDataType == InputRawDataType.boolean:
+					xmlWriter.writeAttribute('inputRawDataType', 'Boolean')
+				elif node.inputRawDataType == InputRawDataType.integer:
+					xmlWriter.writeAttribute('inputRawDataType', 'Integer')
+				elif node.inputRawDataType == InputRawDataType.decimal:
+					xmlWriter.writeAttribute('inputRawDataType', 'Decimal')
+				elif node.inputRawDataType == InputRawDataType.dateTime:
+					xmlWriter.writeAttribute('inputRawDataType', 'DateTime')
+				elif node.inputRawDataType == InputRawDataType.string:
+					xmlWriter.writeAttribute('inputRawDataType', 'String')
+				xmlWriter.writeAttribute('encoderModule', node.encoderModule)
+				xmlWriter.writeAttribute('encoderClass', node.encoderClass)
+				xmlWriter.writeAttribute('encoderParams', node.encoderParams)
 
 		# Tranverse all child nodes
 		for childNode in node.children:

@@ -46,34 +46,34 @@ class NodeInformationForm(QtGui.QWidget):
 		self.textBoxSensorName.setEnabled(False)
 		self.textBoxSensorName.setAlignment(QtCore.Qt.AlignLeft)
 
-		# labelEncodedInput
-		self.labelEncodedInput = QtGui.QLabel()
-		self.labelEncodedInput.setText("Encoded Input")
-		self.labelEncodedInput.setAlignment(QtCore.Qt.AlignRight)
+		# labelCurrentValue
+		self.labelCurrentValue = QtGui.QLabel()
+		self.labelCurrentValue.setText("Current Value")
+		self.labelCurrentValue.setAlignment(QtCore.Qt.AlignRight)
 
-		# textBoxEncodedInput
-		self.textBoxEncodedInput = QtGui.QLineEdit()
-		self.textBoxEncodedInput.setEnabled(False)
-		self.textBoxEncodedInput.setAlignment(QtCore.Qt.AlignRight)
+		# textBoxCurrentValue
+		self.textBoxCurrentValue = QtGui.QLineEdit()
+		self.textBoxCurrentValue.setEnabled(False)
+		self.textBoxCurrentValue.setAlignment(QtCore.Qt.AlignRight)
 
-		# labelDecodedOutput
-		self.labelDecodedOutput = QtGui.QLabel()
-		self.labelDecodedOutput.setText("Decoded Output")
-		self.labelDecodedOutput.setAlignment(QtCore.Qt.AlignRight)
+		# labelPredictedValue
+		self.labelPredictedValue = QtGui.QLabel()
+		self.labelPredictedValue.setText("Predicted Value")
+		self.labelPredictedValue.setAlignment(QtCore.Qt.AlignRight)
 
-		# textBoxRegionDecodedOutput
-		self.textBoxRegionDecodedOutput = QtGui.QLineEdit()
-		self.textBoxRegionDecodedOutput.setEnabled(False)
-		self.textBoxRegionDecodedOutput.setAlignment(QtCore.Qt.AlignRight)
+		# textBoxPredictedValue
+		self.textBoxPredictedValue = QtGui.QLineEdit()
+		self.textBoxPredictedValue.setEnabled(False)
+		self.textBoxPredictedValue.setAlignment(QtCore.Qt.AlignRight)
 
 		# tabPageSensorLayout
 		self.tabPageSensorLayout = QtGui.QGridLayout()
 		self.tabPageSensorLayout.addWidget(self.labelSensorName, 0, 0)
 		self.tabPageSensorLayout.addWidget(self.textBoxSensorName, 0, 1)
-		self.tabPageSensorLayout.addWidget(self.labelEncodedInput, 1, 0)
-		self.tabPageSensorLayout.addWidget(self.textBoxEncodedInput, 1, 1)
-		self.tabPageSensorLayout.addWidget(self.labelDecodedOutput, 2, 0)
-		self.tabPageSensorLayout.addWidget(self.textBoxRegionDecodedOutput, 2, 1)
+		self.tabPageSensorLayout.addWidget(self.labelCurrentValue, 1, 0)
+		self.tabPageSensorLayout.addWidget(self.textBoxCurrentValue, 1, 1)
+		self.tabPageSensorLayout.addWidget(self.labelPredictedValue, 2, 0)
+		self.tabPageSensorLayout.addWidget(self.textBoxPredictedValue, 2, 1)
 		self.tabPageSensorLayout.setRowStretch(3, 100)
 		self.tabPageSensorLayout.setColumnStretch(2, 100)
 

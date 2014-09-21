@@ -1,8 +1,9 @@
-﻿import ast
+﻿import collections
+import json
 from PyQt4 import QtGui, QtCore
 from nustudio import ArrayTableModel
 from nustudio.ui import Global
-from nustudio.htm.node_sensor import InputFormat, DataSourceType
+from nustudio.htm.node_sensor import DataSourceType, InputFormat, InputRawDataType
 
 class SensorForm(QtGui.QDialog):
 
@@ -48,7 +49,6 @@ class SensorForm(QtGui.QDialog):
 		# radioButtonDataSourceFile
 		self.radioButtonDataSourceFile = QtGui.QRadioButton()
 		self.radioButtonDataSourceFile.setText("File")
-		self.radioButtonDataSourceFile.setEnabled(not Global.simulationInitialized)
 		self.radioButtonDataSourceFile.toggled.connect(self.__radioButtonDataSource_Click)
 
 		# labelFile
@@ -58,18 +58,15 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxFile
 		self.textBoxFile = QtGui.QLineEdit()
-		self.textBoxFile.setEnabled(not Global.simulationInitialized)
 
 		# buttonBrowseFile
 		self.buttonBrowseFile = QtGui.QPushButton()
 		self.buttonBrowseFile.setText("Browse...")
-		self.buttonBrowseFile.setEnabled(not Global.simulationInitialized)
 		self.buttonBrowseFile.clicked.connect(self.__buttonBrowseFile_Click)
 
 		# radioButtonDataSourceDatabase
 		self.radioButtonDataSourceDatabase = QtGui.QRadioButton()
 		self.radioButtonDataSourceDatabase.setText("Database")
-		self.radioButtonDataSourceDatabase.setEnabled(not Global.simulationInitialized)
 		self.radioButtonDataSourceDatabase.toggled.connect(self.__radioButtonDataSource_Click)
 
 		# labelDatabaseConnectionString
@@ -79,7 +76,6 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxDatabaseConnectionString
 		self.textBoxDatabaseConnectionString = QtGui.QLineEdit()
-		self.textBoxDatabaseConnectionString.setEnabled(not Global.simulationInitialized)
 
 		# labelDatabaseTable
 		self.labelDatabaseTable = QtGui.QLabel()
@@ -88,7 +84,6 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxDatabaseTable
 		self.textBoxDatabaseTable = QtGui.QLineEdit()
-		self.textBoxDatabaseTable.setEnabled(not Global.simulationInitialized)
 
 		# labelDatabaseField
 		self.labelDatabaseField = QtGui.QLabel()
@@ -97,7 +92,6 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxDatabaseField
 		self.textBoxDatabaseField = QtGui.QLineEdit()
-		self.textBoxDatabaseField.setEnabled(not Global.simulationInitialized)
 
 		# groupBoxDataSourceTypeLayout
 		groupBoxDataSourceTypeLayout = QtGui.QGridLayout()
@@ -117,18 +111,51 @@ class SensorForm(QtGui.QDialog):
 		self.groupBoxDataSourceType = QtGui.QGroupBox()
 		self.groupBoxDataSourceType.setLayout(groupBoxDataSourceTypeLayout)
 		self.groupBoxDataSourceType.setTitle("Data Source Type")
+		self.groupBoxDataSourceType.setEnabled(not Global.simulationInitialized)
 
 		# radioButtonInputFormatHtm
 		self.radioButtonInputFormatHtm = QtGui.QRadioButton()
 		self.radioButtonInputFormatHtm.setText("Htm")
-		self.radioButtonInputFormatHtm.setEnabled(not Global.simulationInitialized)
 		self.radioButtonInputFormatHtm.toggled.connect(self.__radioButtonInputFormat_Click)
 
 		# radioButtonInputFormatRaw
 		self.radioButtonInputFormatRaw = QtGui.QRadioButton()
 		self.radioButtonInputFormatRaw.setText("Raw")
-		self.radioButtonInputFormatRaw.setEnabled(not Global.simulationInitialized)
 		self.radioButtonInputFormatRaw.toggled.connect(self.__radioButtonInputFormat_Click)
+
+		# radioButtonInputRawBoolean
+		self.radioButtonInputRawBoolean = QtGui.QRadioButton()
+		self.radioButtonInputRawBoolean.setText("Boolean")
+
+		# radioButtonInputRawInteger
+		self.radioButtonInputRawInteger = QtGui.QRadioButton()
+		self.radioButtonInputRawInteger.setText("Integer")
+
+		# radioButtonInputRawDecimal
+		self.radioButtonInputRawDecimal = QtGui.QRadioButton()
+		self.radioButtonInputRawDecimal.setText("Decimal")
+
+		# radioButtonInputRawDateTime
+		self.radioButtonInputRawDateTime = QtGui.QRadioButton()
+		self.radioButtonInputRawDateTime.setText("Date/Time")
+
+		# radioButtonInputRawString
+		self.radioButtonInputRawString = QtGui.QRadioButton()
+		self.radioButtonInputRawString.setText("String")
+		self.radioButtonInputRawString.setChecked(True)
+
+		# groupBoxInputRawDataTypeLayout
+		groupBoxInputRawDataTypeLayout = QtGui.QGridLayout()
+		groupBoxInputRawDataTypeLayout.addWidget(self.radioButtonInputRawBoolean, 0, 0)
+		groupBoxInputRawDataTypeLayout.addWidget(self.radioButtonInputRawInteger, 0, 1)
+		groupBoxInputRawDataTypeLayout.addWidget(self.radioButtonInputRawDecimal, 0, 2)
+		groupBoxInputRawDataTypeLayout.addWidget(self.radioButtonInputRawDateTime, 1, 0)
+		groupBoxInputRawDataTypeLayout.addWidget(self.radioButtonInputRawString, 1, 1)
+
+		# groupBoxInputRawDataType
+		self.groupBoxInputRawDataType = QtGui.QGroupBox()
+		self.groupBoxInputRawDataType.setLayout(groupBoxInputRawDataTypeLayout)
+		self.groupBoxInputRawDataType.setTitle("Data Type")
 
 		# labelEncoderModule
 		self.labelEncoderModule = QtGui.QLabel()
@@ -137,7 +164,6 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxEncoderModule
 		self.textBoxEncoderModule = QtGui.QLineEdit()
-		self.textBoxEncoderModule.setEnabled(not Global.simulationInitialized)
 		self.textBoxEncoderModule.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9._]+')))
 
 		# labelEncoderClass
@@ -147,7 +173,6 @@ class SensorForm(QtGui.QDialog):
 
 		# textBoxEncoderClass
 		self.textBoxEncoderClass = QtGui.QLineEdit()
-		self.textBoxEncoderClass.setEnabled(not Global.simulationInitialized)
 		self.textBoxEncoderClass.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9_]+')))
 
 		# labelEncoderParams
@@ -169,27 +194,34 @@ class SensorForm(QtGui.QDialog):
 		self.dataGridEncoderParams.verticalHeader().setDefaultSectionSize(18)
 		self.dataGridEncoderParams.model().update(['Parameter', 'Value'], data)
 		self.dataGridEncoderParams.resizeColumnsToContents()
-		self.dataGridEncoderParams.setEnabled(not Global.simulationInitialized)
+		self.dataGridEncoderParams.setMinimumHeight(140)
 
-		self.groupRadioButtonInputFormat = QtGui.QButtonGroup()
-		self.groupRadioButtonInputFormat.addButton(self.radioButtonInputFormatHtm)
-		self.groupRadioButtonInputFormat.addButton(self.radioButtonInputFormatRaw)
+		# groupBoxEncoderLayout
+		groupBoxEncoderLayout = QtGui.QGridLayout()
+		groupBoxEncoderLayout.addWidget(self.labelEncoderModule, 0, 0)
+		groupBoxEncoderLayout.addWidget(self.textBoxEncoderModule, 0, 1)
+		groupBoxEncoderLayout.addWidget(self.labelEncoderClass, 1, 0)
+		groupBoxEncoderLayout.addWidget(self.textBoxEncoderClass, 1, 1)
+		groupBoxEncoderLayout.addWidget(self.labelEncoderParams, 2, 0)
+		groupBoxEncoderLayout.addWidget(self.dataGridEncoderParams, 2, 1)
+
+		# groupBoxEncoder
+		self.groupBoxEncoder = QtGui.QGroupBox()
+		self.groupBoxEncoder.setLayout(groupBoxEncoderLayout)
+		self.groupBoxEncoder.setTitle("Encoder")
 
 		# groupBoxInputFormatLayout
 		groupBoxInputFormatLayout = QtGui.QGridLayout()
 		groupBoxInputFormatLayout.addWidget(self.radioButtonInputFormatHtm, 0, 0)
 		groupBoxInputFormatLayout.addWidget(self.radioButtonInputFormatRaw, 1, 0)
-		groupBoxInputFormatLayout.addWidget(self.labelEncoderModule, 2, 0)
-		groupBoxInputFormatLayout.addWidget(self.textBoxEncoderModule, 2, 1)
-		groupBoxInputFormatLayout.addWidget(self.labelEncoderClass, 3, 0)
-		groupBoxInputFormatLayout.addWidget(self.textBoxEncoderClass, 3, 1)
-		groupBoxInputFormatLayout.addWidget(self.labelEncoderParams, 4, 0)
-		groupBoxInputFormatLayout.addWidget(self.dataGridEncoderParams, 4, 1)
+		groupBoxInputFormatLayout.addWidget(self.groupBoxInputRawDataType, 2, 0)
+		groupBoxInputFormatLayout.addWidget(self.groupBoxEncoder, 3, 0)
 
 		# groupBoxInputFormat
 		self.groupBoxInputFormat = QtGui.QGroupBox()
 		self.groupBoxInputFormat.setLayout(groupBoxInputFormatLayout)
 		self.groupBoxInputFormat.setTitle("Input Format")
+		self.groupBoxInputFormat.setEnabled(not Global.simulationInitialized)
 
 		# groupBoxMainLayout
 		self.groupBoxMainLayout = QtGui.QGridLayout()
@@ -231,21 +263,6 @@ class SensorForm(QtGui.QDialog):
 		node = Global.nodeSelectorForm.underMouseNode
 		self.spinnerSensorWidth.setValue(node.width)
 		self.spinnerSensorHeight.setValue(node.height)
-		if node.inputFormat == InputFormat.htm:
-			self.radioButtonInputFormatHtm.setChecked(True)
-		elif node.inputFormat == InputFormat.raw:
-			self.radioButtonInputFormatRaw.setChecked(True)
-
-			# Set encoder parameters
-			self.textBoxEncoderModule.setText(node.encoderModule)
-			self.textBoxEncoderClass.setText(node.encoderClass)
-			encoderParams = ast.literal_eval(node.encoderParams)
-			gridData = self.dataGridEncoderParams.model().data
-			row = 0
-			for key, value in encoderParams.iteritems():
-				gridData[row][0] = key
-				gridData[row][1] = value
-				row += 1
 
 		if node.dataSourceType == DataSourceType.file:
 			self.radioButtonDataSourceFile.setChecked(True)
@@ -256,6 +273,32 @@ class SensorForm(QtGui.QDialog):
 			self.textBoxDatabaseTable.setText(node.databaseTable)
 			self.textBoxDatabaseField.setText(node.databaseField)
 
+		if node.inputFormat == InputFormat.htm:
+			self.radioButtonInputFormatHtm.setChecked(True)
+		elif node.inputFormat == InputFormat.raw:
+			self.radioButtonInputFormatRaw.setChecked(True)
+			if node.inputRawDataType == InputRawDataType.boolean:
+				self.radioButtonInputRawBoolean.setChecked(True)
+			elif node.inputRawDataType == InputRawDataType.integer:
+				self.radioButtonInputRawInteger.setChecked(True)
+			elif node.inputRawDataType == InputRawDataType.decimal:
+				self.radioButtonInputRawDecimal.setChecked(True)
+			elif node.inputRawDataType == InputRawDataType.dateTime:
+				self.radioButtonInputRawDateTime.setChecked(True)
+			elif node.inputRawDataType == InputRawDataType.string:
+				self.radioButtonInputRawString.setChecked(True)
+
+			# Set encoder parameters
+			self.textBoxEncoderModule.setText(node.encoderModule)
+			self.textBoxEncoderClass.setText(node.encoderClass)
+			encoderParams = json.loads(node.encoderParams.replace("'", "\""), object_pairs_hook=collections.OrderedDict)
+			gridData = self.dataGridEncoderParams.model().data
+			row = 0
+			for key, value in encoderParams.iteritems():
+				gridData[row][0] = key
+				gridData[row][1] = value
+				row += 1
+
 	#endregion
 
 	#region Events
@@ -265,7 +308,7 @@ class SensorForm(QtGui.QDialog):
 		Check if values changed and save the,.
 		"""
 
-		encoderParamsDict = {}
+		encoderParamsDict = collections.OrderedDict()
 		if self.radioButtonInputFormatRaw.isChecked():
 			if self.textBoxEncoderModule.text() == '':
 				QtGui.QMessageBox.warning(self, "Warning", "Encoder module was not specified.")
@@ -309,14 +352,6 @@ class SensorForm(QtGui.QDialog):
 
 		width = self.spinnerSensorWidth.value()
 		height = self.spinnerSensorHeight.value()
-		inputFormat = None
-		if self.radioButtonInputFormatHtm.isChecked():
-			inputFormat = InputFormat.htm
-		elif self.radioButtonInputFormatRaw.isChecked():
-			inputFormat = InputFormat.raw
-		encoderModule = str(self.textBoxEncoderModule.text())
-		encoderClass = str(self.textBoxEncoderClass.text())
-		encoderParams = str(encoderParamsDict)
 		dataSourceType = None
 		if self.radioButtonDataSourceFile.isChecked():
 			dataSourceType = DataSourceType.file
@@ -326,14 +361,39 @@ class SensorForm(QtGui.QDialog):
 		databaseConnectionString = str(self.textBoxDatabaseConnectionString.text())
 		databaseTable = str(self.textBoxDatabaseTable.text())
 		databaseField = str(self.textBoxDatabaseField.text())
+		inputFormat = None
+		if self.radioButtonInputFormatHtm.isChecked():
+			inputFormat = InputFormat.htm
+		elif self.radioButtonInputFormatRaw.isChecked():
+			inputFormat = InputFormat.raw
+		if self.radioButtonInputRawBoolean.isChecked():
+			inputRawDataType = InputRawDataType.boolean
+		elif self.radioButtonInputRawInteger.isChecked():
+			inputRawDataType = InputRawDataType.integer
+		elif self.radioButtonInputRawDecimal.isChecked():
+			inputRawDataType = InputRawDataType.decimal
+		elif self.radioButtonInputRawDateTime.isChecked():
+			inputRawDataType = InputRawDataType.dateTime
+		elif self.radioButtonInputRawString.isChecked():
+			inputRawDataType = InputRawDataType.string
+		encoderModule = str(self.textBoxEncoderModule.text())
+		encoderClass = str(self.textBoxEncoderClass.text())
+		encoderParams = json.dumps(encoderParamsDict)
+
+		# Remove double quotes from param values
+		encoderParams = encoderParams.replace("\"", "'")
+		encoderParams = encoderParams.replace(": '", ": ")
+		encoderParams = encoderParams.replace("', ", ", ")
+		encoderParams = encoderParams.replace("'}", "}")
 
 		# If anything has changed
 		node = Global.nodeSelectorForm.underMouseNode
-		if node.width != width or node.height != height or node.inputFormat != inputFormat or node.encoderModule != encoderModule or node.encoderClass != encoderClass or node.encoderParams != encoderParams or node.dataSourceType != dataSourceType or node.fileName != fileName or node.databaseConnectionString != databaseConnectionString or node.databaseTable != databaseTable or node.databaseField != databaseField:
+		if node.width != width or node.height != height or node.inputFormat != inputFormat or node.inputRawDataType != inputRawDataType or node.encoderModule != encoderModule or node.encoderClass != encoderClass or node.encoderParams != encoderParams or node.dataSourceType != dataSourceType or node.fileName != fileName or node.databaseConnectionString != databaseConnectionString or node.databaseTable != databaseTable or node.databaseField != databaseField:
 			# Set region params with controls values
 			node.width = width
 			node.height = height
 			node.inputFormat = inputFormat
+			node.inputRawDataType = inputRawDataType
 			node.encoderModule = encoderModule
 			node.encoderClass = encoderClass
 			node.encoderParams = encoderParams
@@ -371,8 +431,7 @@ class SensorForm(QtGui.QDialog):
 	def __radioButtonInputFormat_Click(self, event):
 		if not Global.simulationInitialized:
 			flag = self.radioButtonInputFormatHtm.isChecked()
-			self.textBoxEncoderModule.setEnabled(not flag)
-			self.textBoxEncoderClass.setEnabled(not flag)
-			self.dataGridEncoderParams.setEnabled(not flag)
+			self.groupBoxInputRawDataType.setEnabled(not flag)
+			self.groupBoxEncoder.setEnabled(not flag)
 
 	#endregion

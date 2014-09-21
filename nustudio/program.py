@@ -13,7 +13,7 @@ from nustudio.ui.output_form import OutputForm
 
 def main():
 	app = QtGui.QApplication(sys.argv)
-	app.setStyleSheet("QGroupBox { border: 1px solid gray; }")
+	app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 
 	Global.appPath = os.path.abspath(os.path.join(__file__, '..'))
 	Global.loadConfig()

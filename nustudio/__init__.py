@@ -3,12 +3,12 @@ from PyQt4 import QtGui, QtCore
 
 __version__ = "1.0.0"
 
-def getInstantiatedClass(self, moduleName, className, classParams):
+def getInstantiatedClass(moduleName, className, classParams):
 	"""
 	Return an instantiated class given a module, class, and constructor params
 	"""
 
-	module = __import__(moduleName)
+	module = __import__(moduleName, fromlist=[className])
 	class_ = getattr(module, className)
 	params = ast.literal_eval(classParams)
 	instance = class_(**params)

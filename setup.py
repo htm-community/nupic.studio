@@ -9,51 +9,6 @@ This file should called to install the NuPIC Studio.
 
 repositoryDir = os.getcwd()
 
-# Find which package manageris installed on user machine
-packageManager = ''
-packageManagers = ['yum', 'apt-get', 'brew']
-for p in range(len(packageManagers)):
-	print "Checking " + packageManagers[p] + " version..."
-	process = subprocess.Popen(packageManagers[p] + " --version", shell=True)
-	exitCode = process.wait()
-	if exitCode == 0:
-		packageManager = packageManagers[p]
-		break
-
-
-# If SciPy is not installed, try install it using default package manager
-try:
-	import scipy
-except ImportError:
-	print "Fail when try import SciPy."
-	if packageManager != '':
-		installCommand = ""
-		if packageManager == 'apt-get':
-			installCommand = "apt-get install python-scipy"
-		elif packageManager == 'yum':
-			installCommand = "yum install scipy"
-		elif packageManager == 'brew':
-			installCommand = "brew install scipy"
-		print "Try install manually with '" + packageManager + "':\n" + installCommand
-	sys.exit(1)
-
-
-# If PyQt4 is not installed, try install it using default package manager
-try:
-	import PyQt4
-except ImportError:
-	print "Fail when try import PyQt4."
-	if packageManager != '':
-		installCommand = ""
-		if packageManager == 'apt-get':
-			installCommand = "apt-get install python-qt4"
-		elif packageManager == 'yum':
-			installCommand = "yum install PyQt4"
-		elif packageManager == 'brew':
-			installCommand = "brew install pyqt"
-		print "Try install manually with '" + packageManager + "':\n" + installCommand
-	sys.exit(1)
-
 
 # Check if no option was passed, i.e. if "setup.py" is the only option
 # If True, "develop" is passed by default

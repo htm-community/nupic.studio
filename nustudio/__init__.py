@@ -53,10 +53,10 @@ class ArrayTableModel(QtGui.QStandardItemModel):
 			return self.data[row][column]
 		return
 
-	def columnCount(self, parent=QtCore.QModelIndex(), **kwargs):
+	def columnCount(self, parent=None, **kwargs):
 		return len(self.header)
 
-	def rowCount(self, parent=QtCore.QModelIndex(), **kwargs):
+	def rowCount(self, parent=None, **kwargs):
 		return len(self.data)
 
 	def flags(self, index):

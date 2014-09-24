@@ -51,14 +51,12 @@ setup(
 		'Topic :: Scientific/Engineering :: Artificial Intelligence'
 	],
 	install_requires = [
-		"PyOpenGL",
-		"PyOpenGL-accelerate",
-                "numpy",
-                "pyqtgraph",
-                "scipy",
-                "wsgiref",
-                "numpy",
-		"PyQtGraph"],
+                "numpy==1.8.1",
+                "scipy==0.14.0",
+                "wsgiref==0.1.2",
+		"PyOpenGL==3.1.0",
+		"PyOpenGL-accelerate==3.1.0",
+		"pyqtgraph==0.9.8"],
 	long_description = """NuPIC Studio is a virtual studio that allows developers to create, debug, and visualize HTM networks from NuPIC library. Some of its advantages:
 * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.
 * Users can create their own encoders and sensors to feed the HTM network.

@@ -3,7 +3,7 @@ import json
 from PyQt4 import QtGui, QtCore
 from nustudio import ArrayTableModel
 from nustudio.ui import Global
-from nustudio.htm.node_sensor import DataSourceType, InputFormat, InputRawDataType
+from nustudio.htm.node_sensor import DataSourceType, InputFormat, InputRawDataType, PredictionsMethod
 
 class SensorForm(QtGui.QDialog):
 
@@ -33,6 +33,7 @@ class SensorForm(QtGui.QDialog):
 		self.spinnerSensorWidth = QtGui.QSpinBox()
 		self.spinnerSensorWidth.setAlignment(QtCore.Qt.AlignRight)
 		self.spinnerSensorWidth.setToolTip("Number of output bits in the X direction for this sensor.")
+		self.spinnerSensorWidth.setMaximum(1000)
 		self.spinnerSensorWidth.setEnabled(not Global.simulationInitialized)
 
 		# labelSensorHeight
@@ -44,6 +45,7 @@ class SensorForm(QtGui.QDialog):
 		self.spinnerSensorHeight = QtGui.QSpinBox()
 		self.spinnerSensorHeight.setAlignment(QtCore.Qt.AlignRight)
 		self.spinnerSensorHeight.setToolTip("Number of output bits in the Y direction for this sensor.")
+		self.spinnerSensorHeight.setMaximum(1000)
 		self.spinnerSensorHeight.setEnabled(not Global.simulationInitialized)
 
 		# radioButtonDataSourceFile
@@ -196,6 +198,25 @@ class SensorForm(QtGui.QDialog):
 		self.dataGridEncoderParams.resizeColumnsToContents()
 		self.dataGridEncoderParams.setMinimumHeight(140)
 
+		# radioButtonPredictionsMethodReconstruction
+		self.radioButtonPredictionsMethodReconstruction = QtGui.QRadioButton()
+		self.radioButtonPredictionsMethodReconstruction.setText("Reconstruction")
+
+		# radioButtonPredictionsMethodClassification
+		self.radioButtonPredictionsMethodClassification = QtGui.QRadioButton()
+		self.radioButtonPredictionsMethodClassification.setText("Classification")
+
+		# groupBoxPredictionsMethodLayout
+		groupBoxPredictionsMethodLayout = QtGui.QGridLayout()
+		groupBoxPredictionsMethodLayout.addWidget(self.radioButtonPredictionsMethodReconstruction, 0, 0)
+		groupBoxPredictionsMethodLayout.addWidget(self.radioButtonPredictionsMethodClassification, 0, 1)
+
+		# groupBoxPredictionsMethod
+		self.groupBoxPredictionsMethod = QtGui.QGroupBox()
+		self.groupBoxPredictionsMethod.setLayout(groupBoxPredictionsMethodLayout)
+		self.groupBoxPredictionsMethod.setTitle("Predictions Method")
+		self.groupBoxPredictionsMethod.setEnabled(not Global.simulationInitialized)
+
 		# groupBoxEncoderLayout
 		groupBoxEncoderLayout = QtGui.QGridLayout()
 		groupBoxEncoderLayout.addWidget(self.labelEncoderModule, 0, 0)
@@ -204,6 +225,7 @@ class SensorForm(QtGui.QDialog):
 		groupBoxEncoderLayout.addWidget(self.textBoxEncoderClass, 1, 1)
 		groupBoxEncoderLayout.addWidget(self.labelEncoderParams, 2, 0)
 		groupBoxEncoderLayout.addWidget(self.dataGridEncoderParams, 2, 1)
+		groupBoxEncoderLayout.addWidget(self.groupBoxPredictionsMethod, 3, 1)
 
 		# groupBoxEncoder
 		self.groupBoxEncoder = QtGui.QGroupBox()
@@ -299,6 +321,11 @@ class SensorForm(QtGui.QDialog):
 				gridData[row][1] = value
 				row += 1
 
+			if node.predictionsMethod == PredictionsMethod.reconstruction:
+				self.radioButtonPredictionsMethodReconstruction.setChecked(True)
+			elif node.predictionsMethod == PredictionsMethod.classification:
+				self.radioButtonPredictionsMethodClassification.setChecked(True)
+
 	#endregion
 
 	#region Events
@@ -379,16 +406,23 @@ class SensorForm(QtGui.QDialog):
 		encoderModule = str(self.textBoxEncoderModule.text())
 		encoderClass = str(self.textBoxEncoderClass.text())
 		encoderParams = json.dumps(encoderParamsDict)
+		predictionsMethod = None
+		if self.radioButtonPredictionsMethodReconstruction.isChecked():
+			predictionsMethod = PredictionsMethod.reconstruction
+		elif self.radioButtonPredictionsMethodClassification.isChecked():
+			predictionsMethod = PredictionsMethod.classification
 
 		# Remove double quotes from param values
 		encoderParams = encoderParams.replace("\"", "'")
 		encoderParams = encoderParams.replace(": '", ": ")
 		encoderParams = encoderParams.replace("', ", ", ")
 		encoderParams = encoderParams.replace("'}", "}")
+		encoderParams = encoderParams.replace("True", "true")
+		encoderParams = encoderParams.replace("False", "false")
 
 		# If anything has changed
 		node = Global.nodeSelectorForm.underMouseNode
-		if node.width != width or node.height != height or node.inputFormat != inputFormat or node.inputRawDataType != inputRawDataType or node.encoderModule != encoderModule or node.encoderClass != encoderClass or node.encoderParams != encoderParams or node.dataSourceType != dataSourceType or node.fileName != fileName or node.databaseConnectionString != databaseConnectionString or node.databaseTable != databaseTable or node.databaseField != databaseField:
+		if node.width != width or node.height != height or node.inputFormat != inputFormat or node.inputRawDataType != inputRawDataType or node.encoderModule != encoderModule or node.encoderClass != encoderClass or node.encoderParams != encoderParams or node.predictionsMethod != predictionsMethod or node.dataSourceType != dataSourceType or node.fileName != fileName or node.databaseConnectionString != databaseConnectionString or node.databaseTable != databaseTable or node.databaseField != databaseField:
 			# Set region params with controls values
 			node.width = width
 			node.height = height
@@ -397,6 +431,7 @@ class SensorForm(QtGui.QDialog):
 			node.encoderModule = encoderModule
 			node.encoderClass = encoderClass
 			node.encoderParams = encoderParams
+			node.predictionsMethod = predictionsMethod
 			node.dataSourceType = dataSourceType
 			node.fileName = fileName
 			node.databaseConnectionString = databaseConnectionString

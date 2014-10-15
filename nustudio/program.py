@@ -12,8 +12,8 @@ from nustudio.ui.simulation_form import SimulationForm
 from nustudio.ui.output_form import OutputForm
 
 def main():
-	app = QtGui.QApplication(sys.argv)
-	app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
+	Global.app = QtGui.QApplication(sys.argv)
+	Global.app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 
 	Global.appPath = os.path.abspath(os.path.join(__file__, '..'))
 	Global.loadConfig()
@@ -33,14 +33,14 @@ def main():
 	splash.show()
 	while time.time() - start < 3:
 		time.sleep(0.001)
-		app.processEvents()
+		Global.app.processEvents()
 	splash.close()
 
 	# Show start form
 	startForm = StartForm()
 	startForm.show()
 
-	sys.exit(app.exec_())
+	sys.exit(Global.app.exec_())
 
 
 if __name__ == '__main__':

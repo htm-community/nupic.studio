@@ -1,1 +1,2 @@
-maxStoredSteps = 5
+maxPreviousSteps = 5
+maxFutureSteps = 5

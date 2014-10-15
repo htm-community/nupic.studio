@@ -208,6 +208,12 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowCellsActive.setCheckable(True)
 		self.menuShowCellsActive.triggered.connect(self.menuShowCells_Click)
 
+		# menuShowCellsInactive
+		self.menuShowCellsInactive = QtGui.QAction(self)
+		self.menuShowCellsInactive.setText("&Inactive")
+		self.menuShowCellsInactive.setCheckable(True)
+		self.menuShowCellsInactive.triggered.connect(self.menuShowCells_Click)
+
 		# menuShowCellsPredicted
 		self.menuShowCellsPredicted = QtGui.QAction(self)
 		self.menuShowCellsPredicted.setText("&Predicted")
@@ -227,6 +233,7 @@ class SimulationForm(QtGui.QWidget):
 		self.menuShowCells.addAction(self.menuShowCellsActive)
 		self.menuShowCells.addAction(self.menuShowCellsPredicted)
 		self.menuShowCells.addAction(self.menuShowCellsFalselyPredicted)
+		self.menuShowCells.addAction(self.menuShowCellsInactive)
 		self.menuShowCells.setTitle("C&ells")
 
 		# menuShowProximalSegmentsNone
@@ -650,7 +657,7 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowBitsNone.isChecked():
 			isVisible = False
-		elif (bit.isPredicted[Global.selStep - 1] and not bit.isActive[Global.selStep]) and self.menuShowBitsFalselyPredicted.isChecked():
+		elif bit.isFalselyPredicted[Global.selStep] and self.menuShowBitsFalselyPredicted.isChecked():
 			color = self.colorBitFalselyPredicted
 		elif bit.isPredicted[Global.selStep] and self.menuShowBitsPredicted.isChecked():
 			color = self.colorBitPredicted
@@ -674,7 +681,8 @@ class SimulationForm(QtGui.QWidget):
 				color = self.colorSelected
 			bit.tree3d_item.setColor(color)
 
-		bit.tree3d_item.setVisible(isVisible)
+		if bit.tree3d_item != None:
+			bit.tree3d_item.setVisible(isVisible)
 
 	def __drawColumn(self, column):
 
@@ -689,7 +697,7 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowCellsNone.isChecked():
 			isVisible = False
-		elif (cell.isPredicted[Global.selStep - 1] and not cell.isActive[Global.selStep]) and self.menuShowCellsFalselyPredicted.isChecked():
+		elif cell.isFalselyPredicted[Global.selStep] and self.menuShowCellsFalselyPredicted.isChecked():
 			color = self.colorCellFalselyPredicted
 		elif cell.isPredicted[Global.selStep] and self.menuShowCellsPredicted.isChecked():
 			color = self.colorCellPredicted
@@ -697,14 +705,16 @@ class SimulationForm(QtGui.QWidget):
 			color = self.colorCellLearning
 		elif cell.isActive[Global.selStep] and self.menuShowCellsActive.isChecked():
 			color = self.colorCellActive
-		else:
+		elif self.menuShowCellsInactive.isChecked():
 			color = self.colorInactive
+		else:
+			isVisible = False
 
 		if isVisible:
 			# Draw the cell
 			if not cell.tree3d_initialized:
 				cellMd = gl.MeshData.sphere(rows=10, cols=10)
-				cell.tree3d_item = gl.GLMeshItem(meshdata=cellMd, shader='shaded', smooth=True, glOptions='opaque')
+				cell.tree3d_item = gl.GLMeshItem(meshdata=cellMd, shader='shaded', smooth=False, glOptions='opaque')
 				cell.tree3d_item.translate(cell.tree3d_x, cell.tree3d_y, cell.tree3d_z)
 				cell.tree3d_initialized = True
 				self.viewer.addItem(cell.tree3d_item)
@@ -714,7 +724,8 @@ class SimulationForm(QtGui.QWidget):
 				color = self.colorSelected
 			cell.tree3d_item.setColor(color)
 
-		cell.tree3d_item.setVisible(isVisible)
+		if cell.tree3d_item != None:
+			cell.tree3d_item.setVisible(isVisible)
 
 		# Draw/update all distal segments
 		for segment in cell.segments:
@@ -783,14 +794,12 @@ class SimulationForm(QtGui.QWidget):
 
 	def __drawSegment(self, segment):
 
+		# Update properties according to state
 		isVisible = True
-		if segment.isRemoved[Global.selStep] and segment.tree3d_item in self.viewer.items:
-			self.viewer.removeItem(segment.tree3d_item)
+		if segment.isRemoved[Global.selStep] or (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
+			isVisible = False
 		else:
-			# Update properties according to state
-			if (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
-				isVisible = False
-			elif segment.isPredicted[Global.selStep - 1] and not segment.isActive[Global.selStep]:
+			if segment.isFalselyPredicted[Global.selStep]:
 				if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsFalselyPredicted.isChecked():
 					color = self.colorSegmentFalselyPredicted
 				else:
@@ -806,24 +815,27 @@ class SimulationForm(QtGui.QWidget):
 				else:
 					isVisible = False
 			else:
-				isVisible = False
+				if segment.type == SegmentType.proximal:
+					color = self.colorInactive
+				else:
+					isVisible = False
 
-			if isVisible:
-				# Draw the segment
-				if not segment.tree3d_initialized:
-					pts = numpy.array([[segment.tree3d_x1, segment.tree3d_y1, segment.tree3d_z1], [segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2]])
-					segment.tree3d_item = gl.GLLinePlotItem(pos=pts, width=2, antialias=True)
-					segment.tree3d_initialized = True
-					self.viewer.addItem(segment.tree3d_item)
+		if isVisible:
+			# Draw the segment
+			if not segment.tree3d_initialized:
+				pts = numpy.array([[segment.tree3d_x1, segment.tree3d_y1, segment.tree3d_z1], [segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2]])
+				segment.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
+				segment.tree3d_initialized = True
+				self.viewer.addItem(segment.tree3d_item)
 
-				# Update the color
-				if segment.tree3d_selected:
-					color = self.colorSelected
-				segment.tree3d_item.color = pg.glColor(color)
-			else:
-				segment.tree3d_initialized = False
-				if segment.tree3d_item in self.viewer.items:
-					self.viewer.removeItem(segment.tree3d_item)
+			# Update the color
+			if segment.tree3d_selected:
+				color = self.colorSelected
+			segment.tree3d_item.color = pg.glColor(color)
+		else:
+			segment.tree3d_initialized = False
+			if segment.tree3d_item in self.viewer.items:
+				self.viewer.removeItem(segment.tree3d_item)
 
 		# Draw/update all synapses of this segment
 		for synapse in segment.synapses:
@@ -831,15 +843,12 @@ class SimulationForm(QtGui.QWidget):
 
 	def __drawSynapse(self, segment, synapse, segmentIsVisible):
 
-		if synapse.isRemoved[Global.selStep]:
-			if synapse.tree3d_item in self.viewer.items:
-				self.viewer.removeItem(synapse.tree3d_item)
+		# Update properties according to state
+		isVisible = True
+		if synapse.isRemoved[Global.selStep] or (not segment.isActive[Global.selStep] and not segment.isPredicted[Global.selStep] and not segment.isFalselyPredicted[Global.selStep]) or (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
+			isVisible = False
 		else:
-			# Update properties according to state
-			isVisible = True
-			if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
-				isVisible = False
-			elif synapse.isPredicted[Global.selStep - 1] and not synapse.isConnected[Global.selStep]:
+			if synapse.isFalselyPredicted[Global.selStep]:
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesFalselyPredicted.isChecked()):
 					color = self.colorSynapseFalselyPredicted
 				else:
@@ -860,22 +869,22 @@ class SimulationForm(QtGui.QWidget):
 				else:
 					isVisible = False
 
-			if isVisible and segmentIsVisible:
-				# Draw the synapse
-				if not synapse.tree3d_initialized:
-					pts = numpy.array([[segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2], [synapse.inputElem.tree3d_x, synapse.inputElem.tree3d_y, synapse.inputElem.tree3d_z]])
-					synapse.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
-					synapse.tree3d_initialized = True
-					self.viewer.addItem(synapse.tree3d_item)
+		if isVisible and segmentIsVisible:
+			# Draw the synapse
+			if not synapse.tree3d_initialized:
+				pts = numpy.array([[segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2], [synapse.inputElem.tree3d_x, synapse.inputElem.tree3d_y, synapse.inputElem.tree3d_z]])
+				synapse.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
+				synapse.tree3d_initialized = True
+				self.viewer.addItem(synapse.tree3d_item)
 
-				# Update the color
-				if synapse.tree3d_selected:
-					color = self.colorSelected
-				synapse.tree3d_item.color = pg.glColor(color)
-			else:
-				synapse.tree3d_initialized = False
-				if synapse.tree3d_item in self.viewer.items:
-					self.viewer.removeItem(synapse.tree3d_item)
+			# Update the color
+			if synapse.tree3d_selected:
+				color = self.colorSelected
+			synapse.tree3d_item.color = pg.glColor(color)
+		else:
+			synapse.tree3d_initialized = False
+			if synapse.tree3d_item in self.viewer.items:
+				self.viewer.removeItem(synapse.tree3d_item)
 
 	def selectView(self, viewMenu):
 		"""
@@ -901,6 +910,7 @@ class SimulationForm(QtGui.QWidget):
 				self.menuShowCellsActive.setChecked(view.showCellsActive)
 				self.menuShowCellsPredicted.setChecked(view.showCellsPredicted)
 				self.menuShowCellsFalselyPredicted.setChecked(view.showCellsFalselyPredicted)
+				self.menuShowCellsInactive.setChecked(view.showCellsInactive)
 				self.menuShowProximalSegmentsNone.setChecked(view.showProximalSegmentsNone)
 				self.menuShowProximalSegmentsActive.setChecked(view.showProximalSegmentsActive)
 				self.menuShowProximalSegmentsPredicted.setChecked(view.showProximalSegmentsPredicted)
@@ -958,6 +968,7 @@ class SimulationForm(QtGui.QWidget):
 				self.menuShowCellsActive.setChecked(False)
 				self.menuShowCellsPredicted.setChecked(False)
 				self.menuShowCellsFalselyPredicted.setChecked(False)
+				self.menuShowCellsInactive.setChecked(False)
 		else:
 			self.menuShowCellsNone.setChecked(False)
 
@@ -1048,6 +1059,7 @@ class SimulationForm(QtGui.QWidget):
 				view.showCellsActive = self.menuShowCellsActive.isChecked()
 				view.showCellsPredicted = self.menuShowCellsPredicted.isChecked()
 				view.showCellsFalselyPredicted = self.menuShowCellsFalselyPredicted.isChecked()
+				view.showCellsInactive = self.menuShowCellsInactive.isChecked()
 				view.showProximalSegmentsNone = self.menuShowProximalSegmentsNone.isChecked()
 				view.showProximalSegmentsActive = self.menuShowProximalSegmentsActive.isChecked()
 				view.showProximalSegmentsPredicted = self.menuShowProximalSegmentsPredicted.isChecked()

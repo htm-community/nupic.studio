@@ -2,7 +2,7 @@ import sys
 import time
 import webbrowser
 from PyQt4 import QtGui, QtCore
-from nustudio.htm import maxStoredSteps
+from nustudio.htm import maxPreviousSteps
 from nustudio.ui import Global
 from nustudio.ui.project_properties_form import ProjectPropertiesForm
 
@@ -20,6 +20,7 @@ class MainForm(QtGui.QMainWindow):
 		#region	Instance fields
 
 		self._pendingProjectChanges = False
+		self._numStepsPending = 0
 
 		#endregion
 
@@ -165,13 +166,6 @@ class MainForm(QtGui.QMainWindow):
 		self.buttonMultipleStepsHTM.setToolTip("Forward a specific number of time steps")
 		self.buttonMultipleStepsHTM.triggered.connect(self.__buttonMultipleStepsHTM_Click)
 
-		# buttonPauseHTM
-		self.buttonPauseHTM = QtGui.QAction(self)
-		self.buttonPauseHTM.setEnabled(False)
-		self.buttonPauseHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonPauseHTM.png'))
-		self.buttonPauseHTM.setToolTip("Pause simulation")
-		self.buttonPauseHTM.triggered.connect(self.__buttonPauseHTM_Click)
-
 		# buttonStopHTM
 		self.buttonStopHTM = QtGui.QAction(self)
 		self.buttonStopHTM.setEnabled(False)
@@ -190,6 +184,8 @@ class MainForm(QtGui.QMainWindow):
 		self.sliderStep.setEnabled(False)
 		self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
 		self.sliderStep.setSingleStep(1)
+		self.sliderStep.setRange(0, maxPreviousSteps - 1)
+		self.sliderStep.setValue(maxPreviousSteps - 1)
 		self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
 
 		# toolBar
@@ -197,7 +193,6 @@ class MainForm(QtGui.QMainWindow):
 		self.toolBar.addAction(self.buttonInitHTM)
 		self.toolBar.addAction(self.buttonStepHTM)
 		self.toolBar.addAction(self.buttonMultipleStepsHTM)
-		self.toolBar.addAction(self.buttonPauseHTM)
 		self.toolBar.addAction(self.buttonStopHTM)
 		self.toolBar.addWidget(self.textBoxStep)
 		self.toolBar.addWidget(self.sliderStep)
@@ -233,16 +228,6 @@ class MainForm(QtGui.QMainWindow):
 		self.setWindowTitle("NuPIC Studio")
 		self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
 
-	def __showDefaultTools(self):
-		"""
-		Show all tool windows.
-		"""
-
-		self.dockNodeSelectorForm.show()
-		self.dockSimulationForm.show()
-		self.dockNodeInformationForm.show()
-		self.dockOutputForm.show()
-
 	def __cleanUp(self):
 		"""
 		Prepare UI to load a new configuration.
@@ -267,8 +252,8 @@ class MainForm(QtGui.QMainWindow):
 		self.buttonInitHTM.setEnabled(not enable)
 		if not enable:
 			self.textBoxStep.setText("")
-		self.sliderStep.setEnabled(enable)
-		self.sliderStep.setRange(0, 0)
+			self.sliderStep.setEnabled(False)
+			self.sliderStep.setValue(self.sliderStep.maximum())
 
 	def __enableSteeringButtons(self, enable):
 		"""
@@ -286,6 +271,7 @@ class MainForm(QtGui.QMainWindow):
 
 		Global.simulationForm.clearControls()
 		Global.outputForm.clearControls()
+		Global.nodeInformationForm.clearControls()
 
 	def refreshControls(self):
 		"""
@@ -299,8 +285,10 @@ class MainForm(QtGui.QMainWindow):
 		else:
 			self.textBoxStep.setText("")
 
-		Global.simulationForm.refreshControls()
-		Global.nodeInformationForm.refreshControls()
+		if self.dockSimulationForm.isVisible():
+			Global.simulationForm.refreshControls()
+		if self.dockNodeInformationForm.isVisible():
+			Global.nodeInformationForm.refreshControls()
 
 	def markProjectChanges(self, hasChanges):
 		"""
@@ -353,7 +341,7 @@ class MainForm(QtGui.QMainWindow):
 		if self.__checkCurrentConfigChanges() != QtGui.QMessageBox.Cancel:
 
 			# Ask user for an existing file
-			selectedFile = str(QtGui.QFileDialog().getOpenFileName(self, "Open File", Global.appPath + '/projects', "NuPIC project files (*.nuproj)"))
+			selectedFile = str(QtGui.QFileDialog().getOpenFileName(self, "Open Project", Global.appPath + '/projects', "NuPIC project files (*.nuproj)"))
 
 			# If file exists, continue operation
 			if selectedFile != '':
@@ -378,7 +366,7 @@ class MainForm(QtGui.QMainWindow):
 		fileName = Global.project.fileName
 		if fileName == '':
 			# Ask user for valid file
-			selectedFile = str(QtGui.QFileDialog().getOpenFileName(self, "Open File", Global.appPath + '/projects', "NuPIC project files (*.nuproj)"))
+			selectedFile = str(QtGui.QFileDialog().getSaveFileName(self, "Save Project", Global.appPath + '/projects', "NuPIC project files (*.nuproj)"))
 
 			# If file exists, continue operation
 			if selectedFile != '':
@@ -405,9 +393,6 @@ class MainForm(QtGui.QMainWindow):
 
 		# Reset controls
 		self.clearControls()
-
-	def pauseSimulation(self):
-		self.buttonPauseHTM.setEnabled(False)
 
 	#endregion
 
@@ -444,9 +429,11 @@ class MainForm(QtGui.QMainWindow):
 
 	def __menuViewSimulation_Click(self, event):
 		self.dockSimulationForm.show()
+		Global.nodeSimulationForm.refreshControls()
 
 	def __menuViewNodeInformation_Click(self, event):
 		self.dockNodeInformationForm.show()
+		Global.nodeInformationForm.refreshControls()
 
 	def __menuViewOutput_Click(self, event):
 		self.dockOutputForm.show()
@@ -475,6 +462,11 @@ class MainForm(QtGui.QMainWindow):
 		initialized = Global.project.topRegion.initialize()
 
 		if initialized:
+
+			# Initialize time steps parameters
+			Global.currStep = 0
+			Global.selStep = (maxPreviousSteps - 1)
+
 			Global.outputForm.addText("Initialization: " + "{0:.3f}".format(endTime - startTime) + " secs")
 			Global.outputForm.addText("")
 			Global.outputForm.addText("Step\tTime (secs)\tAccuracy (%)")
@@ -484,14 +476,11 @@ class MainForm(QtGui.QMainWindow):
 			Global.project.topRegion.nextStep()
 			Global.project.topRegion.calculateStatistics()
 			endTime = time.time()
-			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
+			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.topRegion.statsPrecisionRate))
 
 			# Disable relevant buttons:
 			self.__enableSteeringButtons(True)
 			self.__enableSimulationButtons(True)
-
-			# Initialize time steps parameters
-			Global.currStep = 0
 
 			# Update controls
 			Global.simulationForm.topRegion = Global.project.topRegion
@@ -505,24 +494,19 @@ class MainForm(QtGui.QMainWindow):
 
 		# Update time steps parameters
 		Global.currStep += 1
-		if Global.currStep < maxStoredSteps:
-			if Global.currStep == 1:
-				self.sliderStep.setEnabled(True)
-			self.sliderStep.setRange(0, Global.currStep)
-		Global.selStep = self.sliderStep.maximum()
+		if Global.currStep >= (maxPreviousSteps - 1):
+			self.sliderStep.setEnabled(True)
+		Global.selStep = (maxPreviousSteps - 1) - (self.sliderStep.maximum() - self.sliderStep.value())
 
 		# Perfoms actions related to time step progression.
 		startTime = time.time()
 		Global.project.topRegion.nextStep()
 		Global.project.topRegion.calculateStatistics()
 		endTime = time.time()
-		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(0.0))
+		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.topRegion.statsPrecisionRate))
 
 		# Update controls
-		if self.sliderStep.value() != self.sliderStep.maximum():
-			self.sliderStep.setValue(self.sliderStep.maximum())
-		else:
-			self.refreshControls()
+		self.refreshControls()
 
 	def __buttonMultipleStepsHTM_Click(self, event):
 		"""
@@ -530,38 +514,31 @@ class MainForm(QtGui.QMainWindow):
 		"""
 
 		# Get number of steps to perform simulation
-		numberSteps = -1
+		self._numStepsPending = -1
 		enteredInteger, ok = QtGui.QInputDialog.getInt(self, "Input Dialog", "Enter number of steps:")
 		if ok:
 			if enteredInteger < 2:
 				QtGui.QMessageBox.warning(self, "Warning", "Invalid value specified!")
 			else:
-				numberSteps = enteredInteger
+				self._numStepsPending = enteredInteger
 
-		if numberSteps != -1:
-			# In case, simulation will be asynchronous.
-			self.buttonPauseHTM.setEnabled(True)
-
-			try:
-				for i in range(numberSteps):
-					self.__buttonStepHTM_Click(event)
-			except Exception, ex:
-				QtGui.QMessageBox.warning(self, "Warning", ex.message)
-
-			self.pauseSimulation()
-
-	def __buttonPauseHTM_Click(self, event):
-		# TODO: Pause stepping.
-		self.pauseSimulation()
+		while self._numStepsPending > 0:
+			self.__buttonStepHTM_Click(event)
+			Global.app.processEvents()
+			self._numStepsPending -= 1
 
 	def __buttonStopHTM_Click(self, event):
-		dialogResult = QtGui.QMessageBox.question(self, "Question", "Current simulation (learning) will stop!\r\nDo you want proceed?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-
-		if dialogResult == QtGui.QMessageBox.Yes:
-			self.stopSimulation()
+		# If multiple steps processing is running just stop the loop
+		# otherwise, ask user to stop the simulation
+		if self._numStepsPending > 0:
+			self._numStepsPending = 0
+		else:
+			dialogResult = QtGui.QMessageBox.question(self, "Question", "Current simulation (learning) will stop!\r\nDo you want proceed?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+			if dialogResult == QtGui.QMessageBox.Yes:
+				self.stopSimulation()
 
 	def __sliderStep_ValueChanged(self, value):
-		Global.selStep = self.sliderStep.value()
+		Global.selStep = (maxPreviousSteps - 1) - (self.sliderStep.maximum() - self.sliderStep.value())
 		self.refreshControls()
 
 	#endregion

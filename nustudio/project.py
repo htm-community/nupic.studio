@@ -1,7 +1,7 @@
 ﻿from PyQt4 import QtGui, QtCore
 from nustudio.htm.node import NodeType, Node
-from nustudio.htm.node_region import Region, InputMapType
-from nustudio.htm.node_sensor import Sensor, DataSourceType, InputFormat, InputRawDataType
+from nustudio.htm.node_region import Region
+from nustudio.htm.node_sensor import Sensor, DataSourceType, InputFormat, InputRawDataType, PredictionsMethod
 
 """
 Loads and saves the Elements of the .nuproj file, that contains user entries for project properties
@@ -128,11 +128,6 @@ class Project:
 
 		# Read specific parameters according to node type
 		if type == 'Region':
-			inputMapType = self.__getStringAttribute(xmlReader.attributes(), 'inputMapType')
-			if inputMapType == "Grouped":
-				node.inputMapType = InputMapType.grouped
-			elif inputMapType == "Combined":
-				node.inputMapType = InputMapType.combined
 			node.enableSpatialPooling = self.__getBooleanAttribute(xmlReader.attributes(), 'enableSpatialPooling')
 			node.potentialRadius = self.__getIntegerAttribute(xmlReader.attributes(), 'potentialRadius')
 			node.potentialPct = self.__getFloatAttribute(xmlReader.attributes(), 'potentialPct')
@@ -147,6 +142,7 @@ class Project:
 			node.minPctActiveDutyCycle = self.__getFloatAttribute(xmlReader.attributes(), 'minPctActiveDutyCycle')
 			node.dutyCyclePeriod = self.__getIntegerAttribute(xmlReader.attributes(), 'dutyCyclePeriod')
 			node.maxBoost = self.__getFloatAttribute(xmlReader.attributes(), 'maxBoost')
+			node.spSeed = self.__getIntegerAttribute(xmlReader.attributes(), 'spSeed')
 			node.enableTemporalPooling = self.__getBooleanAttribute(xmlReader.attributes(), 'enableTemporalPooling')
 			node.numCellsPerColumn = self.__getIntegerAttribute(xmlReader.attributes(), 'numCellsPerColumn')
 			node.learningRadius = self.__getIntegerAttribute(xmlReader.attributes(), 'learningRadius')
@@ -157,6 +153,7 @@ class Project:
 			node.minThreshold = self.__getIntegerAttribute(xmlReader.attributes(), 'minThreshold')
 			node.activationThreshold = self.__getIntegerAttribute(xmlReader.attributes(), 'activationThreshold')
 			node.maxNumNewSynapses = self.__getIntegerAttribute(xmlReader.attributes(), 'maxNumNewSynapses')
+			node.tpSeed = self.__getIntegerAttribute(xmlReader.attributes(), 'tpSeed')
 		elif type == 'Sensor':
 			dataSourceType = self.__getStringAttribute(xmlReader.attributes(), 'dataSourceType')
 			if dataSourceType == "File":
@@ -186,6 +183,13 @@ class Project:
 				node.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
 				node.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
 				node.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
+				predictionsMethod = self.__getStringAttribute(xmlReader.attributes(), 'predictionsMethod')
+				if predictionsMethod == "Reconstruction":
+					node.predictionsMethod = PredictionsMethod.reconstruction
+				elif predictionsMethod == "Classification":
+					node.predictionsMethod = PredictionsMethod.classification
+					node.enableClassificationLearning = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationLearning')
+					node.enableClassificationInference = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationInference')
 
 		# If still is not end of element it's because this node has children
 		token = xmlReader.readNext()
@@ -234,10 +238,6 @@ class Project:
 			xmlWriter.writeAttribute('type', 'Region')
 			xmlWriter.writeAttribute('width', str(node.width))
 			xmlWriter.writeAttribute('height', str(node.height))
-			if node.inputMapType == InputMapType.grouped:
-				xmlWriter.writeAttribute('inputMapType', "Grouped")
-			elif node.inputMapType == InputMapType.combined:
-				xmlWriter.writeAttribute('inputMapType', "Combined")
 			xmlWriter.writeAttribute('enableSpatialPooling', str(node.enableSpatialPooling))
 			xmlWriter.writeAttribute('potentialRadius', str(node.potentialRadius))
 			xmlWriter.writeAttribute('potentialPct', str(node.potentialPct))
@@ -252,6 +252,7 @@ class Project:
 			xmlWriter.writeAttribute('minPctActiveDutyCycle', str(node.minPctActiveDutyCycle))
 			xmlWriter.writeAttribute('dutyCyclePeriod', str(node.dutyCyclePeriod))
 			xmlWriter.writeAttribute('maxBoost', str(node.maxBoost))
+			xmlWriter.writeAttribute('spSeed', str(node.spSeed))
 			xmlWriter.writeAttribute('enableTemporalPooling', str(node.enableTemporalPooling))
 			xmlWriter.writeAttribute('numCellsPerColumn', str(node.numCellsPerColumn))
 			xmlWriter.writeAttribute('learningRadius', str(node.learningRadius))
@@ -262,6 +263,7 @@ class Project:
 			xmlWriter.writeAttribute('minThreshold', str(node.minThreshold))
 			xmlWriter.writeAttribute('activationThreshold', str(node.activationThreshold))
 			xmlWriter.writeAttribute('maxNumNewSynapses', str(node.maxNumNewSynapses))
+			xmlWriter.writeAttribute('tpSeed', str(node.tpSeed))
 		elif node.type == NodeType.sensor:
 			xmlWriter.writeAttribute('type', 'Sensor')
 			xmlWriter.writeAttribute('width', str(node.width))
@@ -291,6 +293,12 @@ class Project:
 				xmlWriter.writeAttribute('encoderModule', node.encoderModule)
 				xmlWriter.writeAttribute('encoderClass', node.encoderClass)
 				xmlWriter.writeAttribute('encoderParams', node.encoderParams)
+				if node.predictionsMethod == PredictionsMethod.reconstruction:
+					xmlWriter.writeAttribute('predictionsMethod', "Reconstruction")
+				elif node.predictionsMethod == PredictionsMethod.classification:
+					xmlWriter.writeAttribute('predictionsMethod', "Classification")
+					xmlWriter.writeAttribute('enableClassificationLearning', str(node.enableClassificationLearning))
+					xmlWriter.writeAttribute('enableClassificationInference', str(node.enableClassificationInference))
 
 		# Tranverse all child nodes
 		for childNode in node.children:

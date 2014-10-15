@@ -1,6 +1,5 @@
 ﻿from PyQt4 import QtGui, QtCore
 from nustudio.ui import Global
-from nustudio.htm.node_region import InputMapType
 
 class RegionForm(QtGui.QDialog):
 
@@ -52,38 +51,12 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerHeight.setEnabled(not Global.simulationInitialized)
 		self.spinnerHeight.setToolTip("")
 
-		# radioButtonInputMapGrouped
-		self.radioButtonInputMapGrouped = QtGui.QRadioButton()
-		self.radioButtonInputMapGrouped.setText("Grouped")
-		self.radioButtonInputMapGrouped.setEnabled(not Global.simulationInitialized)
-
-		# radioButtonInputMapCombined
-		self.radioButtonInputMapCombined = QtGui.QRadioButton()
-		self.radioButtonInputMapCombined.setText("Combined")
-		self.radioButtonInputMapCombined.setEnabled(not Global.simulationInitialized)
-
-		# groupBoxInputMapTypeLayout
-		groupBoxInputMapTypeLayout = QtGui.QGridLayout()
-		groupBoxInputMapTypeLayout.addWidget(self.radioButtonInputMapGrouped, 0, 0)
-		groupBoxInputMapTypeLayout.addWidget(self.radioButtonInputMapCombined, 1, 0)
-
-		# groupBoxInputMapType
-		self.groupBoxInputMapType = QtGui.QGroupBox()
-		self.groupBoxInputMapType.setLayout(groupBoxInputMapTypeLayout)
-		self.groupBoxInputMapType.setTitle("Input Map Type")
-
 		# mainLayout
 		mainLayout = QtGui.QGridLayout()
 		mainLayout.addWidget(self.labelWidth, 0, 0)
 		mainLayout.addWidget(self.spinnerWidth, 0, 1)
 		mainLayout.addWidget(self.labelHeight, 1, 0)
 		mainLayout.addWidget(self.spinnerHeight, 1, 1)
-		mainLayout.addWidget(self.groupBoxInputMapType, 2, 1)
-
-		# checkBoxEnableSpatialPooling
-		self.checkBoxEnableSpatialPooling = QtGui.QCheckBox()
-		self.checkBoxEnableSpatialPooling.setText("Enable Spatial Pooling")
-		self.checkBoxEnableSpatialPooling.setEnabled(not Global.simulationInitialized)
 
 		# labelPotentialRadius
 		self.labelPotentialRadius = QtGui.QLabel()
@@ -160,8 +133,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynConnectedPerm
 		self.spinnerProximalSynConnectedPerm = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynConnectedPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynConnectedPerm.setDecimals(2)
-		self.spinnerProximalSynConnectedPerm.setSingleStep(0.01)
+		self.spinnerProximalSynConnectedPerm.setDecimals(3)
+		self.spinnerProximalSynConnectedPerm.setSingleStep(0.001)
 		self.spinnerProximalSynConnectedPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynConnectedPerm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
@@ -173,8 +146,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynPermIncrement
 		self.spinnerProximalSynPermIncrement = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynPermIncrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynPermIncrement.setDecimals(2)
-		self.spinnerProximalSynPermIncrement.setSingleStep(0.01)
+		self.spinnerProximalSynPermIncrement.setDecimals(3)
+		self.spinnerProximalSynPermIncrement.setSingleStep(0.001)
 		self.spinnerProximalSynPermIncrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynPermIncrement.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -186,8 +159,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynPermDecrement
 		self.spinnerProximalSynPermDecrement = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynPermDecrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynPermDecrement.setDecimals(2)
-		self.spinnerProximalSynPermDecrement.setSingleStep(0.01)
+		self.spinnerProximalSynPermDecrement.setDecimals(3)
+		self.spinnerProximalSynPermDecrement.setSingleStep(0.001)
 		self.spinnerProximalSynPermDecrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynPermDecrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -245,6 +218,7 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDutyCyclePeriod
 		self.spinnerDutyCyclePeriod = QtGui.QSpinBox()
 		self.spinnerDutyCyclePeriod.setAlignment(QtCore.Qt.AlignRight)
+		self.spinnerDutyCyclePeriod.setMaximum(1000)
 		self.spinnerDutyCyclePeriod.setEnabled(not Global.simulationInitialized)
 		self.spinnerDutyCyclePeriod.setToolTip("The period used to calculate duty cycles. Higher values make it take longer to respond to changes in boost or synPerConnectedCell. Shorter values make it more unstable and likely to oscillate.")
 
@@ -261,38 +235,47 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerMaxBoost.setEnabled(not Global.simulationInitialized)
 		self.spinnerMaxBoost.setToolTip("The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets considered for inhibition. The actual boost factor for a column is number between 1.0 and maxBoost. A boost factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, maxBoost is used if the duty cycle is 0, and any duty cycle in between is linearly extrapolated from these 2 endpoints.")
 
+		# labelSpSeed
+		self.labelSpSeed = QtGui.QLabel()
+		self.labelSpSeed.setText("Seed")
+		self.labelSpSeed.setAlignment(QtCore.Qt.AlignRight)
+
+		# spinnerSpSeed
+		self.spinnerSpSeed = QtGui.QSpinBox()
+		self.spinnerSpSeed.setAlignment(QtCore.Qt.AlignRight)
+		self.spinnerSpSeed.setMinimum(-1)
+		self.spinnerSpSeed.setMaximum(5000)
+		self.spinnerSpSeed.setEnabled(not Global.simulationInitialized)
+		self.spinnerSpSeed.setToolTip("Seed for random values.")
+
 		# tabPageSpatialLayout
 		tabPageSpatialLayout = QtGui.QGridLayout()
-		tabPageSpatialLayout.addWidget(self.checkBoxEnableSpatialPooling, 0, 0)
-		tabPageSpatialLayout.addWidget(self.labelPotentialRadius, 1, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerPotentialRadius, 1, 1)
-		tabPageSpatialLayout.addWidget(self.labelPotentialPct, 2, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerPotentialPct, 2, 1)
-		tabPageSpatialLayout.addWidget(self.checkBoxGlobalInhibition, 3, 0)
-		tabPageSpatialLayout.addWidget(self.labelLocalAreaDensity, 4, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerLocalAreaDensity, 4, 1)
-		tabPageSpatialLayout.addWidget(self.labelNumActiveColumnsPerInhArea, 5, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerNumActiveColumnsPerInhArea, 5, 1)
-		tabPageSpatialLayout.addWidget(self.labelStimulusThreshold, 6, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerStimulusThreshold, 6, 1)
-		tabPageSpatialLayout.addWidget(self.groupBoxProximalSynPerm, 7, 1)
-		tabPageSpatialLayout.addWidget(self.labelMinPctOverlapDutyCycle, 8, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerMinPctOverlapDutyCycle, 8, 1)
-		tabPageSpatialLayout.addWidget(self.labelMinPctActiveDutyCycle, 9, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerMinPctActiveDutyCycle, 9, 1)
-		tabPageSpatialLayout.addWidget(self.labelDutyCyclePeriod, 10, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerDutyCyclePeriod, 10, 1)
-		tabPageSpatialLayout.addWidget(self.labelMaxBoost, 11, 0)
-		tabPageSpatialLayout.addWidget(self.spinnerMaxBoost, 11, 1)
+		tabPageSpatialLayout.addWidget(self.labelPotentialRadius, 0, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerPotentialRadius, 0, 1)
+		tabPageSpatialLayout.addWidget(self.labelPotentialPct, 1, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerPotentialPct, 1, 1)
+		tabPageSpatialLayout.addWidget(self.checkBoxGlobalInhibition, 2, 0)
+		tabPageSpatialLayout.addWidget(self.labelLocalAreaDensity, 3, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerLocalAreaDensity, 3, 1)
+		tabPageSpatialLayout.addWidget(self.labelNumActiveColumnsPerInhArea, 4, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerNumActiveColumnsPerInhArea, 4, 1)
+		tabPageSpatialLayout.addWidget(self.labelStimulusThreshold, 5, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerStimulusThreshold, 5, 1)
+		tabPageSpatialLayout.addWidget(self.groupBoxProximalSynPerm, 6, 1)
+		tabPageSpatialLayout.addWidget(self.labelMinPctOverlapDutyCycle, 7, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerMinPctOverlapDutyCycle, 7, 1)
+		tabPageSpatialLayout.addWidget(self.labelMinPctActiveDutyCycle, 8, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerMinPctActiveDutyCycle, 8, 1)
+		tabPageSpatialLayout.addWidget(self.labelDutyCyclePeriod, 9, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerDutyCyclePeriod, 9, 1)
+		tabPageSpatialLayout.addWidget(self.labelMaxBoost, 10, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerMaxBoost, 10, 1)
+		tabPageSpatialLayout.addWidget(self.labelSpSeed, 11, 0)
+		tabPageSpatialLayout.addWidget(self.spinnerSpSeed, 11, 1)
 
 		# tabPageSpatial
 		self.tabPageSpatial = QtGui.QWidget()
 		self.tabPageSpatial.setLayout(tabPageSpatialLayout)
-
-		# checkBoxEnableTemporalPooling
-		self.checkBoxEnableTemporalPooling = QtGui.QCheckBox()
-		self.checkBoxEnableTemporalPooling.setEnabled(not Global.simulationInitialized)
-		self.checkBoxEnableTemporalPooling.setText("Enable Temporal Pooling")
 
 		# labelNumCellsPerColumn
 		self.labelNumCellsPerColumn = QtGui.QLabel()
@@ -326,8 +309,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynInitialPerm
 		self.spinnerDistalSynInitialPerm = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynInitialPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynInitialPerm.setDecimals(2)
-		self.spinnerDistalSynInitialPerm.setSingleStep(0.01)
+		self.spinnerDistalSynInitialPerm.setDecimals(3)
+		self.spinnerDistalSynInitialPerm.setSingleStep(0.001)
 		self.spinnerDistalSynInitialPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynInitialPerm.setToolTip("The initial permanence of an distal synapse.")
 
@@ -339,8 +322,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynConnectedPerm
 		self.spinnerDistalSynConnectedPerm = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynConnectedPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynConnectedPerm.setDecimals(2)
-		self.spinnerDistalSynConnectedPerm.setSingleStep(0.01)
+		self.spinnerDistalSynConnectedPerm.setDecimals(3)
+		self.spinnerDistalSynConnectedPerm.setSingleStep(0.001)
 		self.spinnerDistalSynConnectedPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynConnectedPerm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
@@ -352,8 +335,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynPermIncrement
 		self.spinnerDistalSynPermIncrement = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynPermIncrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynPermIncrement.setDecimals(2)
-		self.spinnerDistalSynPermIncrement.setSingleStep(0.01)
+		self.spinnerDistalSynPermIncrement.setDecimals(3)
+		self.spinnerDistalSynPermIncrement.setSingleStep(0.001)
 		self.spinnerDistalSynPermIncrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynPermIncrement.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -365,12 +348,12 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynPermDecrement
 		self.spinnerDistalSynPermDecrement = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynPermDecrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynPermDecrement.setDecimals(2)
-		self.spinnerDistalSynPermDecrement.setSingleStep(0.01)
+		self.spinnerDistalSynPermDecrement.setDecimals(3)
+		self.spinnerDistalSynPermDecrement.setSingleStep(0.001)
 		self.spinnerDistalSynPermDecrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynPermDecrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
-		# groupBoxDistalSynPerm
+		# groupBoxDistalSynPermLayout
 		groupBoxDistalSynPermLayout = QtGui.QGridLayout()
 		groupBoxDistalSynPermLayout.addWidget(self.labelDistalSynInitialPerm, 0, 0)
 		groupBoxDistalSynPermLayout.addWidget(self.spinnerDistalSynInitialPerm, 0, 1)
@@ -420,20 +403,34 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerMaxNumNewSynapses.setEnabled(not Global.simulationInitialized)
 		self.spinnerMaxNumNewSynapses.setToolTip("The maximum number of synapses added to a segment during learning")
 
+		# labelTpSeed
+		self.labelTpSeed = QtGui.QLabel()
+		self.labelTpSeed.setText("Seed")
+		self.labelTpSeed.setAlignment(QtCore.Qt.AlignRight)
+
+		# spinnerTpSeed
+		self.spinnerTpSeed = QtGui.QSpinBox()
+		self.spinnerTpSeed.setAlignment(QtCore.Qt.AlignRight)
+		self.spinnerTpSeed.setMinimum(-1)
+		self.spinnerTpSeed.setMaximum(5000)
+		self.spinnerTpSeed.setEnabled(not Global.simulationInitialized)
+		self.spinnerTpSeed.setToolTip("Seed for random values.")
+
 		# tabPageTemporalLayout
 		tabPageTemporalLayout = QtGui.QGridLayout()
-		tabPageTemporalLayout.addWidget(self.checkBoxEnableTemporalPooling, 0, 0)
-		tabPageTemporalLayout.addWidget(self.labelNumCellsPerColumn, 1, 0)
-		tabPageTemporalLayout.addWidget(self.spinnerNumCellsPerColumn, 1, 1)
-		tabPageTemporalLayout.addWidget(self.labelLearningRadius, 2, 0)
-		tabPageTemporalLayout.addWidget(self.spinnerLearningRadius, 2, 1)
-		tabPageTemporalLayout.addWidget(self.groupBoxDistalSynPerm, 3, 1)
-		tabPageTemporalLayout.addWidget(self.labelMinThreshold, 4, 0)
-		tabPageTemporalLayout.addWidget(self.spinnerMinThreshold, 4, 1)
-		tabPageTemporalLayout.addWidget(self.labelActivationThreshold, 5, 0)
-		tabPageTemporalLayout.addWidget(self.spinnerActivationThreshold, 5, 1)
-		tabPageTemporalLayout.addWidget(self.labelMaxNumNewSynapses, 6, 0)
-		tabPageTemporalLayout.addWidget(self.spinnerMaxNumNewSynapses, 6, 1)
+		tabPageTemporalLayout.addWidget(self.labelNumCellsPerColumn, 0, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerNumCellsPerColumn, 0, 1)
+		tabPageTemporalLayout.addWidget(self.labelLearningRadius, 1, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerLearningRadius, 1, 1)
+		tabPageTemporalLayout.addWidget(self.groupBoxDistalSynPerm, 2, 1)
+		tabPageTemporalLayout.addWidget(self.labelMinThreshold, 3, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerMinThreshold, 3, 1)
+		tabPageTemporalLayout.addWidget(self.labelActivationThreshold, 4, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerActivationThreshold, 4, 1)
+		tabPageTemporalLayout.addWidget(self.labelMaxNumNewSynapses, 5, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerMaxNumNewSynapses, 5, 1)
+		tabPageTemporalLayout.addWidget(self.labelTpSeed, 6, 0)
+		tabPageTemporalLayout.addWidget(self.spinnerTpSeed, 6, 1)
 		tabPageTemporalLayout.setRowStretch(7, 100)
 
 		# tabPageTemporal
@@ -473,11 +470,6 @@ class RegionForm(QtGui.QDialog):
 		node = Global.nodeSelectorForm.underMouseNode
 		self.spinnerWidth.setValue(node.width)
 		self.spinnerHeight.setValue(node.height)
-		if node.inputMapType == InputMapType.grouped:
-			self.radioButtonInputMapGrouped.setChecked(True)
-		elif node.inputMapType == InputMapType.combined:
-			self.radioButtonInputMapCombined.setChecked(True)
-		self.checkBoxEnableSpatialPooling.setChecked(node.enableSpatialPooling)
 		self.spinnerPotentialRadius.setValue(node.potentialRadius)
 		self.spinnerPotentialPct.setValue(node.potentialPct)
 		self.checkBoxGlobalInhibition.setChecked(node.globalInhibition)
@@ -491,7 +483,7 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerMinPctActiveDutyCycle.setValue(node.minPctActiveDutyCycle)
 		self.spinnerDutyCyclePeriod.setValue(node.dutyCyclePeriod)
 		self.spinnerMaxBoost.setValue(node.maxBoost)
-		self.checkBoxEnableTemporalPooling.setChecked(node.enableTemporalPooling)
+		self.spinnerSpSeed.setValue(node.spSeed)
 		self.spinnerNumCellsPerColumn.setValue(node.numCellsPerColumn)
 		self.spinnerLearningRadius.setValue(node.learningRadius)
 		self.spinnerDistalSynInitialPerm.setValue(node.distalSynInitialPerm)
@@ -501,6 +493,7 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerMinThreshold.setValue(node.minThreshold)
 		self.spinnerActivationThreshold.setValue(node.activationThreshold)
 		self.spinnerMaxNumNewSynapses.setValue(node.maxNumNewSynapses)
+		self.spinnerTpSeed.setValue(node.tpSeed)
 
 	#endregion
 
@@ -513,11 +506,6 @@ class RegionForm(QtGui.QDialog):
 
 		width = self.spinnerWidth.value()
 		height = self.spinnerHeight.value()
-		if self.radioButtonInputMapGrouped.isChecked():
-			inputMapType = InputMapType.grouped
-		elif self.radioButtonInputMapCombined.isChecked():
-			inputMapType = InputMapType.combined
-		enableSpatialPooling = self.checkBoxEnableSpatialPooling.isChecked()
 		potentialRadius = self.spinnerPotentialRadius.value()
 		potentialPct = self.spinnerPotentialPct.value()
 		globalInhibition = self.checkBoxGlobalInhibition.isChecked()
@@ -531,7 +519,7 @@ class RegionForm(QtGui.QDialog):
 		minPctActiveDutyCycle = self.spinnerMinPctActiveDutyCycle.value()
 		dutyCyclePeriod = self.spinnerDutyCyclePeriod.value()
 		maxBoost = self.spinnerMaxBoost.value()
-		enableTemporalPooling = self.checkBoxEnableTemporalPooling.isChecked()
+		spSeed = self.spinnerSpSeed.value()
 		numCellsPerColumn = self.spinnerNumCellsPerColumn.value()
 		learningRadius = self.spinnerLearningRadius.value()
 		distalSynInitialPerm = self.spinnerDistalSynInitialPerm.value()
@@ -541,18 +529,17 @@ class RegionForm(QtGui.QDialog):
 		minThreshold = self.spinnerMinThreshold.value()
 		activationThreshold = self.spinnerActivationThreshold.value()
 		maxNumNewSynapses = self.spinnerMaxNumNewSynapses.value()
+		tpSeed = self.spinnerTpSeed.value()
 
 		# If anything has changed
 		node = Global.nodeSelectorForm.underMouseNode
-		if  node.width != width or node.height != height or node.inputMapType != inputMapType or node.enableSpatialPooling != enableSpatialPooling or node.potentialRadius != potentialRadius or node.potentialPct != potentialPct or node.globalInhibition != globalInhibition or node.localAreaDensity != localAreaDensity or node.numActiveColumnsPerInhArea != numActiveColumnsPerInhArea or node.stimulusThreshold != stimulusThreshold\
-			or node.proximalSynConnectedPerm != proximalSynConnectedPerm or node.proximalSynPermIncrement != proximalSynPermIncrement or node.proximalSynPermDecrement != proximalSynPermDecrement or node.minPctOverlapDutyCycle != minPctOverlapDutyCycle or node.minPctActiveDutyCycle != minPctActiveDutyCycle or node.dutyCyclePeriod != dutyCyclePeriod or node.maxBoost != maxBoost\
- 			or node.enableTemporalPooling != enableTemporalPooling or node.numCellsPerColumn != numCellsPerColumn or node.learningRadius != learningRadius or node.distalSynInitialPerm != distalSynInitialPerm or node.distalSynConnectedPerm != distalSynConnectedPerm or node.distalSynPermIncrement != distalSynPermIncrement or node.distalSynPermDecrement != distalSynPermDecrement or node.minThreshold != minThreshold or node.activationThreshold != activationThreshold or node.maxNumNewSynapses != maxNumNewSynapses:
+		if  node.width != width or node.height != height or node.potentialRadius != potentialRadius or node.potentialPct != potentialPct or node.globalInhibition != globalInhibition or node.localAreaDensity != localAreaDensity or node.numActiveColumnsPerInhArea != numActiveColumnsPerInhArea or node.stimulusThreshold != stimulusThreshold\
+			or node.proximalSynConnectedPerm != proximalSynConnectedPerm or node.proximalSynPermIncrement != proximalSynPermIncrement or node.proximalSynPermDecrement != proximalSynPermDecrement or node.minPctOverlapDutyCycle != minPctOverlapDutyCycle or node.minPctActiveDutyCycle != minPctActiveDutyCycle or node.dutyCyclePeriod != dutyCyclePeriod or node.maxBoost != maxBoost or node.spSeed != spSeed\
+ 			or node.numCellsPerColumn != numCellsPerColumn or node.learningRadius != learningRadius or node.distalSynInitialPerm != distalSynInitialPerm or node.distalSynConnectedPerm != distalSynConnectedPerm or node.distalSynPermIncrement != distalSynPermIncrement or node.distalSynPermDecrement != distalSynPermDecrement or node.minThreshold != minThreshold or node.activationThreshold != activationThreshold or node.maxNumNewSynapses != maxNumNewSynapses or node.tpSeed != tpSeed:
 
 			# Set region params with controls values
 			node.width = width
 			node.height = height
-			node.inputMapType = inputMapType
-			node.enableSpatialPooling = enableSpatialPooling
 			node.potentialRadius = potentialRadius
 			node.potentialPct = potentialPct
 			node.globalInhibition = globalInhibition
@@ -566,7 +553,7 @@ class RegionForm(QtGui.QDialog):
 			node.minPctActiveDutyCycle = minPctActiveDutyCycle
 			node.dutyCyclePeriod = dutyCyclePeriod
 			node.maxBoost = maxBoost
-			node.enableTemporalPooling = enableTemporalPooling
+			node.spSeed = spSeed
 			node.numCellsPerColumn = numCellsPerColumn
 			node.learningRadius = learningRadius
 			node.distalSynInitialPerm = distalSynInitialPerm
@@ -576,6 +563,7 @@ class RegionForm(QtGui.QDialog):
 			node.minThreshold = minThreshold
 			node.activationThreshold = activationThreshold
 			node.maxNumNewSynapses = maxNumNewSynapses
+			node.tpSeed = tpSeed
 
 			self.accept()
 

@@ -1,4 +1,4 @@
-from nustudio.htm import maxStoredSteps
+from nustudio.htm import maxPreviousSteps
 from nustudio.ui import Global
 
 class Cell:
@@ -25,9 +25,10 @@ class Cell:
 		"""List of distal segments of this cell."""
 
 		# States of this element
-		self.isLearning = [False] * maxStoredSteps
-		self.isActive = [False] * maxStoredSteps
-		self.isPredicted = [False] * maxStoredSteps
+		self.isLearning = [False] * maxPreviousSteps
+		self.isActive = [False] * maxPreviousSteps
+		self.isPredicted = [False] * maxPreviousSteps
+		self.isFalselyPredicted = [False] * maxPreviousSteps
 
 		#region Statistics properties
 
@@ -61,10 +62,11 @@ class Cell:
 		"""
 
 		# Update states machine by remove the first element and add a new element in the end
-		if len(self.isActive) > maxStoredSteps:
+		if len(self.isActive) > maxPreviousSteps:
 			self.isLearning.remove(self.isLearning[0])
 			self.isActive.remove(self.isActive[0])
 			self.isPredicted.remove(self.isPredicted[0])
+			self.isFalselyPredicted.remove(self.isFalselyPredicted[0])
 
 			# Remove segments (and their synapses) that are marked to be removed
 			for segment in self.segments:
@@ -77,6 +79,7 @@ class Cell:
 		self.isLearning.append(False)
 		self.isActive.append(False)
 		self.isPredicted.append(False)
+		self.isFalselyPredicted.append(False)
 
 		for segment in self.segments:
 			segment.nextStep()
@@ -87,9 +90,9 @@ class Cell:
 		"""
 
 		# Calculate statistics
-		if self.isActive[maxStoredSteps - 1]:
+		if self.isActive[maxPreviousSteps - 1]:
 			self.statsActivationCount += 1
-		if self.isPredicted[maxStoredSteps - 1]:
+		if self.isPredicted[maxPreviousSteps - 1]:
 			self.statsPreditionCount += 1
 		if Global.currStep > 0:
 			self.statsActivationRate = self.statsActivationCount / float(Global.currStep)

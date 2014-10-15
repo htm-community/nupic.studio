@@ -1,7 +1,7 @@
 import numpy
 import time
 from PyQt4 import QtGui, QtCore
-from nustudio.htm import maxStoredSteps
+from nustudio.htm import maxPreviousSteps
 from nustudio.htm.node import Node, NodeType
 from nustudio.htm.column import Column
 from nustudio.htm.cell import Cell
@@ -10,20 +10,6 @@ from nustudio.htm.synapse import Synapse
 from nustudio.ui import Global
 from nupic.research.spatial_pooler import SpatialPooler
 from nupic.research.temporal_memory import TemporalMemory as TemporalPooler
-
-class InputMapType:
-	"""
-	Types of input map.
-	An input map is a set of input elements (cells or sensor bits) that can be are grouped or combined.
-	For example, if we have 2 children (#1 and #2) with dimensions 6 and 12 respectively,
-	a grouped input map would be something like:
-	   111111222222222222
-	while a combined one would be something like: 
-	   122122122122122122
-	"""
-
-	grouped = 1
-	combined = 2
 
 class Region(Node):
 	"""
@@ -43,9 +29,6 @@ class Region(Node):
 
 		self.columns = []
 		"""List of columns that compose this region"""
-
-		self.inputMapType = InputMapType.combined
-		"""Specify how the inputs are organized in the input map"""
 
 		self._inputMap = []
 		"""An array representing the input map for this region."""
@@ -98,6 +81,9 @@ class Region(Node):
 		self.maxBoost = 10.0
 		"""The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets considered for inhibition. The actual boost factor for a column is number between 1.0 and maxBoost. A boost factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, maxBoost is used if the duty cycle is 0, and any duty cycle in between is linearly extrapolated from these 2 endpoints."""
 
+		self.spSeed = -1
+		"""Seed for generate random values"""
+
 		#endregion
 
 		#region Temporal Parameters
@@ -132,6 +118,9 @@ class Region(Node):
 		self.maxNumNewSynapses = 15
 		"""The maximum number of synapses added to a segment during learning."""
 
+		self.tpSeed = 42
+		"""Seed for generate random values"""
+
 		#endregion
 
 		self.spatialPooler = None
@@ -139,6 +128,12 @@ class Region(Node):
 
 		self.temporalPooler = None
 		"""Temporal Pooler instance"""
+
+		#endregion
+
+		#region Statistics properties
+
+		self.statsPrecisionRate = 0.
 
 		#endregion
 
@@ -169,74 +164,27 @@ class Region(Node):
 			child.initialize()
 
 		# Create the input map
-		# An input map is a set of input elements (cells or sensor bits) that can be are grouped or combined
+		# An input map is a set of input elements (cells or sensor bits) that should are grouped
 		# For example, if we have 2 children (#1 and #2) with dimensions 6 and 12 respectively,
-		# a grouped input map would be something like:
+		# a input map would be something like:
 		#   111111222222222222
-		# while a combined one would be something like: 
-		#   122122122122122122
 		self._inputMap = []
 		sumDimension = 0
-		if self.inputMapType == InputMapType.grouped:
-			elemIdx = 0
-			for child in self.children:
-				dimension = child.width * child.height
-				sumDimension += dimension
+		elemIdx = 0
+		for child in self.children:
+			dimension = child.width * child.height
+			sumDimension += dimension
 
-				# Arrange input from child into input map of this region
-				if child.type == NodeType.region:
-					for column in child.columns:
-						inputElem = column.cells[0]
-						self._inputMap.append(inputElem)
-				else:
-					for bit in child.bits:
-						inputElem = bit
-						self._inputMap.append(inputElem)
-				elemIdx += 1
-
-		elif self.inputMapType == InputMapType.combined:
-			# Get the overall dimension and the minimum dimension among all children
-			minDimension = self.children[0].width * self.children[0].height
-			for child in self.children:
-				dimension = child.width * child.height
-				sumDimension += dimension
-				if dimension < minDimension:
-					minDimension = dimension
-
-			# Use the minimum dimension as a multiplication common factor to determine the frequency of each child element in a sequence
-			frequencies = []
-			nextIdx = []
-			for child in self.children:
-				dimension = child.width * child.height
-				if dimension % minDimension == 0:
-					frequency = dimension / minDimension
-					frequencies.append(frequency)
-					nextIdx.append(0)
-				else:
-					QtGui.QMessageBox.warning(None, "Warning", "Children dimensions should have a common multiple factor!")
-					return
-
-			# Distribute alternatively child elements into input map according to their frequencies
-			childIdx = 0
-			for elemIdx in range(sumDimension):
-				if childIdx == len(self.children):
-					childIdx = 0
-				child = self.children[childIdx]
-
-				# Start distribution taking in account the last inserted element
-				i0 = nextIdx[childIdx]
-				iN = i0 + frequencies[childIdx]
-				nextIdx[childIdx] = iN
-				for i in range(i0, iN):
-					if child.type == NodeType.region:
-						inputElem = child.columns[i].cells[0]
-						self._inputMap.append(inputElem)
-					else:
-						inputElem = child.bits[i]
-						self._inputMap.append(inputElem)
-
-				# Alternate children
-				childIdx += 1
+			# Arrange input from child into input map of this region
+			if child.type == NodeType.region:
+				for column in child.columns:
+					inputElem = column.cells[0]
+					self._inputMap.append(inputElem)
+			else:
+				for bit in child.bits:
+					inputElem = bit
+					self._inputMap.append(inputElem)
+			elemIdx += 1
 
 		# Initialize elements
 		self.columns = []
@@ -271,7 +219,7 @@ class Region(Node):
 			minPctActiveDutyCycle = self.minPctActiveDutyCycle,
 			dutyCyclePeriod = self.dutyCyclePeriod,
 			maxBoost = self.maxBoost,
-			seed = -1,
+			seed = self.spSeed,
 			spVerbosity = False)
 
 		# Create Temporal Pooler instance with appropriate parameters
@@ -286,7 +234,7 @@ class Region(Node):
 			permanenceIncrement = self.distalSynPermIncrement,
 			permanenceDecrement = self.distalSynPermDecrement,
 			activationThreshold = self.activationThreshold,
-			seed = 42)
+			seed = self.tpSeed)
 
 		return True
 
@@ -325,15 +273,32 @@ class Region(Node):
 		# Update elements regarding temporal pooler
 		self.updateTemporalElements()
 
+		# Get the predicted values
+		self.getPredictions()
+
 		#TODO: self._output = self.temporalPooler.getPredictedState()
+
+	def getPredictions(self):
+		"""
+		Get the predicted values after an iteration.
+		"""
+
+		for child in self.children:
+			child.getPredictions()
 
 	def calculateStatistics(self):
 		"""
 		Calculate statistics after an iteration.
 		"""
 
+		# The region's prediction precision is the average between its children
+		precisionCurrInput = 0.
+		precisionRate = 0.
 		for child in self.children:
 			child.calculateStatistics()
+			precisionRate += child.statsPrecisionRate
+		self.statsPrecisionRate = precisionRate / len(self.children)
+
 		for column in self.columns:
 			column.calculateStatistics()
 
@@ -345,7 +310,7 @@ class Region(Node):
 		# Initialize the vector for representing the current input map
 		inputList = []
 		for inputElem in self._inputMap:
-			if inputElem.isActive[maxStoredSteps - 1]:
+			if inputElem.isActive[maxPreviousSteps - 1]:
 				inputList.append(1)
 			else:
 				inputList.append(0)
@@ -365,17 +330,17 @@ class Region(Node):
 			# Update proximal segment
 			segment = column.segment
 			if activeColumns[colIdx] == 1:
-				segment.isActive[maxStoredSteps - 1] = True
+				segment.isActive[maxPreviousSteps - 1] = True
 			else:
-				segment.isActive[maxStoredSteps - 1] = False
+				segment.isActive[maxPreviousSteps - 1] = False
 
 			# Check if proximal segment is predicted by check if the column has any predicted cell
 			for cell in column.cells:
 				if cell.index in self.temporalPooler.predictiveCells:
-					segment.isPredicted[maxStoredSteps - 1] = True
+					segment.isPredicted[maxPreviousSteps - 1] = True
 
 			# Update proximal synapses
-			if segment.isActive[maxStoredSteps - 1] or segment.isPredicted[maxStoredSteps - 1]:
+			if segment.isActive[maxPreviousSteps - 1] or segment.isPredicted[maxPreviousSteps - 1]:
 				permanencesSynapses = []
 				self.spatialPooler.getPermanence(colIdx, permanencesSynapses)
 				connectedSynapses = []
@@ -397,15 +362,15 @@ class Region(Node):
 							segment.synapses.append(synapse)
 
 						# Update state
-						synapse.isRemoved[maxStoredSteps - 1] = False
-						synapse.permanence[maxStoredSteps - 1] = permanencesSynapses[synIdx]
+						synapse.isRemoved[maxPreviousSteps - 1] = False
+						synapse.permanence[maxPreviousSteps - 1] = permanencesSynapses[synIdx]
 						if connectedSynapses[synIdx] == 1:
-							synapse.isConnected[maxStoredSteps - 1] = True
+							synapse.isConnected[maxPreviousSteps - 1] = True
 						else:
-							synapse.isConnected[maxStoredSteps - 1] = False
+							synapse.isConnected[maxPreviousSteps - 1] = False
 					else:
 						if synapse != None:
-							synapse.isRemoved[maxStoredSteps - 1] = True
+							synapse.isRemoved[maxPreviousSteps - 1] = True
 
 	def updateTemporalElements(self):
 		"""
@@ -417,22 +382,32 @@ class Region(Node):
 			column = self.columns[colIdx]
 
 			# Mark proximal segment and its connected synapses as predicted
-			if column.segment.isPredicted[maxStoredSteps - 1]:
+			if column.segment.isPredicted[maxPreviousSteps - 1]:
 				for synapse in column.segment.synapses:
-					if synapse.isConnected[maxStoredSteps - 1]:
-						synapse.isPredicted[maxStoredSteps - 1] = True
-						synapse.inputElem.isPredicted[maxStoredSteps - 1] = True
+					if synapse.isConnected[maxPreviousSteps - 1]:
+						synapse.isPredicted[maxPreviousSteps - 1] = True
+						synapse.inputElem.isPredicted[maxPreviousSteps - 1] = True
+
+			# Mark proximal segment and its connected synapses that were predicted but are not active now
+			if column.segment.isPredicted[maxPreviousSteps - 2]:
+				if not column.segment.isActive[maxPreviousSteps - 1]:
+					column.segment.isFalselyPredicted[maxPreviousSteps - 1] = True
+				for synapse in column.segment.synapses:
+					if (synapse.isPredicted[maxPreviousSteps - 2] and not synapse.isConnected[maxPreviousSteps - 1]) or (synapse.isConnected[maxPreviousSteps - 1] and synapse.inputElem.isFalselyPredicted[maxPreviousSteps - 1]):
+						synapse.isFalselyPredicted[maxPreviousSteps - 1] = True
 
 			for cell in column.cells:
 				cellIdx = cell.index
 
 				# Update cell's states
 				if cellIdx in self.temporalPooler.winnerCells:
-					cell.isLearning[maxStoredSteps - 1] = True
+					cell.isLearning[maxPreviousSteps - 1] = True
 				if cellIdx in self.temporalPooler.activeCells:
-					cell.isActive[maxStoredSteps - 1] = True
+					cell.isActive[maxPreviousSteps - 1] = True
 				if cellIdx in self.temporalPooler.predictiveCells:
-					cell.isPredicted[maxStoredSteps - 1] = True
+					cell.isPredicted[maxPreviousSteps - 1] = True
+				if cell.isPredicted[maxPreviousSteps - 2] and not cell.isActive[maxPreviousSteps - 1]:
+					cell.isFalselyPredicted[maxPreviousSteps - 1] = True
 
 				# Get the indexes of the distal segments of this cell
 				segmentsForCell = self.temporalPooler.connections.segmentsForCell(cellIdx)
@@ -461,9 +436,9 @@ class Region(Node):
 
 						# Update segment's state
 						if segIdx in self.temporalPooler.activeSegments:
-							segment.isActive[maxStoredSteps - 1] = True
+							segment.isActive[maxPreviousSteps - 1] = True
 						else:
-							segment.isActive[maxStoredSteps - 1] = False
+							segment.isActive[maxPreviousSteps - 1] = False
 
 						# Get the indexes of the synapses of this segment
 						synapsesForSegment = self.temporalPooler.connections.synapsesForSegment(segIdx)
@@ -491,21 +466,21 @@ class Region(Node):
 							if synIdx in synapsesForSegment:
 
 								# Update synapse's state
-								(_, sourceCellIdx, permanence) = self.temporalPooler.connections.dataForSynapse(synIdx)
-								synapse.permanence[maxStoredSteps - 1] = permanence
+								(_, sourceCellAbsIdx, permanence) = self.temporalPooler.connections.dataForSynapse(synIdx)
+								synapse.permanence[maxPreviousSteps - 1] = permanence
 								if permanence >= self.distalSynConnectedPerm:
-									synapse.isConnected[maxStoredSteps - 1] = True
+									synapse.isConnected[maxPreviousSteps - 1] = True
 								else:
-									synapse.isConnected[maxStoredSteps - 1] = False
+									synapse.isConnected[maxPreviousSteps - 1] = False
 
 								# Get cell given cell's index
-								for sourceColumn in self.columns:
-									for sourceCell in sourceColumn.cells:
-										if sourceCell.index == sourceCellIdx:
-											synapse.inputElem = sourceCell
+								sourceColIdx = sourceCellAbsIdx / self.numCellsPerColumn
+								sourceCellRelIdx = sourceCellAbsIdx % self.numCellsPerColumn
+								sourceCell = self.columns[sourceColIdx].cells[sourceCellRelIdx]
+								synapse.inputElem = sourceCell
 							else:
-								synapse.isRemoved[maxStoredSteps - 1] = True
+								synapse.isRemoved[maxPreviousSteps - 1] = True
 					else:
-						segment.isRemoved[maxStoredSteps - 1] = True
+						segment.isRemoved[maxPreviousSteps - 1] = True
 
 	#endregion

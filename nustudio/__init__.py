@@ -1,4 +1,5 @@
-import ast
+import collections
+import json
 from PyQt4 import QtGui, QtCore
 
 __version__ = "1.0.1"
@@ -10,7 +11,7 @@ def getInstantiatedClass(moduleName, className, classParams):
 
 	module = __import__(moduleName, fromlist=[className])
 	class_ = getattr(module, className)
-	params = ast.literal_eval(classParams)
+	params = json.loads(classParams.replace("'", "\""), object_pairs_hook=collections.OrderedDict)
 	instance = class_(**params)
 
 	return instance
@@ -43,6 +44,7 @@ class ArrayTableModel(QtGui.QStandardItemModel):
 
 	def setData(self, index, value, role=None):
 		self.data[index.row()][index.column()] = value
+		self.dataChanged.emit(index, index)
 		return True
 
 	def data(self, index, role=None):

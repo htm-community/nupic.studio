@@ -26,6 +26,7 @@ class View:
 		self.showCellsActive = True
 		self.showCellsPredicted = True
 		self.showCellsFalselyPredicted = True
+		self.showCellsInactive = True
 		self.showProximalSegmentsNone = False
 		self.showProximalSegmentsActive = True
 		self.showProximalSegmentsPredicted = True
@@ -88,6 +89,7 @@ class Global:
 						view.showCellsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsActive')
 						view.showCellsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsPredicted')
 						view.showCellsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsFalselyPredicted')
+						view.showCellsInactive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsInactive')
 						view.showProximalSegmentsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsNone')
 						view.showProximalSegmentsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsActive')
 						view.showProximalSegmentsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsPredicted')
@@ -164,6 +166,7 @@ class Global:
 			xmlWriter.writeAttribute('showCellsActive',  str(view.showCellsActive))
 			xmlWriter.writeAttribute('showCellsPredicted',  str(view.showCellsPredicted))
 			xmlWriter.writeAttribute('showCellsFalselyPredicted',  str(view.showCellsFalselyPredicted))
+			xmlWriter.writeAttribute('showCellsInactive',  str(view.showCellsInactive))
 			xmlWriter.writeAttribute('showProximalSegmentsNone',  str(view.showProximalSegmentsNone))
 			xmlWriter.writeAttribute('showProximalSegmentsActive',  str(view.showProximalSegmentsActive))
 			xmlWriter.writeAttribute('showProximalSegmentsPredicted',  str(view.showProximalSegmentsPredicted))

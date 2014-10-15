@@ -2,7 +2,7 @@ import collections
 import json
 from PyQt4 import QtGui, QtCore
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 def getInstantiatedClass(moduleName, className, classParams):
 	"""

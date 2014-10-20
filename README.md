@@ -34,7 +34,7 @@ _Note_: Except Python, PIP and NuPIC, all dependencies above are already automat
     yum install scipy
     brew install scipy
 
-    apt-get install python-qt4
+    apt-get install python-qt4 python-qt4-gl
     yum install PyQt4
     brew install pyqt
 

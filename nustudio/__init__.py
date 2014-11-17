@@ -2,7 +2,7 @@ import collections
 import json
 from PyQt4 import QtGui, QtCore
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 class MachineState(object):
 	"""

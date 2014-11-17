@@ -1,5 +1,7 @@
 import os
+import collections
 from PyQt4 import QtGui, QtCore
+from nustudio.htm import maxPreviousStepsWithInference
 
 class View:
 	"""
@@ -53,12 +55,13 @@ class Global:
 	simulationInitialized = False
 	currStep = 0
 	selStep = 0
+	timeStepsPredictionsChart = None
 	output = []
 
 	views = []
 
 	project = None
-	nodeSelectorForm = None
+	architectureForm = None
 	nodeInformationForm = None
 	simulationForm = None
 	outputForm = None

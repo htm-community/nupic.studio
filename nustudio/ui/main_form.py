@@ -2,7 +2,8 @@ import sys
 import time
 import webbrowser
 from PyQt4 import QtGui, QtCore
-from nustudio.htm import maxPreviousSteps
+from nustudio import MachineState
+from nustudio.htm import maxPreviousSteps, maxPreviousStepsWithInference
 from nustudio.ui import Global
 from nustudio.ui.project_properties_form import ProjectPropertiesForm
 
@@ -65,10 +66,10 @@ class MainForm(QtGui.QMainWindow):
 		self.menuFile.addAction(self.menuFileExit)
 		self.menuFile.setTitle("&File")
 
-		# menuViewNodeSelector
-		self.menuViewNodeSelector = QtGui.QAction(self)
-		self.menuViewNodeSelector.setText("&Node Selector")
-		self.menuViewNodeSelector.triggered.connect(self.__menuViewNodeSelector_Click)
+		# menuViewArchitecture
+		self.menuViewArchitecture = QtGui.QAction(self)
+		self.menuViewArchitecture.setText("&Network Architecture")
+		self.menuViewArchitecture.triggered.connect(self.__menuViewArchitecture_Click)
 
 		# menuViewSimulation
 		self.menuViewSimulation = QtGui.QAction(self)
@@ -87,7 +88,7 @@ class MainForm(QtGui.QMainWindow):
 
 		# menuViewToolWindows
 		self.menuViewToolWindows = QtGui.QMenu()
-		self.menuViewToolWindows.addAction(self.menuViewNodeSelector)
+		self.menuViewToolWindows.addAction(self.menuViewArchitecture)
 		self.menuViewToolWindows.addAction(self.menuViewNodeInformation)
 		self.menuViewToolWindows.addAction(self.menuViewSimulation)
 		self.menuViewToolWindows.addAction(self.menuViewOutput)
@@ -197,10 +198,10 @@ class MainForm(QtGui.QMainWindow):
 		self.toolBar.addWidget(self.textBoxStep)
 		self.toolBar.addWidget(self.sliderStep)
 
-		# dockNodeSelectorForm
-		self.dockNodeSelectorForm = QtGui.QDockWidget()
-		self.dockNodeSelectorForm.setWidget(Global.nodeSelectorForm)
-		self.dockNodeSelectorForm.setWindowTitle(Global.nodeSelectorForm.windowTitle())
+		# dockArchitectureForm
+		self.dockArchitectureForm = QtGui.QDockWidget()
+		self.dockArchitectureForm.setWidget(Global.architectureForm)
+		self.dockArchitectureForm.setWindowTitle(Global.architectureForm.windowTitle())
 
 		# dockSimulationForm
 		self.dockSimulationForm = QtGui.QDockWidget()
@@ -219,11 +220,11 @@ class MainForm(QtGui.QMainWindow):
 
 		# MainForm
 		self.addToolBar(self.toolBar)
-		self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockNodeSelectorForm)
+		self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockArchitectureForm)
 		self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockSimulationForm)
 		self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.dockNodeInformationForm)
 		self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.dockOutputForm)
-		self.tabifyDockWidget(self.dockNodeInformationForm, self.dockOutputForm);
+		self.tabifyDockWidget(self.dockNodeInformationForm, self.dockOutputForm)
 		self.setCentralWidget(self.dockSimulationForm)
 		self.setWindowTitle("NuPIC Studio")
 		self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
@@ -236,9 +237,11 @@ class MainForm(QtGui.QMainWindow):
 		self.__enableSimulationButtons(False)
 		self.__enableSteeringButtons(False)
 
-		# Highlight the top region
-		Global.nodeSelectorForm.selectedNode = Global.project.topRegion
-		Global.nodeSelectorForm.repaint()
+		# Update architecture controls
+		Global.architectureForm.designPanel.topRegion = Global.project.network.nodes[0]
+		Global.architectureForm.designPanel.selectedNode = Global.project.network.nodes[0]
+		Global.architectureForm.designPanel.repaint()
+		Global.architectureForm.updateCode()
 
 		# Reset the controls
 		self.clearControls()
@@ -424,12 +427,12 @@ class MainForm(QtGui.QMainWindow):
 		if dialogResult == QtGui.QDialog.Accepted:
 			Global.mainForm.markProjectChanges(True)
 
-	def __menuViewNodeSelector_Click(self, event):
-		self.dockNodeSelectorForm.show()
+	def __menuViewArchitecture_Click(self, event):
+		self.dockArchitectureForm.show()
 
 	def __menuViewSimulation_Click(self, event):
 		self.dockSimulationForm.show()
-		Global.nodeSimulationForm.refreshControls()
+		Global.simulationForm.refreshControls()
 
 	def __menuViewNodeInformation_Click(self, event):
 		self.dockNodeInformationForm.show()
@@ -459,13 +462,14 @@ class MainForm(QtGui.QMainWindow):
 		# Initialize the network starting from top region.
 		startTime = time.time()
 		endTime = time.time()
-		initialized = Global.project.topRegion.initialize()
+		initialized = Global.project.network.initialize()
 
 		if initialized:
 
 			# Initialize time steps parameters
 			Global.currStep = 0
-			Global.selStep = (maxPreviousSteps - 1)
+			Global.selStep = 0
+			Global.timeStepsPredictionsChart = MachineState(0, maxPreviousStepsWithInference)
 
 			Global.outputForm.addText("Initialization: " + "{0:.3f}".format(endTime - startTime) + " secs")
 			Global.outputForm.addText("")
@@ -473,17 +477,17 @@ class MainForm(QtGui.QMainWindow):
 
 			# Perfoms actions related to time step progression.
 			startTime = time.time()
-			Global.project.topRegion.nextStep()
-			Global.project.topRegion.calculateStatistics()
+			Global.project.network.nextStep()
+			Global.project.network.calculateStatistics()
 			endTime = time.time()
-			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.topRegion.statsPrecisionRate))
+			Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.network.statsPrecisionRate))
 
 			# Disable relevant buttons:
 			self.__enableSteeringButtons(True)
 			self.__enableSimulationButtons(True)
 
 			# Update controls
-			Global.simulationForm.topRegion = Global.project.topRegion
+			Global.simulationForm.topRegion = Global.project.network.nodes[0]
 			Global.simulationForm.initializeControls()
 			self.refreshControls()
 
@@ -496,14 +500,16 @@ class MainForm(QtGui.QMainWindow):
 		Global.currStep += 1
 		if Global.currStep >= (maxPreviousSteps - 1):
 			self.sliderStep.setEnabled(True)
-		Global.selStep = (maxPreviousSteps - 1) - (self.sliderStep.maximum() - self.sliderStep.value())
+		Global.selStep = self.sliderStep.maximum() - self.sliderStep.value()
+		Global.timeStepsPredictionsChart.rotate()
+		Global.timeStepsPredictionsChart.setForCurrStep(Global.currStep)
 
 		# Perfoms actions related to time step progression.
 		startTime = time.time()
-		Global.project.topRegion.nextStep()
-		Global.project.topRegion.calculateStatistics()
+		Global.project.network.nextStep()
+		Global.project.network.calculateStatistics()
 		endTime = time.time()
-		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.topRegion.statsPrecisionRate))
+		Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.network.statsPrecisionRate))
 
 		# Update controls
 		self.refreshControls()
@@ -538,7 +544,7 @@ class MainForm(QtGui.QMainWindow):
 				self.stopSimulation()
 
 	def __sliderStep_ValueChanged(self, value):
-		Global.selStep = (maxPreviousSteps - 1) - (self.sliderStep.maximum() - self.sliderStep.value())
+		Global.selStep = Global.selStep = self.sliderStep.maximum() - self.sliderStep.value()
 		self.refreshControls()
 
 	#endregion

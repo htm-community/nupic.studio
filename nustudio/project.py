@@ -1,7 +1,10 @@
 ﻿from PyQt4 import QtGui, QtCore
+from nustudio.htm.network import Network
 from nustudio.htm.node import NodeType, Node
 from nustudio.htm.node_region import Region
-from nustudio.htm.node_sensor import Sensor, DataSourceType, InputFormat, InputRawDataType, PredictionsMethod
+from nustudio.htm.node_sensor import Sensor, DataSourceType, PredictionsMethod
+from nustudio.htm.encoding import Encoding
+from nustudio.htm.link import Link
 
 """
 Loads and saves the Elements of the .nuproj file, that contains user entries for project properties
@@ -35,8 +38,8 @@ class Project:
 		self.description = ""
 		"""Description of the project."""
 
-		self.topRegion = Region(None, "TopRegion")
-		"""Parameters for the regions."""
+		self.network = Network()
+		"""The network created for the project."""
 
 		#endregion
 
@@ -55,13 +58,21 @@ class Project:
 		self.author = ""
 		self.description = ""
 
-		# Initialize top region params
-		self.topRegion = Region(None, "TopRegion")
+		# Create the top region
+		topRegion = Region("TopRegion")
+
+		# Create the network and add topRegion as its starting node
+		self.network = Network()
+		self.network.nodes.append(topRegion)
+		self.network.preparePhases()
 
 	def open(self, fileName):
 		"""
 		Loads the content from XML file to Project instance.
 		"""
+
+		# Create the network
+		self.network = Network()
 
 		self.fileName = fileName
 		file = QtCore.QFile(self.fileName)
@@ -75,14 +86,21 @@ class Project:
 						self.author = self.__getStringAttribute(xmlReader.attributes(), 'author')
 						self.description = self.__getStringAttribute(xmlReader.attributes(), 'description')
 					elif xmlReader.name().toString() == 'Net':
-						xmlReader.readNextStartElement()
-						self.topRegion = self.__readNode(None, xmlReader)
+						while xmlReader.readNextStartElement():
+							if xmlReader.name().toString() == 'Node':
+								node = self.__readNode(xmlReader)
+								self.network.nodes.append(node)
+							elif xmlReader.name().toString() == 'Link':
+								link = self.__readLink(xmlReader)
+								self.network.links.append(link)
 
 				xmlReader.readNext()
 			if (xmlReader.hasError()):
 				QtGui.QMessageBox.critical(self, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
 		else:
 			QtGui.QMessageBox.critical(self, "Critical", "Cannot read the project file!", QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
+
+		self.network.preparePhases()
 
 	def __getStringAttribute(self, attributes, attributeName):
 		if attributes.value(attributeName).toString() != "":
@@ -109,22 +127,20 @@ class Project:
 			attributeValue = True
 		return attributeValue
 
-	def __readNode(self, parentNode, xmlReader):
+	def __readNode(self, xmlReader):
 
 		# Read type of node
 		name = self.__getStringAttribute(xmlReader.attributes(), 'name')
 		type = self.__getStringAttribute(xmlReader.attributes(), 'type')
-		width = self.__getIntegerAttribute(xmlReader.attributes(), 'width')
-		height = self.__getIntegerAttribute(xmlReader.attributes(), 'height')
 
-		# Initialize node
+		# Create a node from parameters
 		node = None
 		if type == 'Region':
-			node = Region(parentNode, name)
+			node = Region(name)
 		elif type == 'Sensor':
-			node = Sensor(parentNode, name)
-		node.width = width
-		node.height = height
+			node = Sensor(name)
+		node.width = self.__getIntegerAttribute(xmlReader.attributes(), 'width')
+		node.height = self.__getIntegerAttribute(xmlReader.attributes(), 'height')
 
 		# Read specific parameters according to node type
 		if type == 'Region':
@@ -163,43 +179,66 @@ class Project:
 				node.dataSourceType = DataSourceType.database
 				node.databaseConnectionString = self.__getStringAttribute(xmlReader.attributes(), 'databaseConnectionString')
 				node.databaseTable = self.__getStringAttribute(xmlReader.attributes(), 'databaseTable')
-				node.databaseField = self.__getStringAttribute(xmlReader.attributes(), 'databaseField')
-			inputFormat = self.__getStringAttribute(xmlReader.attributes(), 'inputFormat')
-			if inputFormat == "Htm":
-				node.inputFormat = InputFormat.htm
-			elif inputFormat == "Raw":
-				node.inputFormat = InputFormat.raw
-				inputRawDataType = self.__getStringAttribute(xmlReader.attributes(), 'inputRawDataType')
-				if inputRawDataType == "Boolean":
-					node.inputRawDataType = InputRawDataType.boolean
-				if inputRawDataType == "Integer":
-					node.inputRawDataType = InputRawDataType.integer
-				if inputRawDataType == "Decimal":
-					node.inputRawDataType = InputRawDataType.decimal
-				if inputRawDataType == "DateTime":
-					node.inputRawDataType = InputRawDataType.dateTime
-				if inputRawDataType == "String":
-					node.inputRawDataType = InputRawDataType.string
-				node.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
-				node.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
-				node.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
-				predictionsMethod = self.__getStringAttribute(xmlReader.attributes(), 'predictionsMethod')
-				if predictionsMethod == "Reconstruction":
-					node.predictionsMethod = PredictionsMethod.reconstruction
-				elif predictionsMethod == "Classification":
-					node.predictionsMethod = PredictionsMethod.classification
-					node.enableClassificationLearning = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationLearning')
-					node.enableClassificationInference = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationInference')
+			node.predictionsMethod = self.__getStringAttribute(xmlReader.attributes(), 'predictionsMethod')
+			if node.predictionsMethod == PredictionsMethod.classification:
+				node.enableClassificationLearning = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationLearning')
+				node.enableClassificationInference = self.__getBooleanAttribute(xmlReader.attributes(), 'enableClassificationInference')
 
-		# If still is not end of element it's because this node has children
+			# If still is not end of element it's because this node has encodings
+			token = xmlReader.readNext()
+			if not xmlReader.isEndElement():
+				while xmlReader.readNextStartElement():
+					encoding = self.__readEncoding(xmlReader)
+					node.encodings.append(encoding)
+
 		token = xmlReader.readNext()
-		if not xmlReader.isEndElement():
-			while xmlReader.readNextStartElement():
-				childNode = self.__readNode(node, xmlReader)
-				node.children.append(childNode)
 
 		return node
-		
+
+	def __readEncoding(self, xmlReader):
+
+		# Create a encoding from parameters
+		encoding = Encoding()
+		encoding.recordFieldName = self.__getStringAttribute(xmlReader.attributes(), 'recordFieldName')
+		encoding.recordFieldDataType = self.__getStringAttribute(xmlReader.attributes(), 'recordFieldDataType')
+		encoding.enableInference = self.__getBooleanAttribute(xmlReader.attributes(), 'enableInference')
+		encoding.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
+		encoding.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
+		encoding.encoderParams = self.__getStringAttribute(xmlReader.attributes(), 'encoderParams')
+		encoding.encoderFieldName = self.__getStringAttribute(xmlReader.attributes(), 'encoderFieldName')
+		encoding.encoderFieldDataType = self.__getStringAttribute(xmlReader.attributes(), 'encoderFieldDataType')
+		token = xmlReader.readNext()
+
+		return encoding
+
+	def __readLink(self, xmlReader):
+
+		# Read link parameters
+		outNodeName = self.__getStringAttribute(xmlReader.attributes(), 'outNode')
+		inNodeName = self.__getStringAttribute(xmlReader.attributes(), 'inNode')
+		token = xmlReader.readNext()
+
+		# Find output node instance
+		outNode = None
+		for node in self.network.nodes:
+			if node.name == outNodeName:
+				outNode = node
+				break
+
+		# Find input node instance
+		inNode = None
+		for node in self.network.nodes:
+			if node.name == inNodeName:
+				inNode = node
+				break
+
+		# Create a link from parameters
+		link = Link()
+		link.outNode = outNode
+		link.inNode = inNode
+
+		return link
+
 	def save(self, fileName):
 		"""
 		Saves the content from Project instance to XML file.
@@ -220,7 +259,10 @@ class Project:
 		xmlWriter.writeEndElement()
 
 		xmlWriter.writeStartElement('Net')
-		self.__writeNode(self.topRegion, xmlWriter)
+		for node in self.network.nodes:
+			self.__writeNode(node, xmlWriter)
+		for link in self.network.links:
+			self.__writeLink(link, xmlWriter)
 		xmlWriter.writeEndElement()
 
 		xmlWriter.writeEndElement()
@@ -275,35 +317,37 @@ class Project:
 				xmlWriter.writeAttribute('dataSourceType', "Database")
 				xmlWriter.writeAttribute('databaseConnectionString', node.databaseConnectionString)
 				xmlWriter.writeAttribute('databaseTable', node.databaseTable)
-				xmlWriter.writeAttribute('databaseField', node.databaseField)
-			if node.inputFormat == InputFormat.htm:
-				xmlWriter.writeAttribute('inputFormat', "Htm")
-			elif node.inputFormat == InputFormat.raw:
-				xmlWriter.writeAttribute('inputFormat', "Raw")
-				if node.inputRawDataType == InputRawDataType.boolean:
-					xmlWriter.writeAttribute('inputRawDataType', 'Boolean')
-				elif node.inputRawDataType == InputRawDataType.integer:
-					xmlWriter.writeAttribute('inputRawDataType', 'Integer')
-				elif node.inputRawDataType == InputRawDataType.decimal:
-					xmlWriter.writeAttribute('inputRawDataType', 'Decimal')
-				elif node.inputRawDataType == InputRawDataType.dateTime:
-					xmlWriter.writeAttribute('inputRawDataType', 'DateTime')
-				elif node.inputRawDataType == InputRawDataType.string:
-					xmlWriter.writeAttribute('inputRawDataType', 'String')
-				xmlWriter.writeAttribute('encoderModule', node.encoderModule)
-				xmlWriter.writeAttribute('encoderClass', node.encoderClass)
-				xmlWriter.writeAttribute('encoderParams', node.encoderParams)
-				if node.predictionsMethod == PredictionsMethod.reconstruction:
-					xmlWriter.writeAttribute('predictionsMethod', "Reconstruction")
-				elif node.predictionsMethod == PredictionsMethod.classification:
-					xmlWriter.writeAttribute('predictionsMethod', "Classification")
-					xmlWriter.writeAttribute('enableClassificationLearning', str(node.enableClassificationLearning))
-					xmlWriter.writeAttribute('enableClassificationInference', str(node.enableClassificationInference))
+			xmlWriter.writeAttribute('predictionsMethod', node.predictionsMethod)
+			if node.predictionsMethod == PredictionsMethod.classification:
+				xmlWriter.writeAttribute('enableClassificationLearning', str(node.enableClassificationLearning))
+				xmlWriter.writeAttribute('enableClassificationInference', str(node.enableClassificationInference))
 
-		# Tranverse all child nodes
-		for childNode in node.children:
-			self.__writeNode(childNode, xmlWriter)
+			# Tranverse all encodings
+			for encoding in node.encodings:
+				self.__writeEncoding(encoding, xmlWriter)
 
+		xmlWriter.writeEndElement()
+
+	def __writeEncoding(self, encoding, xmlWriter):
+
+		# Write encoding parameters
+		xmlWriter.writeStartElement('Encoding')
+		xmlWriter.writeAttribute('recordFieldName', encoding.recordFieldName)
+		xmlWriter.writeAttribute('recordFieldDataType', encoding.recordFieldDataType)
+		xmlWriter.writeAttribute('enableInference', str(encoding.enableInference))
+		xmlWriter.writeAttribute('encoderModule', encoding.encoderModule)
+		xmlWriter.writeAttribute('encoderClass', encoding.encoderClass)
+		xmlWriter.writeAttribute('encoderParams', encoding.encoderParams)
+		xmlWriter.writeAttribute('encoderFieldName', encoding.encoderFieldName)
+		xmlWriter.writeAttribute('encoderFieldDataType', encoding.encoderFieldDataType)
+		xmlWriter.writeEndElement()
+
+	def __writeLink(self, link, xmlWriter):
+
+		# Write encoding parameters
+		xmlWriter.writeStartElement('Link')
+		xmlWriter.writeAttribute('outNode', link.outNode.name)
+		xmlWriter.writeAttribute('inNode', link.inNode.name)
 		xmlWriter.writeEndElement()
 
 	#endregion

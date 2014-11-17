@@ -1,3 +1,4 @@
+from nustudio import MachineState
 from nustudio.htm import maxPreviousSteps
 from nustudio.ui import Global
 
@@ -24,14 +25,14 @@ class Synapse:
 		self.inputElem = None
 		"""An input element is a cell in case of the source be a column or then a bit in case of the source be a sensor"""
 
-		self.permanence = [0.] * maxPreviousSteps
+		self.permanence = MachineState(0., maxPreviousSteps)
 		"""Permanence of this synapse."""
 
 		# States of this element
-		self.isConnected = [False] * maxPreviousSteps
-		self.isPredicted = [False] * maxPreviousSteps
-		self.isFalselyPredicted = [False] * maxPreviousSteps
-		self.isRemoved = [False] * maxPreviousSteps
+		self.isConnected = MachineState(False, maxPreviousSteps)
+		self.isPredicted = MachineState(False, maxPreviousSteps)
+		self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
+		self.isRemoved = MachineState(False, maxPreviousSteps)
 
 		#region Statistics properties
 
@@ -62,17 +63,11 @@ class Synapse:
 		"""
 
 		# Update states machine by remove the first element and add a new element in the end
-		if len(self.isConnected) > maxPreviousSteps:
-			self.permanence.remove(self.permanence[0])
-			self.isConnected.remove(self.isConnected[0])
-			self.isPredicted.remove(self.isPredicted[0])
-			self.isFalselyPredicted.remove(self.isFalselyPredicted[0])
-			self.isRemoved.remove(self.isRemoved[0])
-		self.permanence.append(0.)
-		self.isConnected.append(False)
-		self.isPredicted.append(False)
-		self.isFalselyPredicted.append(False)
-		self.isRemoved.append(False)
+		self.permanence.rotate()
+		self.isConnected.rotate()
+		self.isPredicted.rotate()
+		self.isFalselyPredicted.rotate()
+		self.isRemoved.rotate()
 
 	def calculateStatistics(self):
 		"""
@@ -80,9 +75,9 @@ class Synapse:
 		"""
 
 		# Calculate statistics
-		if self.isConnected[maxPreviousSteps - 1]:
+		if self.isConnected.atCurrStep():
 			self.statsConnectionCount += 1
-		if self.isPredicted[maxPreviousSteps - 1]:
+		if self.isPredicted.atCurrStep():
 			self.statsPreditionCount += 1
 		if Global.currStep > 0:
 			self.statsConnectionRate = self.statsConnectionCount / float(Global.currStep)

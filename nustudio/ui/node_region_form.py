@@ -3,13 +3,6 @@ from nustudio.ui import Global
 
 class RegionForm(QtGui.QDialog):
 
-	#region Static fields
-
-	ChoosenRegionIndex = 0
-	"""Choosen region zero-based index."""
-
-	#endregion
-
 	#region Constructor
 
 	def __init__(self):
@@ -133,8 +126,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynConnectedPerm
 		self.spinnerProximalSynConnectedPerm = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynConnectedPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynConnectedPerm.setDecimals(3)
-		self.spinnerProximalSynConnectedPerm.setSingleStep(0.001)
+		self.spinnerProximalSynConnectedPerm.setDecimals(4)
+		self.spinnerProximalSynConnectedPerm.setSingleStep(0.0001)
 		self.spinnerProximalSynConnectedPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynConnectedPerm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
@@ -146,8 +139,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynPermIncrement
 		self.spinnerProximalSynPermIncrement = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynPermIncrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynPermIncrement.setDecimals(3)
-		self.spinnerProximalSynPermIncrement.setSingleStep(0.001)
+		self.spinnerProximalSynPermIncrement.setDecimals(4)
+		self.spinnerProximalSynPermIncrement.setSingleStep(0.0001)
 		self.spinnerProximalSynPermIncrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynPermIncrement.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -159,8 +152,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerProximalSynPermDecrement
 		self.spinnerProximalSynPermDecrement = QtGui.QDoubleSpinBox()
 		self.spinnerProximalSynPermDecrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerProximalSynPermDecrement.setDecimals(3)
-		self.spinnerProximalSynPermDecrement.setSingleStep(0.001)
+		self.spinnerProximalSynPermDecrement.setDecimals(4)
+		self.spinnerProximalSynPermDecrement.setSingleStep(0.0001)
 		self.spinnerProximalSynPermDecrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerProximalSynPermDecrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -298,6 +291,7 @@ class RegionForm(QtGui.QDialog):
 		self.spinnerLearningRadius = QtGui.QSpinBox()
 		self.spinnerLearningRadius.setAlignment(QtCore.Qt.AlignRight)
 		self.spinnerLearningRadius.setMinimum(1)
+		self.spinnerLearningRadius.setMaximum(10000)
 		self.spinnerLearningRadius.setEnabled(not Global.simulationInitialized)
 		self.spinnerLearningRadius.setToolTip("Radius around cell from which it can sample to form distal dendrite connections")
 
@@ -309,8 +303,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynInitialPerm
 		self.spinnerDistalSynInitialPerm = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynInitialPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynInitialPerm.setDecimals(3)
-		self.spinnerDistalSynInitialPerm.setSingleStep(0.001)
+		self.spinnerDistalSynInitialPerm.setDecimals(4)
+		self.spinnerDistalSynInitialPerm.setSingleStep(0.0001)
 		self.spinnerDistalSynInitialPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynInitialPerm.setToolTip("The initial permanence of an distal synapse.")
 
@@ -322,8 +316,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynConnectedPerm
 		self.spinnerDistalSynConnectedPerm = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynConnectedPerm.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynConnectedPerm.setDecimals(3)
-		self.spinnerDistalSynConnectedPerm.setSingleStep(0.001)
+		self.spinnerDistalSynConnectedPerm.setDecimals(4)
+		self.spinnerDistalSynConnectedPerm.setSingleStep(0.0001)
 		self.spinnerDistalSynConnectedPerm.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynConnectedPerm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
@@ -335,8 +329,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynPermIncrement
 		self.spinnerDistalSynPermIncrement = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynPermIncrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynPermIncrement.setDecimals(3)
-		self.spinnerDistalSynPermIncrement.setSingleStep(0.001)
+		self.spinnerDistalSynPermIncrement.setDecimals(4)
+		self.spinnerDistalSynPermIncrement.setSingleStep(0.0001)
 		self.spinnerDistalSynPermIncrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynPermIncrement.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -348,8 +342,8 @@ class RegionForm(QtGui.QDialog):
 		# spinnerDistalSynPermDecrement
 		self.spinnerDistalSynPermDecrement = QtGui.QDoubleSpinBox()
 		self.spinnerDistalSynPermDecrement.setAlignment(QtCore.Qt.AlignRight)
-		self.spinnerDistalSynPermDecrement.setDecimals(3)
-		self.spinnerDistalSynPermDecrement.setSingleStep(0.001)
+		self.spinnerDistalSynPermDecrement.setDecimals(4)
+		self.spinnerDistalSynPermDecrement.setSingleStep(0.0001)
 		self.spinnerDistalSynPermDecrement.setEnabled(not Global.simulationInitialized)
 		self.spinnerDistalSynPermDecrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
@@ -467,7 +461,7 @@ class RegionForm(QtGui.QDialog):
 		"""
 
 		# Set controls value with region params
-		node = Global.nodeSelectorForm.underMouseNode
+		node = Global.architectureForm.designPanel.underMouseNode
 		self.spinnerWidth.setValue(node.width)
 		self.spinnerHeight.setValue(node.height)
 		self.spinnerPotentialRadius.setValue(node.potentialRadius)
@@ -532,7 +526,7 @@ class RegionForm(QtGui.QDialog):
 		tpSeed = self.spinnerTpSeed.value()
 
 		# If anything has changed
-		node = Global.nodeSelectorForm.underMouseNode
+		node = Global.architectureForm.designPanel.underMouseNode
 		if  node.width != width or node.height != height or node.potentialRadius != potentialRadius or node.potentialPct != potentialPct or node.globalInhibition != globalInhibition or node.localAreaDensity != localAreaDensity or node.numActiveColumnsPerInhArea != numActiveColumnsPerInhArea or node.stimulusThreshold != stimulusThreshold\
 			or node.proximalSynConnectedPerm != proximalSynConnectedPerm or node.proximalSynPermIncrement != proximalSynPermIncrement or node.proximalSynPermDecrement != proximalSynPermDecrement or node.minPctOverlapDutyCycle != minPctOverlapDutyCycle or node.minPctActiveDutyCycle != minPctActiveDutyCycle or node.dutyCyclePeriod != dutyCyclePeriod or node.maxBoost != maxBoost or node.spSeed != spSeed\
  			or node.numCellsPerColumn != numCellsPerColumn or node.learningRadius != learningRadius or node.distalSynInitialPerm != distalSynInitialPerm or node.distalSynConnectedPerm != distalSynConnectedPerm or node.distalSynPermIncrement != distalSynPermIncrement or node.distalSynPermDecrement != distalSynPermDecrement or node.minThreshold != minThreshold or node.activationThreshold != activationThreshold or node.maxNumNewSynapses != maxNumNewSynapses or node.tpSeed != tpSeed:

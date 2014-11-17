@@ -18,12 +18,12 @@ class Region(Node):
 
 	#region Constructor
 
-	def __init__(self, parentNode, name):
+	def __init__(self, name):
 		"""
 		Initializes a new instance of this class.
 		"""
 
-		Node.__init__(self, parentNode, name, NodeType.region)
+		Node.__init__(self, name, NodeType.region)
 
 		#region Instance fields
 
@@ -150,38 +150,47 @@ class Region(Node):
 
 		return column
 
+	def getInputSize(self):
+		"""
+		Return the sum of sizes of all feeder nodes.
+		"""
+
+		sumSizes = 0
+		for feeder in Global.project.network.getFeederNodes(self):
+			sumSizes += feeder.width * feeder.height
+
+		return sumSizes
+
 	def initialize(self):
 		"""
 		Initialize this node.
 		"""
 
-		if len(self.children) == 0:
+		# Check if this region has nodes that feed it
+		numFeeders = len(Global.project.network.getFeederNodes(self))
+		if numFeeders == 0:
 			QtGui.QMessageBox.warning(None, "Warning", "Region '" + self.name + "' does not have any child!")
 			return
 
+		# Initialize this node and the nodes that feed it
 		Node.initialize(self)
-		for child in self.children:
-			child.initialize()
 
 		# Create the input map
 		# An input map is a set of input elements (cells or sensor bits) that should are grouped
-		# For example, if we have 2 children (#1 and #2) with dimensions 6 and 12 respectively,
+		# For example, if we have 2 nodes that feed this region (#1 and #2) with dimensions 6 and 12 respectively,
 		# a input map would be something like:
 		#   111111222222222222
 		self._inputMap = []
-		sumDimension = 0
 		elemIdx = 0
-		for child in self.children:
-			dimension = child.width * child.height
-			sumDimension += dimension
+		for feeder in Global.project.network.getFeederNodes(self):
 
-			# Arrange input from child into input map of this region
-			if child.type == NodeType.region:
-				for column in child.columns:
+			# Arrange input from feeder into input map of this region
+			if feeder.type == NodeType.region:
+				for column in feeder.columns:
 					inputElem = column.cells[0]
 					self._inputMap.append(inputElem)
 			else:
-				for bit in child.bits:
+				for bit in feeder.bits:
 					inputElem = bit
 					self._inputMap.append(inputElem)
 			elemIdx += 1
@@ -204,7 +213,7 @@ class Region(Node):
 
 		# Create Spatial Pooler instance with appropriate parameters
 		self.spatialPooler = SpatialPooler(
-			inputDimensions = (sumDimension, 1),
+			inputDimensions = (self.getInputSize(), 1),
 			columnDimensions = (self.width, self.height),
 			potentialRadius = self.potentialRadius,
 			potentialPct = self.potentialPct,
@@ -244,8 +253,6 @@ class Region(Node):
 		"""
 
 		Node.nextStep(self)
-		for child in self.children:
-			child.nextStep()
 		for column in self.columns:
 			column.nextStep()
 
@@ -283,21 +290,21 @@ class Region(Node):
 		Get the predicted values after an iteration.
 		"""
 
-		for child in self.children:
-			child.getPredictions()
+		for feeder in Global.project.network.getFeederNodes(self):
+			feeder.getPredictions()
 
 	def calculateStatistics(self):
 		"""
 		Calculate statistics after an iteration.
 		"""
 
-		# The region's prediction precision is the average between its children
-		precisionCurrInput = 0.
+		# The region's prediction precision is the average between the nodes that feed it
 		precisionRate = 0.
-		for child in self.children:
-			child.calculateStatistics()
-			precisionRate += child.statsPrecisionRate
-		self.statsPrecisionRate = precisionRate / len(self.children)
+		numFeeders = 0
+		for feeder in Global.project.network.getFeederNodes(self):
+			precisionRate += feeder.statsPrecisionRate
+			numFeeders += 1
+		self.statsPrecisionRate = precisionRate / numFeeders
 
 		for column in self.columns:
 			column.calculateStatistics()
@@ -310,7 +317,7 @@ class Region(Node):
 		# Initialize the vector for representing the current input map
 		inputList = []
 		for inputElem in self._inputMap:
-			if inputElem.isActive[maxPreviousSteps - 1]:
+			if inputElem.isActive.atCurrStep():
 				inputList.append(1)
 			else:
 				inputList.append(0)
@@ -330,17 +337,17 @@ class Region(Node):
 			# Update proximal segment
 			segment = column.segment
 			if activeColumns[colIdx] == 1:
-				segment.isActive[maxPreviousSteps - 1] = True
+				segment.isActive.setForCurrStep(True)
 			else:
-				segment.isActive[maxPreviousSteps - 1] = False
+				segment.isActive.setForCurrStep(False)
 
 			# Check if proximal segment is predicted by check if the column has any predicted cell
 			for cell in column.cells:
 				if cell.index in self.temporalPooler.predictiveCells:
-					segment.isPredicted[maxPreviousSteps - 1] = True
+					segment.isPredicted.setForCurrStep(True)
 
 			# Update proximal synapses
-			if segment.isActive[maxPreviousSteps - 1] or segment.isPredicted[maxPreviousSteps - 1]:
+			if segment.isActive.atCurrStep() or segment.isPredicted.atCurrStep():
 				permanencesSynapses = []
 				self.spatialPooler.getPermanence(colIdx, permanencesSynapses)
 				connectedSynapses = []
@@ -354,23 +361,23 @@ class Region(Node):
 					if permanencesSynapses[synIdx] > 0.:
 						if synapse == None:
 							# Create a new synapse to a input element
-							# An input element is a column if child is a region
-							# or then a bit if child is a sensor
+							# An input element is a column if feeder is a region
+							# or then a bit if feeder is a sensor
 							synapse = Synapse()
 							synapse.inputElem = self._inputMap[synIdx]
 							synapse.indexSP = synIdx
 							segment.synapses.append(synapse)
 
 						# Update state
-						synapse.isRemoved[maxPreviousSteps - 1] = False
-						synapse.permanence[maxPreviousSteps - 1] = permanencesSynapses[synIdx]
+						synapse.isRemoved.setForCurrStep(False)
+						synapse.permanence.setForCurrStep(permanencesSynapses[synIdx])
 						if connectedSynapses[synIdx] == 1:
-							synapse.isConnected[maxPreviousSteps - 1] = True
+							synapse.isConnected.setForCurrStep(True)
 						else:
-							synapse.isConnected[maxPreviousSteps - 1] = False
+							synapse.isConnected.setForCurrStep(False)
 					else:
 						if synapse != None:
-							synapse.isRemoved[maxPreviousSteps - 1] = True
+							synapse.isRemoved.setForCurrStep(True)
 
 	def updateTemporalElements(self):
 		"""
@@ -382,32 +389,32 @@ class Region(Node):
 			column = self.columns[colIdx]
 
 			# Mark proximal segment and its connected synapses as predicted
-			if column.segment.isPredicted[maxPreviousSteps - 1]:
+			if column.segment.isPredicted.atCurrStep():
 				for synapse in column.segment.synapses:
-					if synapse.isConnected[maxPreviousSteps - 1]:
-						synapse.isPredicted[maxPreviousSteps - 1] = True
-						synapse.inputElem.isPredicted[maxPreviousSteps - 1] = True
+					if synapse.isConnected.atCurrStep():
+						synapse.isPredicted.setForCurrStep(True)
+						synapse.inputElem.isPredicted.setForCurrStep(True)
 
 			# Mark proximal segment and its connected synapses that were predicted but are not active now
-			if column.segment.isPredicted[maxPreviousSteps - 2]:
-				if not column.segment.isActive[maxPreviousSteps - 1]:
-					column.segment.isFalselyPredicted[maxPreviousSteps - 1] = True
+			if column.segment.isPredicted.atPreviousStep():
+				if not column.segment.isActive.atCurrStep():
+					column.segment.isFalselyPredicted.setForCurrStep(True)
 				for synapse in column.segment.synapses:
-					if (synapse.isPredicted[maxPreviousSteps - 2] and not synapse.isConnected[maxPreviousSteps - 1]) or (synapse.isConnected[maxPreviousSteps - 1] and synapse.inputElem.isFalselyPredicted[maxPreviousSteps - 1]):
-						synapse.isFalselyPredicted[maxPreviousSteps - 1] = True
+					if (synapse.isPredicted.atPreviousStep() and not synapse.isConnected.atCurrStep()) or (synapse.isConnected.atCurrStep() and synapse.inputElem.isFalselyPredicted.atCurrStep()):
+						synapse.isFalselyPredicted.setForCurrStep(True)
 
 			for cell in column.cells:
 				cellIdx = cell.index
 
 				# Update cell's states
 				if cellIdx in self.temporalPooler.winnerCells:
-					cell.isLearning[maxPreviousSteps - 1] = True
+					cell.isLearning.setForCurrStep(True)
 				if cellIdx in self.temporalPooler.activeCells:
-					cell.isActive[maxPreviousSteps - 1] = True
+					cell.isActive.setForCurrStep(True)
 				if cellIdx in self.temporalPooler.predictiveCells:
-					cell.isPredicted[maxPreviousSteps - 1] = True
-				if cell.isPredicted[maxPreviousSteps - 2] and not cell.isActive[maxPreviousSteps - 1]:
-					cell.isFalselyPredicted[maxPreviousSteps - 1] = True
+					cell.isPredicted.setForCurrStep(True)
+				if cell.isPredicted.atPreviousStep() and not cell.isActive.atCurrStep():
+					cell.isFalselyPredicted.setForCurrStep(True)
 
 				# Get the indexes of the distal segments of this cell
 				segmentsForCell = self.temporalPooler.connections.segmentsForCell(cellIdx)
@@ -436,9 +443,9 @@ class Region(Node):
 
 						# Update segment's state
 						if segIdx in self.temporalPooler.activeSegments:
-							segment.isActive[maxPreviousSteps - 1] = True
+							segment.isActive.setForCurrStep(True)
 						else:
-							segment.isActive[maxPreviousSteps - 1] = False
+							segment.isActive.setForCurrStep(False)
 
 						# Get the indexes of the synapses of this segment
 						synapsesForSegment = self.temporalPooler.connections.synapsesForSegment(segIdx)
@@ -467,11 +474,11 @@ class Region(Node):
 
 								# Update synapse's state
 								(_, sourceCellAbsIdx, permanence) = self.temporalPooler.connections.dataForSynapse(synIdx)
-								synapse.permanence[maxPreviousSteps - 1] = permanence
+								synapse.permanence.setForCurrStep(permanence)
 								if permanence >= self.distalSynConnectedPerm:
-									synapse.isConnected[maxPreviousSteps - 1] = True
+									synapse.isConnected.setForCurrStep(True)
 								else:
-									synapse.isConnected[maxPreviousSteps - 1] = False
+									synapse.isConnected.setForCurrStep(False)
 
 								# Get cell given cell's index
 								sourceColIdx = sourceCellAbsIdx / self.numCellsPerColumn
@@ -479,8 +486,8 @@ class Region(Node):
 								sourceCell = self.columns[sourceColIdx].cells[sourceCellRelIdx]
 								synapse.inputElem = sourceCell
 							else:
-								synapse.isRemoved[maxPreviousSteps - 1] = True
+								synapse.isRemoved.setForCurrStep(True)
 					else:
-						segment.isRemoved[maxPreviousSteps - 1] = True
+						segment.isRemoved.setForCurrStep(True)
 
 	#endregion

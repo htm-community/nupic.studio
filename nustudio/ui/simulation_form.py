@@ -1,4 +1,4 @@
-﻿import time
+﻿import collections
 import numpy
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
@@ -98,10 +98,10 @@ class SimulationForm(QtGui.QWidget):
 
 	def initUI(self):
 
-		# viewer
-		self.viewer = gl.GLViewWidget()
-		self.viewer.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-		self.viewer.customContextMenuRequested.connect(self.showContextMenu)
+		# simulationViewer
+		self.simulationViewer = gl.GLViewWidget()
+		self.simulationViewer.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+		self.simulationViewer.customContextMenuRequested.connect(self.showContextMenu)
 
 		# menuViewsNew
 		self.menuViewsNew = QtGui.QAction(self)
@@ -385,7 +385,7 @@ class SimulationForm(QtGui.QWidget):
 
 		# layout
 		layout = QtGui.QGridLayout()
-		layout.addWidget(self.viewer, 1, 0)
+		layout.addWidget(self.simulationViewer, 1, 0)
 		layout.setRowStretch(1, 100)
 
 		# SimulationForm
@@ -412,19 +412,19 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		menuClicked = self.sender()
-		self.viewer.setCameraPosition(distance = (self.treeHeight * 30))
+		self.simulationViewer.setCameraPosition(distance = (self.treeHeight * 30))
 		if menuClicked == self.menuCameraTop:
-			self.viewer.setCameraPosition(elevation = 90)
-			self.viewer.setCameraPosition(azimuth = 90)
+			self.simulationViewer.setCameraPosition(elevation = 90)
+			self.simulationViewer.setCameraPosition(azimuth = 90)
 		elif menuClicked == self.menuCameraBottom:
-			self.viewer.setCameraPosition(elevation = -90)
-			self.viewer.setCameraPosition(azimuth = 90)
+			self.simulationViewer.setCameraPosition(elevation = -90)
+			self.simulationViewer.setCameraPosition(azimuth = 90)
 		elif menuClicked == self.menuCameraPerspective:
-			self.viewer.setCameraPosition(elevation = 17)
-			self.viewer.setCameraPosition(azimuth = 45)
+			self.simulationViewer.setCameraPosition(elevation = 17)
+			self.simulationViewer.setCameraPosition(azimuth = 45)
 		else:
-			self.viewer.setCameraPosition(elevation = 17)
-			self.viewer.setCameraPosition(azimuth = 90)
+			self.simulationViewer.setCameraPosition(elevation = 17)
+			self.simulationViewer.setCameraPosition(azimuth = 90)
 
 	def clearControls(self):
 		"""
@@ -432,16 +432,16 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		# Remove all items
-		while len(self.viewer.items) > 0:
-			self.viewer.removeItem(self.viewer.items[0])
+		while len(self.simulationViewer.items) > 0:
+			self.simulationViewer.removeItem(self.simulationViewer.items[0])
 
 		# Draw a sphere only to initialize simulation.
 		# If we don't do this, viewer crashes. Probably a PYQtGraph bug
 		fooMd = gl.MeshData.sphere(rows=10, cols=10)
 		self.fooItem = gl.GLMeshItem(meshdata=fooMd, smooth=False, shader='shaded', glOptions='opaque')
 		self.fooItem.translate(0, 0, 0)
-		self.viewer.addItem(self.fooItem)
-		self.viewer.setCameraPosition(distance = 10000)
+		self.simulationViewer.addItem(self.fooItem)
+		self.simulationViewer.setCameraPosition(distance = 10000)
 
 	def initializeControls(self):
 		"""
@@ -449,25 +449,25 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		# Remove initial sphere
-		self.viewer.removeItem(self.fooItem)
+		self.simulationViewer.removeItem(self.fooItem)
 
 		# Arrange the tree once to see how big it is.
 		self.treeWidth = 0
 		self.treeHeight = 0
 		minX = 0
 		minZ = 0
-		minX, minZ = self.__arrangeNode(Global.project.topRegion, minX, minZ)
+		minX, minZ = self.__arrangeNode(self.topRegion, minX, minZ)
 
 		# Rearrange the tree again to center it horizontally.
-		offsetX = Global.project.topRegion.tree3d_x
-		self.__centerNode(Global.project.topRegion, offsetX)
+		offsetX = self.topRegion.tree3d_x
+		self.__centerNode(self.topRegion, offsetX)
 
 		# Rearrange the tree again to invert it vertically.
 		offsetZ = 50
-		self.__invertNode(Global.project.topRegion, offsetZ)
+		self.__invertNode(self.topRegion, offsetZ)
 
 		# Once we have the final position of the regions, we can calculate the position of every column and cell.
-		self.__calculateNodeElementsPosition(Global.project.topRegion)
+		self.__calculateNodeElementsPosition(self.topRegion)
 
 		# Draw the tree recursively from top region.
 		self.__drawNode(self.topRegion, True)
@@ -490,8 +490,8 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		node.tree3d_x -= offsetX
-		for child in node.children:
-			self.__centerNode(child, offsetX)
+		for feeder in Global.project.network.getFeederNodes(node):
+			self.__centerNode(feeder, offsetX)
 
 	def __invertNode(self, node, offsetZ):
 		"""
@@ -499,8 +499,8 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		node.tree3d_z = offsetZ - node.tree3d_z
-		for child in node.children:
-			self.__invertNode(child, offsetZ)
+		for feeder in Global.project.network.getFeederNodes(node):
+			self.__invertNode(feeder, offsetZ)
 
 	def __calculateNodeElementsPosition(self, node):
 		"""
@@ -537,7 +537,7 @@ class SimulationForm(QtGui.QWidget):
 					column.segment.tree3d_z1 = zCol + ((node.numCellsPerColumn - 1) * self.offsetCells)
 					column.segment.tree3d_x2 = xCol
 					column.segment.tree3d_y2 = yCol
-					column.segment.tree3d_z2 = zCol - self.offsetCells # Segment down towards to child nodes
+					column.segment.tree3d_z2 = zCol - self.offsetCells # Segment down towards to feeder nodes
 
 					# Calculate the absolute position of each cell
 					for z in range(len(column.cells)):
@@ -552,13 +552,13 @@ class SimulationForm(QtGui.QWidget):
 					bit.tree3d_y = yCol
 					bit.tree3d_z = zCol
 
-		# Perform the same actions for its children
-		for child in node.children:
-			self.__calculateNodeElementsPosition(child)
+		# Perform the same actions for the lower nodes that feed this node
+		for feeder in Global.project.network.getFeederNodes(node):
+			self.__calculateNodeElementsPosition(feeder)
 
 	def __arrangeNode(self, node, minX, minZ):
 		"""
-		Arrange the node and its children in the allowed area.
+		Arrange the node and the lower nodes that feed it in the allowed area.
 		Set minX to indicate the right edge of our subtree.
 		Set minZ to indicate the bottom edge of our subtree.
 		"""
@@ -571,37 +571,40 @@ class SimulationForm(QtGui.QWidget):
 		else:
 			depth = self.offsetCells
 
-		# Recursively arrange our children,
+		# Recursively arrange the lower nodes that feed this node,
 		# allowing room for this node.
 		x = minX
 		biggestMinZ = minZ + depth
 		subtreeMinZ = minZ + depth + self.offsetVerticalNodes
-		for child in node.children:
-			# Arrange this child's subtree.
-			childMinZ = subtreeMinZ
-			x, childMinZ = self.__arrangeNode(child, x, childMinZ)
+		numFeeders = 0
+		for feeder in Global.project.network.getFeederNodes(node):
+			# Arrange this feeder's subtree.
+			feederMinZ = subtreeMinZ
+			x, feederMinZ = self.__arrangeNode(feeder, x, feederMinZ)
 
 			# See if this increases the biggest minZ value.
-			if biggestMinZ < childMinZ:
-				biggestMinZ = childMinZ
+			if biggestMinZ < feederMinZ:
+				biggestMinZ = feederMinZ
 
 			# Allow room before the next sibling.
 			x += self.offsetHorizontalNodes
 
-		# Remove the spacing after the last child.
-		if len(node.children) > 0:
+			numFeeders += 1
+
+		# Remove the spacing after the last feeder.
+		if numFeeders > 0:
 			x -= self.offsetHorizontalNodes
 
 		# See if this node is wider than the subtree under it.
 		subtreeWidth = x - minX
 		if width > subtreeWidth:
 			# Center the subtree under this node.
-			# Make the children rearrange themselves
+			# Make the lower nodes that feed this node rearrange themselves
 			# moved to center their subtrees.
 			x = minX + (width - subtreeWidth) / 2
-			for child in node.children:
-				# Arrange this child's subtree.
-				x, subtreeMinZ = self.__arrangeNode(child, x, subtreeMinZ)
+			for feeder in Global.project.network.getFeederNodes(node):
+				# Arrange this feeder's subtree.
+				x, subtreeMinZ = self.__arrangeNode(feeder, x, subtreeMinZ)
 
 				# Allow room before the next sibling.
 				x += self.offsetHorizontalNodes
@@ -633,9 +636,9 @@ class SimulationForm(QtGui.QWidget):
 		Draw the nodes for the subtree rooted at this node.
 		"""
 
-		# Recursively make the child draw its subtree nodes.
-		for child in node.children:
-			self.__drawNode(child, initialize)
+		# Recursively make the node draw its feeders.
+		for feeder in Global.project.network.getFeederNodes(node):
+			self.__drawNode(feeder, initialize)
 
 		# Draw a column of cells if node is a region
 		# or an input bit if node is a sensor
@@ -657,11 +660,11 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowBitsNone.isChecked():
 			isVisible = False
-		elif bit.isFalselyPredicted[Global.selStep] and self.menuShowBitsFalselyPredicted.isChecked():
+		elif bit.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsFalselyPredicted.isChecked():
 			color = self.colorBitFalselyPredicted
-		elif bit.isPredicted[Global.selStep] and self.menuShowBitsPredicted.isChecked():
+		elif bit.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsPredicted.isChecked():
 			color = self.colorBitPredicted
-		elif bit.isActive[Global.selStep] and self.menuShowBitsActive.isChecked():
+		elif bit.isActive.atGivenStepAgo(Global.selStep) and self.menuShowBitsActive.isChecked():
 			color = self.colorBitActive
 		else:
 			color = self.colorInactive
@@ -674,7 +677,7 @@ class SimulationForm(QtGui.QWidget):
 				bit.tree3d_item = gl.GLMeshItem(meshdata=bitMd, shader='shaded', smooth=False, glOptions='opaque')
 				bit.tree3d_item.translate(bit.tree3d_x, bit.tree3d_y, bit.tree3d_z)
 				bit.tree3d_initialized = True
-				self.viewer.addItem(bit.tree3d_item)
+				self.simulationViewer.addItem(bit.tree3d_item)
 
 			# Update the color
 			if bit.tree3d_selected:
@@ -697,13 +700,13 @@ class SimulationForm(QtGui.QWidget):
 		isVisible = True
 		if self.menuShowCellsNone.isChecked():
 			isVisible = False
-		elif cell.isFalselyPredicted[Global.selStep] and self.menuShowCellsFalselyPredicted.isChecked():
+		elif cell.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsFalselyPredicted.isChecked():
 			color = self.colorCellFalselyPredicted
-		elif cell.isPredicted[Global.selStep] and self.menuShowCellsPredicted.isChecked():
+		elif cell.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsPredicted.isChecked():
 			color = self.colorCellPredicted
-		elif cell.isLearning[Global.selStep] and self.menuShowCellsLearning.isChecked():
+		elif cell.isLearning.atGivenStepAgo(Global.selStep) and self.menuShowCellsLearning.isChecked():
 			color = self.colorCellLearning
-		elif cell.isActive[Global.selStep] and self.menuShowCellsActive.isChecked():
+		elif cell.isActive.atGivenStepAgo(Global.selStep) and self.menuShowCellsActive.isChecked():
 			color = self.colorCellActive
 		elif self.menuShowCellsInactive.isChecked():
 			color = self.colorInactive
@@ -717,7 +720,7 @@ class SimulationForm(QtGui.QWidget):
 				cell.tree3d_item = gl.GLMeshItem(meshdata=cellMd, shader='shaded', smooth=False, glOptions='opaque')
 				cell.tree3d_item.translate(cell.tree3d_x, cell.tree3d_y, cell.tree3d_z)
 				cell.tree3d_initialized = True
-				self.viewer.addItem(cell.tree3d_item)
+				self.simulationViewer.addItem(cell.tree3d_item)
 
 			# Update the color
 			if cell.tree3d_selected:
@@ -796,20 +799,20 @@ class SimulationForm(QtGui.QWidget):
 
 		# Update properties according to state
 		isVisible = True
-		if segment.isRemoved[Global.selStep] or (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
+		if segment.isRemoved.atGivenStepAgo(Global.selStep) or (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
 			isVisible = False
 		else:
-			if segment.isFalselyPredicted[Global.selStep]:
+			if segment.isFalselyPredicted.atGivenStepAgo(Global.selStep):
 				if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsFalselyPredicted.isChecked():
 					color = self.colorSegmentFalselyPredicted
 				else:
 					isVisible = False
-			elif segment.isPredicted[Global.selStep]:
+			elif segment.isPredicted.atGivenStepAgo(Global.selStep):
 				if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsPredicted.isChecked():
 					color = self.colorSegmentPredicted
 				else:
 					isVisible = False
-			elif segment.isActive[Global.selStep]:
+			elif segment.isActive.atGivenStepAgo(Global.selStep):
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsActive.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsActive.isChecked()):
 					color = self.colorSegmentActive
 				else:
@@ -826,7 +829,7 @@ class SimulationForm(QtGui.QWidget):
 				pts = numpy.array([[segment.tree3d_x1, segment.tree3d_y1, segment.tree3d_z1], [segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2]])
 				segment.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
 				segment.tree3d_initialized = True
-				self.viewer.addItem(segment.tree3d_item)
+				self.simulationViewer.addItem(segment.tree3d_item)
 
 			# Update the color
 			if segment.tree3d_selected:
@@ -834,8 +837,8 @@ class SimulationForm(QtGui.QWidget):
 			segment.tree3d_item.color = pg.glColor(color)
 		else:
 			segment.tree3d_initialized = False
-			if segment.tree3d_item in self.viewer.items:
-				self.viewer.removeItem(segment.tree3d_item)
+			if segment.tree3d_item in self.simulationViewer.items:
+				self.simulationViewer.removeItem(segment.tree3d_item)
 
 		# Draw/update all synapses of this segment
 		for synapse in segment.synapses:
@@ -845,20 +848,20 @@ class SimulationForm(QtGui.QWidget):
 
 		# Update properties according to state
 		isVisible = True
-		if synapse.isRemoved[Global.selStep] or (not segment.isActive[Global.selStep] and not segment.isPredicted[Global.selStep] and not segment.isFalselyPredicted[Global.selStep]) or (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
+		if synapse.isRemoved.atGivenStepAgo(Global.selStep) or (not segment.isActive.atGivenStepAgo(Global.selStep) and not segment.isPredicted.atGivenStepAgo(Global.selStep) and not segment.isFalselyPredicted.atGivenStepAgo(Global.selStep)) or (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
 			isVisible = False
 		else:
-			if synapse.isFalselyPredicted[Global.selStep]:
+			if synapse.isFalselyPredicted.atGivenStepAgo(Global.selStep):
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesFalselyPredicted.isChecked()):
 					color = self.colorSynapseFalselyPredicted
 				else:
 					isVisible = False
-			elif synapse.isPredicted[Global.selStep]:
+			elif synapse.isPredicted.atGivenStepAgo(Global.selStep):
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesPredicted.isChecked()):
 					color = self.colorSynapsePredicted
 				else:
 					isVisible = False
-			elif synapse.isConnected[Global.selStep]:
+			elif synapse.isConnected.atGivenStepAgo(Global.selStep):
 				if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesConnected.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesConnected.isChecked()):
 					color = self.colorSynapseConnected
 				else:
@@ -875,7 +878,7 @@ class SimulationForm(QtGui.QWidget):
 				pts = numpy.array([[segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2], [synapse.inputElem.tree3d_x, synapse.inputElem.tree3d_y, synapse.inputElem.tree3d_z]])
 				synapse.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
 				synapse.tree3d_initialized = True
-				self.viewer.addItem(synapse.tree3d_item)
+				self.simulationViewer.addItem(synapse.tree3d_item)
 
 			# Update the color
 			if synapse.tree3d_selected:
@@ -883,8 +886,8 @@ class SimulationForm(QtGui.QWidget):
 			synapse.tree3d_item.color = pg.glColor(color)
 		else:
 			synapse.tree3d_initialized = False
-			if synapse.tree3d_item in self.viewer.items:
-				self.viewer.removeItem(synapse.tree3d_item)
+			if synapse.tree3d_item in self.simulationViewer.items:
+				self.simulationViewer.removeItem(synapse.tree3d_item)
 
 	def selectView(self, viewMenu):
 		"""

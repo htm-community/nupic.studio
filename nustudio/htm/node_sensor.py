@@ -1,15 +1,18 @@
 import os
-import datetime
+import collections
 import numpy
 import operator
 import math
+import dateutil.parser
 from PyQt4 import QtGui, QtCore
 from nustudio import getInstantiatedClass
 from nustudio.ui import Global
-from nustudio.htm import maxPreviousSteps, maxFutureSteps
+from nustudio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
 from nustudio.htm.node import Node, NodeType
 from nustudio.htm.bit import Bit
-from nupic.algorithms.CLAClassifier import CLAClassifier
+from nustudio.htm.encoding import FieldDataType
+from nupic.encoders import MultiEncoder
+from nupic.data.file_record_stream import FileRecordStream
 
 class DataSourceType:
 	"""
@@ -19,32 +22,13 @@ class DataSourceType:
 	file = 1
 	database = 2
 
-class InputFormat:
-	"""
-	Types of input which a sensor should handle.
-	"""
-
-	htm = 1
-	raw = 2
-
-class InputRawDataType:
-	"""
-	Types of data which a raw input is composed.
-	"""
-
-	boolean = 1
-	integer = 2
-	decimal = 3
-	dateTime = 4
-	string = 5
-
 class PredictionsMethod:
 	"""
 	Methods used to get predicted values and their probabilities
 	"""
 
-	reconstruction = 1
-	classification = 2
+	reconstruction = "Reconstruction"
+	classification = "Classification"
 
 class Sensor(Node):
 	"""
@@ -53,17 +37,20 @@ class Sensor(Node):
 
 	#region Constructor
 
-	def __init__(self, parentNode, name):
+	def __init__(self, name):
 		"""
 		Initializes a new instance of this class.
 		"""
 
-		Node.__init__(self, parentNode, name, NodeType.sensor)
+		Node.__init__(self, name, NodeType.sensor)
 
 		#region Instance fields
 
 		self.bits = []
 		"""An array of the bit objects that compose the current output of this node."""
+
+		self.dataSource = None
+		"""Data source which provides records to fed into a region."""
 
 		self.dataSourceType = DataSourceType.file
 		"""Type of the data source (File or Database)"""
@@ -71,35 +58,17 @@ class Sensor(Node):
 		self.fileName = ''
 		"""The input file name to be handled. Returns the input file name only if it is in the project directory, full path otherwise."""
 
-		self._file = None
-		"""File stream to handle the file."""
-
 		self.databaseConnectionString = ""
 		"""Connection string of the database."""
 
 		self.databaseTable = ''
 		"""Target table of the database."""
 
-		self.databaseField = ''
-		"""Target field of the database table."""
-
-		self.inputFormat = InputFormat.htm
-		"""Format of the node (HTM or raw data)"""
-
-		self.inputRawDataType = InputRawDataType.string
-		"""Data type of the raw input"""
-
 		self.encoder = None
-		"""Optional encoder to convert raw data to htm input and vice-versa."""
+		"""Multi-encoder which concatenate sub-encodings to convert raw data to htm input and vice-versa."""
 
-		self.encoderModule = ""
-		"""Module name which encoder class is imported."""
-
-		self.encoderClass = ""
-		"""Class name which encode or decode values."""
-
-		self.encoderParams = ""
-		"""Parameters passed to the encoder class constructor."""
+		self.encodings = []
+		"""List of sub-encodings that handles the input from database"""
 
 		self.predictionsMethod = PredictionsMethod.reconstruction
 		"""Method used to get predicted values and their probabilities."""
@@ -109,12 +78,6 @@ class Sensor(Node):
 
 		self.enableClassificationInference = True
 		"""Switch for classification inference"""
-
-		self.currentValue = [None] * maxPreviousSteps
-		"""Raw value encoded to network."""
-
-		self.predictedValues = [None] * maxPreviousSteps
-		"""Raw value decoded from network."""
 
 		#endregion
 
@@ -164,68 +127,39 @@ class Sensor(Node):
 			else:
 				fullFileName = self.fileName
 
-			# Open file
+			# Check if file really exists
 			if not os.path.isfile(fullFileName):
 				QtGui.QMessageBox.warning(None, "Warning", "Input stream file '" + fullFileName + "' was not found or specified.", QtGui.QMessageBox.Ok)
 				return
 
-			if self.inputFormat == InputFormat.htm:
-				self._file = open(fullFileName, "rb")
-
-				# Get dimensions of the record
-				width = 0
-				height = 0
-				character = 0
-				while True:
-					# Read next character
-					character = self._file.read(1)
-
-					# Check if character is 'return' and not a number, i.e. if the first record was read
-					if character == '\r':
-						character = self._file.read(1)
-					if character == '\n':
-						break
-
-					# Pass over the line until find a 'return' character in order to get the width
-					width = 0
-					while character != '\n':
-						width += 1
-						character = self._file.read(1)
-						if character == '\r':
-							character = self._file.read(1)
-
-					# Increments height
-					height += 1
-
-				# If current file record dimensions is not the same to sensor size then throws exception
-				if self.width != width or self.height != height:
-					QtGui.QMessageBox.warning(None, "Warning", "'" + self.name + "': File input size (" + width + " x " + height + ") is different from sensor size (" + self.width + " x " + self.height + ").", QtGui.QMessageBox.Ok)
-					return
-
-				# Put the pointer back to initial position
-				self._file.seek(0)
-			elif self.inputFormat == InputFormat.raw:
-				self._file = open(fullFileName)
-
-				# Create an instance class for an encoder given its module, class and constructor params
-				self.encoder = getInstantiatedClass(self.encoderModule, self.encoderClass, self.encoderParams)
-
-				# If encoder size is not the same to sensor size then throws exception
-				encoderSize = self.encoder.getWidth()
-				sensorSize = self.width * self.height
-				if encoderSize > sensorSize:
-					QtGui.QMessageBox.warning(None, "Warning", "'" + self.name + "': Encoder size (" + str(encoderSize) + ") is different from sensor size (" + str(self.width) + " x " + str(self.height) + " = " + str(sensorSize) + ").", QtGui.QMessageBox.Ok)
-					return
+			# Create a data source for read the file
+			self.dataSource = FileRecordStream(fullFileName)
 
 		elif self.dataSourceType == DataSourceType.database:
 			pass
 
-		# Create Classifier instance with appropriate parameters
-		self.minProbabilityThreshold = 0.0001
-		self.steps = []
-		for step in range(maxFutureSteps):
-			self.steps.append(step+1)
-		self.classifier = CLAClassifier(steps=self.steps)
+		self.encoder = MultiEncoder()
+		for encoding in self.encodings:
+			encoding.initialize()
+
+			# Create an instance class for an encoder given its module, class and constructor params
+			encoding.encoder = getInstantiatedClass(encoding.encoderModule, encoding.encoderClass, encoding.encoderParams)
+
+			# Take the first part of encoder field name as encoder name
+			# Ex: timestamp_weekend.weekend => timestamp_weekend
+			encoding.encoder.name = encoding.encoderFieldName.split('.')[0]
+
+			# Add sub-encoder to multi-encoder list
+			self.encoder.addEncoder(encoding.recordFieldName, encoding.encoder)
+
+		# If encoder size is not the same to sensor size then throws exception
+		encoderSize = self.encoder.getWidth()
+		sensorSize = self.width * self.height
+		if encoderSize > sensorSize:
+			QtGui.QMessageBox.warning(None, "Warning", "'" + self.name + "': Encoder size (" + str(encoderSize) + ") is different from sensor size (" + str(self.width) + " x " + str(self.height) + " = " + str(sensorSize) + ").", QtGui.QMessageBox.Ok)
+			return
+
+		return True
 
 	def nextStep(self):
 		"""
@@ -233,139 +167,174 @@ class Sensor(Node):
 		"""
 
 		# Update states machine by remove the first element and add a new element in the end
-		if self.inputFormat == InputFormat.raw:
-			if len(self.currentValue) > maxPreviousSteps:
-				self.currentValue.remove(self.currentValue[0])
-				self.predictedValues.remove(self.predictedValues[0])
-			self.currentValue.append(None)
-			self.predictedValues.append(None)
+		for encoding in self.encodings:
+			encoding.currentValue.rotate()
+			if encoding.enableInference:
+				encoding.predictedValues.rotate()
+				encoding.bestPredictedValue.rotate()
 
 		Node.nextStep(self)
 		for bit in self.bits:
 			bit.nextStep()
 
 		# Get record value from data source
-		recordValue = None
-		if self.dataSourceType == DataSourceType.file:
-			recordValue = self.__getNextFileRecord()
-		elif self.dataSourceType == DataSourceType.database:
-			pass
+		# If the last record was reached just rewind it
+		data = self.dataSource.getNextRecordDict()
+		if not data:
+			self.dataSource.rewind()
+			data = self.dataSource.getNextRecordDict()
 
-		# Handle the value according to its type
-		self._output = []
-		if self.inputFormat == InputFormat.htm:
+		for i in range(len(self.encodings)):
+			encoding = self.encodings[i]
 
-			# Initialize the array for representing the current record
-			self._output = recordValue
-		elif self.inputFormat == InputFormat.raw:
+			if encoding.recordFieldDataType == FieldDataType.binaryArray:
+				strValue = data[encoding.recordFieldName]
+				currValue = []
+				for c in strValue:
+					if c == '1':
+						currValue.append(1)
+					else:
+						currValue.append(0)
+				data[encoding.recordFieldName] = currValue
+
+		# Pass raw values to encoder and get a concatenated array
+		outputArray = numpy.zeros(self.encoder.getWidth())
+		self.encoder.encodeIntoArray(data, outputArray)
+
+		# Get values obtained from the data source.
+		outputValues = self.encoder.getScalars(data)
+
+		# Get raw values and respective encoded bit array for each field
+		prevOffset = 0
+		for i in range(len(self.encodings)):
+			encoding = self.encodings[i]
 
 			# Convert the value to its respective data type
-			rawValue = None
-			if self.inputRawDataType == InputRawDataType.boolean:
-				rawValue = bool(recordValue)
-			elif self.inputRawDataType == InputRawDataType.integer:
-				rawValue = int(recordValue)
-			elif self.inputRawDataType == InputRawDataType.decimal:
-				rawValue = float(recordValue)
-			elif self.inputRawDataType == InputRawDataType.dateTime:
-				rawValue = datetime.datetime.strptime(recordValue, "%m/%d/%y %H:%M")
-			elif self.inputRawDataType == InputRawDataType.string:
-				rawValue = str(recordValue)
-			self.currentValue[maxPreviousSteps - 1] = rawValue
-
-			# Pass raw value to encoder and get its respective array
-			self._output = self.encoder.encode(rawValue)
+			currValue = outputValues[i]
+			if encoding.encoderFieldDataType == FieldDataType.boolean:
+				currValue = bool(currValue)
+			elif encoding.encoderFieldDataType == FieldDataType.integer:
+				currValue = int(currValue)
+			elif encoding.encoderFieldDataType == FieldDataType.decimal:
+				currValue = float(currValue)
+			elif encoding.encoderFieldDataType == FieldDataType.dateTime:
+				currValue = dateutil.parser.parse(str(currValue))
+			elif encoding.encoderFieldDataType == FieldDataType.string:
+				currValue = str(currValue)
+			encoding.currentValue.setForCurrStep(currValue)
 
 		# Update sensor bits
-		for i in range(len(self._output)):
-			if self._output[i] > 0.:
-				self.bits[i].isActive[maxPreviousSteps - 1] = True
+		for i in range(len(outputArray)):
+			if outputArray[i] > 0.:
+				self.bits[i].isActive.setForCurrStep(True)
 			else:
-				self.bits[i].isActive[maxPreviousSteps - 1] = False
+				self.bits[i].isActive.setForCurrStep(False)
 
 		# Mark falsely predicted bits
 		for bit in self.bits:
-			if bit.isPredicted[maxPreviousSteps - 2] and not bit.isActive[maxPreviousSteps - 1]:
-				bit.isFalselyPredicted[maxPreviousSteps - 1] = True
+			if bit.isPredicted.atPreviousStep() and not bit.isActive.atCurrStep():
+				bit.isFalselyPredicted.setForCurrStep(True)
+
+		self._output = outputArray
 
 	def getPredictions(self):
 		"""
 		Get the predictions after an iteration.
 		"""
 
-		if self.inputFormat == InputFormat.raw:
+		if self.predictionsMethod == PredictionsMethod.reconstruction:
 
-			if self.predictionsMethod == PredictionsMethod.reconstruction:
+			# Prepare list with predictions to be classified
+			# This list contains the indexes of all bits that are predicted
+			output = []
+			for i in range(len(self.bits)):
+				if self.bits[i].isPredicted.atCurrStep():
+					output.append(1)
+				else:
+					output.append(0)
+			output = numpy.array(output)
 
-				# Prepare list with predictions to be classified
-				# This list contains the indexes of all bits that are predicted
-				output = []
-				for i in range(len(self.bits)):
-					if self.bits[i].isPredicted[maxPreviousSteps - 1]:
-						output.append(1)
-					else:
-						output.append(0)
-				output = numpy.array(output)
+			# Decode output and create predictions list
+			fieldsDict, fieldsOrder = self.encoder.decode(output)
+			for encoding in self.encodings:
+				if encoding.enableInference:
+					predictions = []
+					encoding.predictedValues.setForCurrStep(dict())
 
-				# Decode output and create predictions list
-				fieldsDict, fieldsOrder = self.encoder.decode(output)
-				self.predictedValues[maxPreviousSteps - 1] = dict()
-				predictions = []
-				if len(fieldsOrder) > 0:
-					fieldName = fieldsOrder[0]
-					predictedLabels = fieldsDict[fieldName][1].split(', ')
-					predictedValues = fieldsDict[fieldName][0]
-					for i in range(len(predictedLabels)):
-						predictions.append([predictedValues[i], predictedLabels[i]])
+					# If encoder field name was returned by decode(), assign the the predictions to it
+					if encoding.encoderFieldName in fieldsOrder:
+						predictedLabels = fieldsDict[encoding.encoderFieldName][1].split(', ')
+						predictedValues = fieldsDict[encoding.encoderFieldName][0]
+						for i in range(len(predictedLabels)):
+							predictions.append([predictedValues[i], predictedLabels[i]])
 
-				self.predictedValues[maxPreviousSteps - 1][1] = predictions
+					encoding.predictedValues.atCurrStep()[1] = predictions
 
-			elif self.predictionsMethod == PredictionsMethod.classification:
-				# A classification involves estimate which are the likely values to occurs in the next time step.
+					# Get the predicted value with the biggest probability to happen
+					if len(predictions) > 0:
+						bestPredictionRange = predictions[0][0]
+						min = bestPredictionRange[0]
+						max = bestPredictionRange[1]
+						bestPredictedValue = (min + max) / 2.0
+						encoding.bestPredictedValue.setForCurrStep(bestPredictedValue)
 
-				# Prepare list with predictions to be classified
-				# This list contains the indexes of all bits that are predicted
-				patternNZ = []
-				for i in range(len(self.bits)):
-					if self.bits[i].isActive[maxPreviousSteps - 1]:
-						patternNZ.append(i)
+		elif self.predictionsMethod == PredictionsMethod.classification:
+			# A classification involves estimate which are the likely values to occurs in the next time step.
 
-				# Get the bucket index of the current value at the encoder
-				actualValue = self.currentValue[maxPreviousSteps - 1]
-				bucketIdx = self.encoder.getBucketIndices(actualValue)[0]
+			offset = 0
+			for encoding in self.encodings:
+				encoderWidth = encoding.encoder.getWidth()
 
-				# Perform classification
-				clasResults = self.classifier.compute(recordNum=Global.currStep, patternNZ=patternNZ, classification={'bucketIdx': bucketIdx, 'actValue': actualValue}, learn=self.enableClassificationLearning, infer=self.enableClassificationInference)
+				if encoding.enableInference:
+					# Prepare list with predictions to be classified
+					# This list contains the indexes of all bits that are predicted
+					patternNZ = []
+					for i in range(offset, encoderWidth):
+						if self.bits[i].isActive.atCurrStep():
+							patternNZ.append(i)
 
-				self.predictedValues[maxPreviousSteps - 1] = dict()
-				for step in self.steps:
+					# Get the bucket index of the current value at the encoder
+					actualValue = encoding.currentValue.atCurrStep()
+					bucketIdx = encoding.encoder.getBucketIndices(actualValue)[0]
 
-					# Calculate probability for each predicted value
-					predictions = dict()
-					for (actValue, prob) in zip(clasResults['actualValues'], clasResults[step]):
-						if actValue in predictions:
-							predictions[actValue] += prob
-						else:
-							predictions[actValue] = prob
+					# Perform classification
+					clasResults = encoding.classifier.compute(recordNum=Global.currStep, patternNZ=patternNZ, classification={'bucketIdx': bucketIdx, 'actValue': actualValue}, learn=self.enableClassificationLearning, infer=self.enableClassificationInference)
 
-					# Remove predictions with low probabilities
-					maxVal = (None, None)
-					for (actValue, prob) in predictions.items():
-						if len(predictions) <= 1:
-							break
-						if maxVal[0] is None or prob >= maxVal[1]:
-							if maxVal[0] is not None and maxVal[1] < self.minProbabilityThreshold:
-								del predictions[maxVal[0]]
-							maxVal = (actValue, prob)
-						elif prob < self.minProbabilityThreshold:
-							del predictions[actValue]
+					encoding.predictedValues.setForCurrStep(dict())
+					for step in encoding.steps:
 
-					# Sort the list of values from more probable to less probable values
-					# an decrease the list length to max predictions per step limit
-					predictions = sorted(predictions.iteritems(), key=operator.itemgetter(1), reverse=True)
-					predictions = predictions[:maxFutureSteps]
+						# Calculate probability for each predicted value
+						predictions = dict()
+						for (actValue, prob) in zip(clasResults['actualValues'], clasResults[step]):
+							if actValue in predictions:
+								predictions[actValue] += prob
+							else:
+								predictions[actValue] = prob
 
-					self.predictedValues[maxPreviousSteps - 1][step] = predictions
+						# Remove predictions with low probabilities
+						maxVal = (None, None)
+						for (actValue, prob) in predictions.items():
+							if len(predictions) <= 1:
+								break
+							if maxVal[0] is None or prob >= maxVal[1]:
+								if maxVal[0] is not None and maxVal[1] < encoding.minProbabilityThreshold:
+									del predictions[maxVal[0]]
+								maxVal = (actValue, prob)
+							elif prob < encoding.minProbabilityThreshold:
+								del predictions[actValue]
+
+						# Sort the list of values from more probable to less probable values
+						# an decrease the list length to max predictions per step limit
+						predictions = sorted(predictions.iteritems(), key=operator.itemgetter(1), reverse=True)
+						predictions = predictions[:maxFutureSteps]
+
+						encoding.predictedValues.atCurrStep()[step] = predictions
+
+					# Get the predicted value with the biggest probability to happen
+					bestPredictedValue = encoding.predictedValues.atCurrStep()[1][0][0]
+					encoding.bestPredictedValue.setForCurrStep(bestPredictedValue)
+
+				offset += encoderWidth
 
 	def calculateStatistics(self):
 		"""
@@ -375,35 +344,26 @@ class Sensor(Node):
 		if Global.currStep > 0:
 			precision = 0.
 
-			if self.inputFormat == InputFormat.htm:
-				# Calculate the prediction precision comparing with bits are equal between the predicted array and the active array
-				# The prediction precision is the percentage of shared bits over the sum of all bits
-				numSharedBitStates = 0
-				numNonSharedBitStates = 0
-				for bit in self.bits:
-					if bit.isPredicted[maxPreviousSteps - 2] or bit.isActive[maxPreviousSteps - 1]:
-						if bit.isPredicted[maxPreviousSteps - 2] == bit.isActive[maxPreviousSteps - 1]:
-							numSharedBitStates += 1
-						else:
-							numNonSharedBitStates += 1
-				precision = (numSharedBitStates / float(numNonSharedBitStates + numSharedBitStates)) * 100
-
-			elif self.inputFormat == InputFormat.raw:
-				# Calculate the prediction precision comparing if the current value is in the range of any prediction.
-				predictions = self.predictedValues[maxPreviousSteps - 2][1]
-				for predictedValue in predictions:
-					min = 0.
-					max = 0.
-					value = predictedValue[0]
-					if self.predictionsMethod == PredictionsMethod.reconstruction:
-						min = math.floor(value[0])
-						max = math.ceil(value[1])
-					elif self.predictionsMethod == PredictionsMethod.classification:
-						min = math.floor(value)
-						max = math.ceil(value)
-					if min <= self.currentValue[maxPreviousSteps - 1] <= max:
-						precision = 100.
-						break
+			# Calculate the prediction precision comparing if the current value is in the range of any prediction.
+			for encoding in self.encodings:
+				if encoding.enableInference:
+					predictions = encoding.predictedValues.atPreviousStep()[1]
+					for predictedValue in predictions:
+						min = None
+						max = None
+						value = predictedValue[0]
+						if self.predictionsMethod == PredictionsMethod.reconstruction:
+							min = value[0]
+							max = value[1]
+						elif self.predictionsMethod == PredictionsMethod.classification:
+							min = value
+							max = value
+						if isinstance(min, (int, long, float, complex)) and isinstance(max, (int, long, float, complex)):
+							min = math.floor(min)
+							max = math.ceil(max)
+						if min <= encoding.currentValue.atCurrStep() <= max:
+							precision = 100.
+							break
 
 			# The precision rate is the average of the precision calculated in every step
 			self.statsPrecisionRate = (self.statsPrecisionRate + precision) / 2
@@ -412,57 +372,5 @@ class Sensor(Node):
 
 		for bit in self.bits:
 			bit.calculateStatistics()
-
-	def __getNextFileRecord(self):
-		"""
-		Get the next record from file.
-		If file end is reached then start reading from scratch again.
-		"""
-
-		recordValue = None
-
-		# If end of file was reached then place cursor on the first byte again
-		if self._file.tell() == os.fstat(self._file.fileno()).st_size:
-			self._file.seek(0)
-
-		if self.inputFormat == InputFormat.htm:
-
-			# Start reading from last position
-			outputList = []
-			character = 0
-			for y in range(self.height):
-				for x in range(self.width):
-					character = self._file.read(1)
-					if character == '1':
-						outputList.append(1.)
-					elif character == '0':
-						outputList.append(0.)
-					else:
-						raise Exception("Invalid file format.")
-
-				# Check if next char is a 'return', i.e. the row end
-				character = self._file.read(1)
-				if character == '\r':
-					character = self._file.read(1)
-				if character != '\n':
-					raise Exception("Invalid file format.")
-
-			# Check if next char is a 'return' character, i.e. the record end
-			character = self._file.read(1)
-			if character == '\r':
-				character = self._file.read(1)
-			if character != '\n' and character != -1:
-				raise Exception("Invalid file format.")
-
-			# Return the output list as record value
-			recordValue = numpy.array(outputList)
-
-		elif self.inputFormat == InputFormat.raw:
-
-			# Return the raw value as record value
-			recordValue = self._file.readline()
-			recordValue = recordValue.rstrip('\r\n').rstrip('\n')
-
-		return recordValue
 
 	#endregion

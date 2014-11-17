@@ -6,7 +6,7 @@ from nustudio.project import Project
 from nustudio.ui import Global
 from nustudio.ui.start_form import StartForm
 from nustudio.ui.main_form import MainForm
-from nustudio.ui.node_selector_form import NodeSelectorForm
+from nustudio.ui.architecture_form import ArchitectureForm
 from nustudio.ui.node_information_form import NodeInformationForm
 from nustudio.ui.simulation_form import SimulationForm
 from nustudio.ui.output_form import OutputForm
@@ -20,7 +20,7 @@ def main():
 
 	Global.project = Project()
 	Global.simulationForm = SimulationForm()
-	Global.nodeSelectorForm = NodeSelectorForm()
+	Global.architectureForm = ArchitectureForm()
 	Global.nodeInformationForm = NodeInformationForm()
 	Global.outputForm = OutputForm()
 	Global.mainForm = MainForm()

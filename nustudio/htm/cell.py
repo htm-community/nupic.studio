@@ -1,3 +1,4 @@
+from nustudio import MachineState
 from nustudio.htm import maxPreviousSteps
 from nustudio.ui import Global
 
@@ -25,10 +26,10 @@ class Cell:
 		"""List of distal segments of this cell."""
 
 		# States of this element
-		self.isLearning = [False] * maxPreviousSteps
-		self.isActive = [False] * maxPreviousSteps
-		self.isPredicted = [False] * maxPreviousSteps
-		self.isFalselyPredicted = [False] * maxPreviousSteps
+		self.isLearning = MachineState(False, maxPreviousSteps)
+		self.isActive = MachineState(False, maxPreviousSteps)
+		self.isPredicted = MachineState(False, maxPreviousSteps)
+		self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
 
 		#region Statistics properties
 
@@ -62,24 +63,19 @@ class Cell:
 		"""
 
 		# Update states machine by remove the first element and add a new element in the end
-		if len(self.isActive) > maxPreviousSteps:
-			self.isLearning.remove(self.isLearning[0])
-			self.isActive.remove(self.isActive[0])
-			self.isPredicted.remove(self.isPredicted[0])
-			self.isFalselyPredicted.remove(self.isFalselyPredicted[0])
+		self.isLearning.rotate()
+		self.isActive.rotate()
+		self.isPredicted.rotate()
+		self.isFalselyPredicted.rotate()
 
-			# Remove segments (and their synapses) that are marked to be removed
-			for segment in self.segments:
-				if segment.isRemoved[0]:
-					for synapse in segment.synapses:
-						segment.synapses.remove(synapse)
-						del synapse
-					self.segments.remove(segment)
-					del segment
-		self.isLearning.append(False)
-		self.isActive.append(False)
-		self.isPredicted.append(False)
-		self.isFalselyPredicted.append(False)
+		# Remove segments (and their synapses) that are marked to be removed
+		for segment in self.segments:
+			if segment.isRemoved.atFirstStep():
+				for synapse in segment.synapses:
+					segment.synapses.remove(synapse)
+					del synapse
+				self.segments.remove(segment)
+				del segment
 
 		for segment in self.segments:
 			segment.nextStep()
@@ -90,9 +86,9 @@ class Cell:
 		"""
 
 		# Calculate statistics
-		if self.isActive[maxPreviousSteps - 1]:
+		if self.isActive.atCurrStep():
 			self.statsActivationCount += 1
-		if self.isPredicted[maxPreviousSteps - 1]:
+		if self.isPredicted.atCurrStep():
 			self.statsPreditionCount += 1
 		if Global.currStep > 0:
 			self.statsActivationRate = self.statsActivationCount / float(Global.currStep)

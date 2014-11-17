@@ -1,9 +1,11 @@
-﻿from PyQt4 import Qt, QtGui, QtCore
+﻿import pyqtgraph as pg
+from PyQt4 import Qt, QtGui, QtCore
 from nustudio import ArrayTableModel
 from nustudio.ui import Global
-from nustudio.htm import maxPreviousSteps, maxFutureSteps
+from nustudio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
 from nustudio.htm.node import NodeType, Node
-from nustudio.htm.node_sensor import InputFormat, InputRawDataType, InputRawDataType, PredictionsMethod
+from nustudio.htm.node_sensor import PredictionsMethod
+from nustudio.htm.encoding import FieldDataType
 
 class NodeInformationForm(QtGui.QWidget):
 
@@ -19,14 +21,18 @@ class NodeInformationForm(QtGui.QWidget):
 		#region Instance fields
 
 		self.previousSelectedNode = None
-
 		self.selectedSensor = None
+		self.selectedEncoding = None
 		self.selectedRegion = None
 		self.selectedColumn = None
 		self.selectedProximalSynapse = None
 		self.selectedCell = None
 		self.selectedDistalSegment = None
 		self.selectedDistalSynapse = None
+
+		# Predictions variables used for the predictions chart
+		self.currentValuesPlotItem = None
+		self.predictedValuesPlotItem = None
 
 		#endregion
 
@@ -58,14 +64,6 @@ class NodeInformationForm(QtGui.QWidget):
 		self.textBoxSensorPrecisionRate.setEnabled(False)
 		self.textBoxSensorPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
-		# tabPageSensor1Layout
-		tabPageSensor1Layout = QtGui.QGridLayout()
-		tabPageSensor1Layout.addWidget(self.labelSensorName, 0, 0)
-		tabPageSensor1Layout.addWidget(self.textBoxSensorName, 0, 1)
-		tabPageSensor1Layout.addWidget(self.labelSensorPrecisionRate, 1, 0)
-		tabPageSensor1Layout.addWidget(self.textBoxSensorPrecisionRate, 1, 1)
-		tabPageSensor1Layout.setRowStretch(2, 100)
-
 		# checkBoxEnableClassificationLearning
 		self.checkBoxEnableClassificationLearning = QtGui.QCheckBox()
 		self.checkBoxEnableClassificationLearning.setText("Enable Classification Learning")
@@ -76,64 +74,20 @@ class NodeInformationForm(QtGui.QWidget):
 		self.checkBoxEnableClassificationInference.setText("Enable Classification Inference")
 		self.checkBoxEnableClassificationInference.toggled.connect(self.__checkBoxEnableClassificationInference_Toggled)
 
-		# labelCurrentValue
-		self.labelCurrentValue = QtGui.QLabel()
-		self.labelCurrentValue.setText("Current Value")
-		self.labelCurrentValue.setAlignment(QtCore.Qt.AlignRight)
-
-		# textBoxCurrentValue
-		self.textBoxCurrentValue = QtGui.QLineEdit()
-		self.textBoxCurrentValue.setEnabled(False)
-		self.textBoxCurrentValue.setAlignment(QtCore.Qt.AlignRight)
-
-		# labelPredictedValue
-		self.labelPredictedValue = QtGui.QLabel()
-		self.labelPredictedValue.setText("Predicted Values")
-		self.labelPredictedValue.setAlignment(QtCore.Qt.AlignRight)
-
-		# dataGridPredictedValues
-		self.dataGridPredictedValues = QtGui.QTableView()
-		self.dataGridPredictedValues.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-		self.dataGridPredictedValues.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-		self.dataGridPredictedValues.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-		self.dataGridPredictedValues.verticalHeader().setDefaultSectionSize(20)
-
-		# groupBoxEncoding1Layout
-		groupBoxEncoding1Layout = QtGui.QGridLayout()
-		groupBoxEncoding1Layout.addWidget(self.checkBoxEnableClassificationLearning, 0, 1)
-		groupBoxEncoding1Layout.addWidget(self.checkBoxEnableClassificationInference, 1, 1)
-		groupBoxEncoding1Layout.addWidget(self.labelCurrentValue, 2, 0)
-		groupBoxEncoding1Layout.addWidget(self.textBoxCurrentValue, 2, 1)
-		groupBoxEncoding1Layout.setRowStretch(3, 100)
-
-		# sliderStep
-		self.sliderStep = QtGui.QSlider()
-		self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
-		self.sliderStep.setSingleStep(1)
-		self.sliderStep.setRange(1, maxFutureSteps)
-		self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
-
-		# groupBoxEncoding2Layout
-		groupBoxEncoding2Layout = QtGui.QGridLayout()
-		groupBoxEncoding2Layout.addWidget(self.sliderStep, 0, 1)
-		groupBoxEncoding2Layout.addWidget(self.labelPredictedValue, 1, 0)
-		groupBoxEncoding2Layout.addWidget(self.dataGridPredictedValues, 1, 1)
-
-		# groupBoxEncodingLayout
-		groupBoxEncodingLayout = QtGui.QHBoxLayout()
-		groupBoxEncodingLayout.addLayout(groupBoxEncoding1Layout)
-		groupBoxEncodingLayout.addLayout(groupBoxEncoding2Layout)
-
-		# groupBoxEncoding
-		self.groupBoxEncoding = QtGui.QGroupBox()
-		self.groupBoxEncoding.setLayout(groupBoxEncodingLayout)
-		self.groupBoxEncoding.setTitle("Encoding")
+		# tabPageSensor1Layout
+		tabPageSensor1Layout = QtGui.QGridLayout()
+		tabPageSensor1Layout.addWidget(self.labelSensorName, 0, 0)
+		tabPageSensor1Layout.addWidget(self.textBoxSensorName, 0, 1)
+		tabPageSensor1Layout.addWidget(self.labelSensorPrecisionRate, 1, 0)
+		tabPageSensor1Layout.addWidget(self.textBoxSensorPrecisionRate, 1, 1)
+		tabPageSensor1Layout.addWidget(self.checkBoxEnableClassificationLearning, 2, 1)
+		tabPageSensor1Layout.addWidget(self.checkBoxEnableClassificationInference, 3, 1)
+		tabPageSensor1Layout.setRowStretch(4, 100)
 
 		# tabPageSensorLayout
 		tabPageSensorLayout = QtGui.QGridLayout()
 		tabPageSensorLayout.addLayout(tabPageSensor1Layout, 0, 0)
-		tabPageSensorLayout.addWidget(self.groupBoxEncoding, 0, 1)
-		tabPageSensorLayout.setColumnStretch(2, 100)
+		tabPageSensorLayout.setColumnStretch(1, 100)
 
 		# tabPageSensor
 		self.tabPageSensor = QtGui.QWidget()
@@ -148,12 +102,83 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridBits.verticalHeader().setDefaultSectionSize(20)
 
 		# tabPageBitsLayout
-		self.tabPageBitsLayout = QtGui.QHBoxLayout()
-		self.tabPageBitsLayout.addWidget(self.dataGridBits)
+		tabPageBitsLayout = QtGui.QHBoxLayout()
+		tabPageBitsLayout.addWidget(self.dataGridBits)
 
 		# tabPageBits
 		self.tabPageBits = QtGui.QWidget()
-		self.tabPageBits.setLayout(self.tabPageBitsLayout)
+		self.tabPageBits.setLayout(tabPageBitsLayout)
+
+		# labelEncoding
+		self.labelEncoding = QtGui.QLabel()
+		self.labelEncoding.setText("Encoding:")
+		self.labelEncoding.setAlignment(QtCore.Qt.AlignRight)
+
+		# comboBoxEncoding
+		self.comboBoxEncoding = QtGui.QComboBox()
+		self.comboBoxEncoding.currentIndexChanged.connect(self.__comboBoxEncoding_CurrentIndexChanged)
+
+		# labelCurrentValue
+		self.labelCurrentValue = QtGui.QLabel()
+		self.labelCurrentValue.setText("Current Value")
+		self.labelCurrentValue.setAlignment(QtCore.Qt.AlignRight)
+
+		# textBoxCurrentValue
+		self.textBoxCurrentValue = QtGui.QLineEdit()
+		self.textBoxCurrentValue.setEnabled(False)
+		self.textBoxCurrentValue.setAlignment(QtCore.Qt.AlignRight)
+
+		# labelPredictedValues
+		self.labelPredictedValues = QtGui.QLabel()
+		self.labelPredictedValues.setText("Predicted Values")
+		self.labelPredictedValues.setAlignment(QtCore.Qt.AlignRight)
+
+		# dataGridPredictedValues
+		self.dataGridPredictedValues = QtGui.QTableView()
+		self.dataGridPredictedValues.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+		self.dataGridPredictedValues.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+		self.dataGridPredictedValues.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+		self.dataGridPredictedValues.verticalHeader().setDefaultSectionSize(20)
+
+		# encoding1Layout
+		encoding1Layout = QtGui.QGridLayout()
+		encoding1Layout.addWidget(self.labelEncoding, 0, 0)
+		encoding1Layout.addWidget(self.comboBoxEncoding, 0, 1)
+		encoding1Layout.addWidget(self.labelCurrentValue, 1, 0)
+		encoding1Layout.addWidget(self.textBoxCurrentValue, 1, 1)
+		encoding1Layout.setRowStretch(2, 100)
+
+		# sliderStep
+		self.sliderStep = QtGui.QSlider()
+		self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
+		self.sliderStep.setSingleStep(1)
+		self.sliderStep.setRange(1, maxFutureSteps)
+		self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
+
+		# encoding2Layout
+		encoding2Layout = QtGui.QGridLayout()
+		encoding2Layout.addWidget(self.sliderStep, 0, 1)
+		encoding2Layout.addWidget(self.labelPredictedValues, 1, 0)
+		encoding2Layout.addWidget(self.dataGridPredictedValues, 1, 1)
+
+		# predictionsChart
+		self.predictionsChart = pg.PlotWidget()
+		self.predictionsChart.showGrid(x=True, y=True)
+		self.predictionsChart.getAxis('left').setGrid(1)
+
+		# encoding3Layout
+		encoding3Layout = QtGui.QGridLayout()
+		encoding3Layout.addWidget(self.predictionsChart, 0, 1)
+
+		# tabPageEncodingsLayout
+		tabPageEncodingsLayout = QtGui.QHBoxLayout()
+		tabPageEncodingsLayout.addLayout(encoding1Layout)
+		tabPageEncodingsLayout.addLayout(encoding2Layout)
+		tabPageEncodingsLayout.addLayout(encoding3Layout)
+
+		# tabPageEncodings
+		self.tabPageEncodings = QtGui.QWidget()
+		self.tabPageEncodings.setLayout(tabPageEncodingsLayout)
 
 		# labelRegionName
 		self.labelRegionName = QtGui.QLabel()
@@ -186,19 +211,19 @@ class NodeInformationForm(QtGui.QWidget):
 		self.checkBoxEnableTemporalPooling.toggled.connect(self.__checkBoxEnableTemporalPooling_Toggled)
 
 		# tabPageRegionsLayout
-		self.tabPageRegionsLayout = QtGui.QGridLayout()
-		self.tabPageRegionsLayout.addWidget(self.labelRegionName, 0, 0)
-		self.tabPageRegionsLayout.addWidget(self.textBoxRegionName, 0, 1)
-		self.tabPageRegionsLayout.addWidget(self.labelRegionPrecisionRate, 1, 0)
-		self.tabPageRegionsLayout.addWidget(self.textBoxRegionPrecisionRate, 1, 1)
-		self.tabPageRegionsLayout.addWidget(self.checkBoxEnableSpatialPooling, 2, 1)
-		self.tabPageRegionsLayout.addWidget(self.checkBoxEnableTemporalPooling, 3, 1)
-		self.tabPageRegionsLayout.setRowStretch(4, 100)
-		self.tabPageRegionsLayout.setColumnStretch(2, 100)
+		tabPageRegionsLayout = QtGui.QGridLayout()
+		tabPageRegionsLayout.addWidget(self.labelRegionName, 0, 0)
+		tabPageRegionsLayout.addWidget(self.textBoxRegionName, 0, 1)
+		tabPageRegionsLayout.addWidget(self.labelRegionPrecisionRate, 1, 0)
+		tabPageRegionsLayout.addWidget(self.textBoxRegionPrecisionRate, 1, 1)
+		tabPageRegionsLayout.addWidget(self.checkBoxEnableSpatialPooling, 2, 1)
+		tabPageRegionsLayout.addWidget(self.checkBoxEnableTemporalPooling, 3, 1)
+		tabPageRegionsLayout.setRowStretch(4, 100)
+		tabPageRegionsLayout.setColumnStretch(2, 100)
 
 		# tabPageRegions
 		self.tabPageRegions = QtGui.QWidget()
-		self.tabPageRegions.setLayout(self.tabPageRegionsLayout)
+		self.tabPageRegions.setLayout(tabPageRegionsLayout)
 
 		# dataGridColumns
 		self.dataGridColumns = QtGui.QTableView()
@@ -210,12 +235,12 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridColumns.selectionModel().selectionChanged.connect(self.__dataGridColumns_SelectionChanged)
 
 		# tabPageColumnsLayout
-		self.tabPageColumnsLayout = QtGui.QHBoxLayout()
-		self.tabPageColumnsLayout.addWidget(self.dataGridColumns)
+		tabPageColumnsLayout = QtGui.QHBoxLayout()
+		tabPageColumnsLayout.addWidget(self.dataGridColumns)
 
 		# tabPageColumns
 		self.tabPageColumns = QtGui.QWidget()
-		self.tabPageColumns.setLayout(self.tabPageColumnsLayout)
+		self.tabPageColumns.setLayout(tabPageColumnsLayout)
 
 		# dataGridProximalSynapses
 		self.dataGridProximalSynapses = QtGui.QTableView()
@@ -227,12 +252,12 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridProximalSynapses.selectionModel().selectionChanged.connect(self.__dataGridProximalSynapses_SelectionChanged)
 
 		# tabPageProximalSynapsesLayout
-		self.tabPageProximalSynapsesLayout = QtGui.QHBoxLayout()
-		self.tabPageProximalSynapsesLayout.addWidget(self.dataGridProximalSynapses)
+		tabPageProximalSynapsesLayout = QtGui.QHBoxLayout()
+		tabPageProximalSynapsesLayout.addWidget(self.dataGridProximalSynapses)
 
 		# tabPageProximalSynapses
 		self.tabPageProximalSynapses = QtGui.QWidget()
-		self.tabPageProximalSynapses.setLayout(self.tabPageProximalSynapsesLayout)
+		self.tabPageProximalSynapses.setLayout(tabPageProximalSynapsesLayout)
 
 		# dataGridCells
 		self.dataGridCells = QtGui.QTableView()
@@ -244,12 +269,12 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridCells.selectionModel().selectionChanged.connect(self.__dataGridCells_SelectionChanged)
 
 		# tabPageCellsLayout
-		self.tabPageCellsLayout = QtGui.QHBoxLayout()
-		self.tabPageCellsLayout.addWidget(self.dataGridCells)
+		tabPageCellsLayout = QtGui.QHBoxLayout()
+		tabPageCellsLayout.addWidget(self.dataGridCells)
 
 		# tabPageCells
 		self.tabPageCells = QtGui.QWidget()
-		self.tabPageCells.setLayout(self.tabPageCellsLayout)
+		self.tabPageCells.setLayout(tabPageCellsLayout)
 
 		# dataGridDistalSegments
 		self.dataGridDistalSegments = QtGui.QTableView()
@@ -261,12 +286,12 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridDistalSegments.selectionModel().selectionChanged.connect(self.__dataGridDistalSegments_SelectionChanged)
 
 		# tabPageDistalSegmentsLayout
-		self.tabPageDistalSegmentsLayout = QtGui.QHBoxLayout()
-		self.tabPageDistalSegmentsLayout.addWidget(self.dataGridDistalSegments)
+		tabPageDistalSegmentsLayout = QtGui.QHBoxLayout()
+		tabPageDistalSegmentsLayout.addWidget(self.dataGridDistalSegments)
 
 		# tabPageDistalSegments
 		self.tabPageDistalSegments = QtGui.QWidget()
-		self.tabPageDistalSegments.setLayout(self.tabPageDistalSegmentsLayout)
+		self.tabPageDistalSegments.setLayout(tabPageDistalSegmentsLayout)
 
 		# dataGridDistalSynapses
 		self.dataGridDistalSynapses = QtGui.QTableView()
@@ -278,12 +303,12 @@ class NodeInformationForm(QtGui.QWidget):
 		self.dataGridDistalSynapses.selectionModel().selectionChanged.connect(self.__dataGridDistalSynapses_SelectionChanged)
 
 		# tabPageDistalSynapsesLayout
-		self.tabPageDistalSynapsesLayout = QtGui.QHBoxLayout()
-		self.tabPageDistalSynapsesLayout.addWidget(self.dataGridDistalSynapses)
+		tabPageDistalSynapsesLayout = QtGui.QHBoxLayout()
+		tabPageDistalSynapsesLayout.addWidget(self.dataGridDistalSynapses)
 
 		# tabPageDistalSynapses
 		self.tabPageDistalSynapses = QtGui.QWidget()
-		self.tabPageDistalSynapses.setLayout(self.tabPageDistalSynapsesLayout)
+		self.tabPageDistalSynapses.setLayout(tabPageDistalSynapsesLayout)
 
 		# tabControlMain
 		self.tabControlMain = QtGui.QTabWidget()
@@ -307,13 +332,14 @@ class NodeInformationForm(QtGui.QWidget):
 		self.textBoxCurrentValue.setText("")
 		self.sliderStep.setEnabled(False)
 		self.dataGridPredictedValues.model().update([], [])
+		self.predictionsChart.setVisible(False)
 
 	def refreshControls(self):
 		"""
 		Refresh controls for each time step.
 		"""
 
-		selectedNode = Global.nodeSelectorForm.selectedNode
+		selectedNode = Global.architectureForm.designPanel.selectedNode
 
 		# Show information according to note type
 		if selectedNode != self.previousSelectedNode:
@@ -336,19 +362,24 @@ class NodeInformationForm(QtGui.QWidget):
 				self.textBoxSensorName.setText(self.selectedSensor.name)
 				self.showTab(self.tabPageSensor, "Sensor")
 				self.showTab(self.tabPageBits, "Bits")
+				self.showTab(self.tabPageEncodings, "Encodings")
 				self.dataGridBits.clearSelection()
-				if self.selectedSensor.inputFormat == InputFormat.raw:
-					self.groupBoxEncoding.setVisible(True)
-					if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-						self.checkBoxEnableClassificationLearning.setVisible(True)
-						self.checkBoxEnableClassificationLearning.setChecked(self.selectedSensor.enableClassificationLearning)
-						self.checkBoxEnableClassificationInference.setVisible(True)
-						self.checkBoxEnableClassificationInference.setChecked(self.selectedSensor.enableClassificationInference)
-					else:
-						self.checkBoxEnableClassificationLearning.setVisible(False)
-						self.checkBoxEnableClassificationInference.setVisible(False)
+				if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
+					self.checkBoxEnableClassificationLearning.setVisible(True)
+					self.checkBoxEnableClassificationLearning.setChecked(self.selectedSensor.enableClassificationLearning)
+					self.checkBoxEnableClassificationInference.setVisible(True)
+					self.checkBoxEnableClassificationInference.setChecked(self.selectedSensor.enableClassificationInference)
 				else:
-					self.groupBoxEncoding.setVisible(False)
+					self.checkBoxEnableClassificationLearning.setVisible(False)
+					self.checkBoxEnableClassificationInference.setVisible(False)
+
+				# Populate encodings combobox
+				self.comboBoxEncoding.clear()
+				for encoding in self.selectedSensor.encodings:
+					if encoding.enableInference and not encoding.encoderFieldDataType == FieldDataType.binaryArray:
+						name = encoding.encoderFieldName.split('.')[0]
+						self.comboBoxEncoding.addItem(name)
+				self.selectedEncoding = None
 			self.tabControlMain.selectedIndex = 0
 
 			self.previousSelectedNode = selectedNode
@@ -370,33 +401,37 @@ class NodeInformationForm(QtGui.QWidget):
 				self.dataGridBits.model().update(header, data)
 				self.dataGridBits.resizeColumnsToContents()
 
-				if self.selectedSensor.inputFormat == InputFormat.raw:
-					currValue = self.formatValue(self.selectedSensor.currentValue[Global.selStep])
-					self.textBoxCurrentValue.setText(currValue)
+				# Reset step slider state
+				self.sliderStep.setEnabled(True)
+				self.sliderStep.setValue(self.sliderStep.minimum())
+				if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
 					self.sliderStep.setEnabled(True)
-					self.sliderStep.setValue(self.sliderStep.minimum())
-					self.updatePredictedValuesGrid()
-					if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-						self.sliderStep.setEnabled(True)
-					else:
-						self.sliderStep.setEnabled(False)
+				else:
+					self.sliderStep.setEnabled(False)
 
-	def formatValue(self, value):
+				# Set default encoding
+				if self.selectedEncoding == None:
+					self.selectedEncoding = self.selectedSensor.encodings[0]
+				self.updateEncodingControls()
+
+	def formatValue(self, dataType, value):
 		formattedValue = None
 
-		if self.selectedSensor.inputRawDataType == InputRawDataType.boolean:
+		if value == None:
+			formattedValue = "None"
+		elif dataType == FieldDataType.boolean:
 			if value == 0:
 				formattedValue = "False"
 			else:
 				formattedValue = "True"
-		elif self.selectedSensor.inputRawDataType == InputRawDataType.integer:
+		elif dataType == FieldDataType.integer:
 			formattedValue = "{0}".format(value)
-		elif self.selectedSensor.inputRawDataType == InputRawDataType.decimal:
+		elif dataType == FieldDataType.decimal:
 			formattedValue = "{0:.3f}".format(value)
-		elif self.selectedSensor.inputRawDataType == InputRawDataType.dateTime:
-			formattedValue = value.strftime("%m/%d/%y %H:%M")
+		elif dataType == FieldDataType.dateTime:
+			formattedValue = value.strftime("%Y-%m-%d %H:%M:%S")
 		else:
-			formattedValue = value
+			formattedValue = str(value)
 
 		return formattedValue
 
@@ -405,19 +440,55 @@ class NodeInformationForm(QtGui.QWidget):
 		data = []
 		for bit in selectedSensor.bits:
 			pos = str(bit.x) + ", " + str(bit.y)
-			wasPredicted = bit.isPredicted[Global.selStep - 1]
-			isActive = bit.isActive[Global.selStep]
+			wasPredicted = bit.isPredicted.atGivenStepAgo(Global.selStep + 1)
+			isActive = bit.isActive.atGivenStepAgo(Global.selStep)
 			activationRate = "{0:.3f}".format(bit.statsActivationRate)
 			precisionRate = "{0:.3f}".format(bit.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
 
 		return header, data
 
+	def updateEncodingControls(self):
+		self.textBoxCurrentValue.setText(self.formatValue(self.selectedEncoding.encoderFieldDataType, self.selectedEncoding.currentValue.atGivenStepAgo(Global.selStep)))
+		self.sliderStep.setVisible(self.selectedEncoding.enableInference)
+		self.labelPredictedValues.setVisible(self.selectedEncoding.enableInference)
+		self.dataGridPredictedValues.setVisible(self.selectedEncoding.enableInference)
+		self.predictionsChart.setVisible(False)
+		if Global.simulationInitialized and self.selectedEncoding.enableInference:
+			self.updatePredictedValuesGrid()
+			if self.selectedEncoding.encoderFieldDataType == FieldDataType.integer or self.selectedEncoding.encoderFieldDataType == FieldDataType.decimal:
+				self.updatePredictionsChart()
+				self.predictionsChart.setVisible(True)
+
 	def updatePredictedValuesGrid(self):
 		step = self.sliderStep.value()
 		header, data = self.getPredictedValuesData(step)
 		self.dataGridPredictedValues.model().update(header, data)
 		self.dataGridPredictedValues.resizeColumnsToContents()
+
+	def updatePredictionsChart(self):
+
+		# Update the chart with the updated predictions history
+		if self.currentValuesPlotItem == None:
+			# Set plot lines
+			self.currentValuesPlotItem = self.predictionsChart.plot(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.currentValue.getList())
+			self.currentValuesPlotItem.setPen(QtGui.QColor.fromRgb(0, 100, 0)) # green color
+			self.predictedValuesPlotItem = self.predictionsChart.plot(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.bestPredictedValue.getList())
+			self.predictedValuesPlotItem.setPen(QtGui.QColor.fromRgb(255, 215, 80)) # yellow color
+
+			# Set legend
+			legend = self.predictionsChart.addLegend(size=None, offset=(0, 0))
+			legend.addItem(self.currentValuesPlotItem, "Current")
+			legend.addItem(self.predictedValuesPlotItem, "Predicted")
+		else:
+			self.currentValuesPlotItem.setData(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.currentValue.getList())
+			self.predictedValuesPlotItem.setData(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.bestPredictedValue.getList())
+
+		# Set X axis visible range
+		minX = Global.timeStepsPredictionsChart.atFirstStep()
+		maxX = minX + maxPreviousStepsWithInference
+		maxX += 30 # Increase space to avoid plot lines overlap the legend
+		self.predictionsChart.setXRange(minX, maxX)
 
 	def getPredictedValuesData(self, futureStep):
 		header = []
@@ -426,14 +497,14 @@ class NodeInformationForm(QtGui.QWidget):
 		elif self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
 			header = ['Value', 'Probability']
 
-		predictions = self.selectedSensor.predictedValues[Global.selStep][futureStep]
 		data = []
+		predictions = self.selectedEncoding.predictedValues.atGivenStepAgo(Global.selStep)[futureStep]
 		for predictedValue in predictions:
 			if self.selectedSensor.predictionsMethod == PredictionsMethod.reconstruction:
 				value = predictedValue[1]
 				data.append([value])
 			elif self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-				value = self.formatValue(predictedValue[0])
+				value = self.formatValue(self.selectedEncoding.encoderFieldDataType, predictedValue[0])
 				probability = "{0:.3f}".format(predictedValue[1] * 100)
 				data.append([value, probability])
 
@@ -444,8 +515,8 @@ class NodeInformationForm(QtGui.QWidget):
 		data = []
 		for column in selectedRegion.columns:
 			pos = str(column.x) + ", " + str(column.y)
-			wasPredicted = column.segment.isPredicted[Global.selStep - 1]
-			isActive = column.segment.isActive[Global.selStep]
+			wasPredicted = column.segment.isPredicted.atGivenStepAgo(Global.selStep + 1)
+			isActive = column.segment.isActive.atGivenStepAgo(Global.selStep)
 			activationRate = "{0:.3f}".format(column.segment.statsActivationRate)
 			precisionRate = "{0:.3f}".format(column.segment.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
@@ -457,8 +528,8 @@ class NodeInformationForm(QtGui.QWidget):
 		header = ['Permanence', 'Is Connected', 'Connection Rate', 'Precision Rate']
 		data = []
 		for synapse in selectedSegment.synapses:
-			permanence = "{0:.3f}".format(synapse.permanence[Global.selStep])
-			isConnected = synapse.isConnected[Global.selStep]
+			permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.selStep))
+			isConnected = synapse.isConnected.atGivenStepAgo(Global.selStep)
 			connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
 			precisionRate = "{0:.3f}".format(synapse.statsPrecisionRate)
 			data.append([permanence, isConnected, connectionRate, precisionRate])
@@ -470,8 +541,8 @@ class NodeInformationForm(QtGui.QWidget):
 		data = []
 		for cell in selectedColumn.cells:
 			pos = str(cell.z)
-			wasPredicted = cell.isPredicted[Global.selStep - 1]
-			isActive = cell.isActive[Global.selStep]
+			wasPredicted = cell.isPredicted.atGivenStepAgo(Global.selStep + 1)
+			isActive = cell.isActive.atGivenStepAgo(Global.selStep)
 			activationRate = "{0:.3f}".format(cell.statsActivationRate)
 			precisionRate = "{0:.3f}".format(cell.statsPrecisionRate)
 			data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
@@ -482,7 +553,7 @@ class NodeInformationForm(QtGui.QWidget):
 		header = ['Is Active', 'Activation Rate', 'Activation Rate']
 		data = []
 		for segment in selectedCell.segments:
-			isActive = segment.isActive[Global.selStep]
+			isActive = segment.isActive.atGivenStepAgo(Global.selStep)
 			activationRate = "{0:.3f}".format(segment.statsActivationRate)
 			data.append([isActive, activationRate, activationRate])
 
@@ -493,8 +564,8 @@ class NodeInformationForm(QtGui.QWidget):
 		header = ['Permanence', 'Is Connected', 'Connection Rate']
 		data = []
 		for synapse in selectedSegment.synapses:
-			permanence = "{0:.3f}".format(synapse.permanence[Global.selStep])
-			isConnected = synapse.isConnected[Global.selStep]
+			permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.selStep))
+			isConnected = synapse.isConnected.atGivenStepAgo(Global.selStep)
 			connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
 			data.append([permanence, isConnected, connectionRate])
 
@@ -519,6 +590,12 @@ class NodeInformationForm(QtGui.QWidget):
 
 	def __sliderStep_ValueChanged(self, value):
 		self.updatePredictedValuesGrid()
+
+	def __comboBoxEncoding_CurrentIndexChanged(self, event):
+		if Global.simulationInitialized:
+			encodingIdx = self.comboBoxEncoding.currentIndex()
+			self.selectedEncoding = self.selectedSensor.encodings[encodingIdx]
+			self.updateEncodingControls()
 
 	def __checkBoxEnableSpatialPooling_Toggled(self, event):
 		self.selectedRegion.enableSpatialPooling = self.checkBoxEnableSpatialPooling.isChecked()

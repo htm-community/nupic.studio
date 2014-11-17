@@ -45,17 +45,17 @@ class ProjectPropertiesForm(QtGui.QDialog):
 		self.textBoxDescription = QtGui.QTextEdit()
 
 		# groupBoxMainLayout
-		self.groupBoxMainLayout = QtGui.QGridLayout()
-		self.groupBoxMainLayout.addWidget(self.labelName, 0, 0)
-		self.groupBoxMainLayout.addWidget(self.textBoxName, 0, 1)
-		self.groupBoxMainLayout.addWidget(self.labelAuthor, 1, 0)
-		self.groupBoxMainLayout.addWidget(self.textBoxAuthor, 1, 1)
-		self.groupBoxMainLayout.addWidget(self.labelDescription, 2, 0)
-		self.groupBoxMainLayout.addWidget(self.textBoxDescription, 2, 1)
+		groupBoxMainLayout = QtGui.QGridLayout()
+		groupBoxMainLayout.addWidget(self.labelName, 0, 0)
+		groupBoxMainLayout.addWidget(self.textBoxName, 0, 1)
+		groupBoxMainLayout.addWidget(self.labelAuthor, 1, 0)
+		groupBoxMainLayout.addWidget(self.textBoxAuthor, 1, 1)
+		groupBoxMainLayout.addWidget(self.labelDescription, 2, 0)
+		groupBoxMainLayout.addWidget(self.textBoxDescription, 2, 1)
 
 		# groupBoxMain
 		self.groupBoxMain = QtGui.QGroupBox()
-		self.groupBoxMain.setLayout(self.groupBoxMainLayout)
+		self.groupBoxMain.setLayout(groupBoxMainLayout)
 
 		# buttonBox
 		self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)

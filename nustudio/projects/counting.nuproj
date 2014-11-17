@@ -2,8 +2,10 @@
 <Project>
     <MetaData name="Counting" author="David Ragazzi" description="This example aims the use of a scalar encoder to predict a numeric sequence."/>
     <Net>
-        <Node name="TopRegion" type="Region" width="32" height="16" enableSpatialPooling="True" potentialRadius="1" potentialPct="1.0" globalInhibition="True" localAreaDensity="0.02" numActiveColumnsPerInhArea="0.0" stimulusThreshold="0" proximalSynConnectedPerm="0.1" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.05" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="2.0" spSeed="1956" enableTemporalPooling="True" numCellsPerColumn="10" learningRadius="32" distalSynInitialPerm="0.21" distalSynConnectedPerm="0.15" distalSynPermIncrement="0.1" distalSynPermDecrement="0.04" minThreshold="3" activationThreshold="4" maxNumNewSynapses="5" tpSeed="1960">
-            <Node name="Numbers" type="Sensor" width="60" height="1" dataSourceType="File" fileName="counting_numbers.txt" inputFormat="Raw" inputRawDataType="Decimal" encoderModule="nupic.encoders.scalar" encoderClass="ScalarEncoder" encoderParams="{'w': 3, 'minval': 0, 'maxval': 99, 'n': 60, 'forced': true}" predictionsMethod="Classification" enableClassificationLearning="True" enableClassificationInference="True"/>
+        <Node name="Top" type="Region" width="32" height="16" enableSpatialPooling="True" potentialRadius="1" potentialPct="1.0" globalInhibition="True" localAreaDensity="0.02" numActiveColumnsPerInhArea="0.0" stimulusThreshold="0" proximalSynConnectedPerm="0.1" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.05" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="2.0" spSeed="1956" enableTemporalPooling="True" numCellsPerColumn="10" learningRadius="32" distalSynInitialPerm="0.21" distalSynConnectedPerm="0.15" distalSynPermIncrement="0.1" distalSynPermDecrement="0.04" minThreshold="3" activationThreshold="4" maxNumNewSynapses="5" tpSeed="1960"/>
+        <Node name="Numbers" type="Sensor" width="50" height="1" dataSourceType="File" fileName="counting.csv" predictionsMethod="Reconstruction">
+            <Encoding recordFieldName="Numbers" recordFieldDataType="Decimal" enableInference="True" encoderModule="nupic.encoders.scalar" encoderClass="ScalarEncoder" encoderParams="{'w': '3', 'minval': '0.0', 'maxval': '100.0', 'n': '50', 'forced': 'true'}" encoderFieldName="Numbers" encoderFieldDataType="Decimal"/>
         </Node>
+        <Link outNode="Numbers" inNode="Top"/>
     </Net>
 </Project>

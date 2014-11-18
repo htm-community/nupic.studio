@@ -294,7 +294,7 @@ class Network:
 
 						encodingsParams = "\"" + name + "\": { "
 						encodingsParams += "\"name\": \"" + name + "\", "
-						encodingsParams += "\"fieldname\": \"" + encoding.recordFieldName + "\", "
+						encodingsParams += "\"fieldname\": \"" + encoding.dataSourceFieldName + "\", "
 
 						for paramName in params:
 							paramValue = params[paramName]

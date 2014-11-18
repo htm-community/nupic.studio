@@ -376,7 +376,7 @@ class NodeInformationForm(QtGui.QWidget):
 				# Populate encodings combobox
 				self.comboBoxEncoding.clear()
 				for encoding in self.selectedSensor.encodings:
-					if encoding.enableInference and not encoding.encoderFieldDataType == FieldDataType.binaryArray:
+					if encoding.enableInference:
 						name = encoding.encoderFieldName.split('.')[0]
 						self.comboBoxEncoding.addItem(name)
 				self.selectedEncoding = None

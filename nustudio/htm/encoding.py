@@ -12,7 +12,6 @@ class FieldDataType:
 	decimal = "Decimal"
 	dateTime = "DateTime"
 	string = "String"
-	binaryArray = "BinaryArray"
 
 class Encoding:
 	"""
@@ -28,10 +27,10 @@ class Encoding:
 
 		#region Instance fields
 
-		self.recordFieldName = ''
+		self.dataSourceFieldName = ''
 		"""Target field of the database table or file."""
 
-		self.recordFieldDataType = FieldDataType.string
+		self.dataSourceFieldDataType = FieldDataType.string
 		"""Data type of the field returned by database table or file."""
 
 		self.encoder = None

@@ -199,8 +199,8 @@ class Project:
 
 		# Create a encoding from parameters
 		encoding = Encoding()
-		encoding.recordFieldName = self.__getStringAttribute(xmlReader.attributes(), 'recordFieldName')
-		encoding.recordFieldDataType = self.__getStringAttribute(xmlReader.attributes(), 'recordFieldDataType')
+		encoding.dataSourceFieldName = self.__getStringAttribute(xmlReader.attributes(), 'dataSourceFieldName')
+		encoding.dataSourceFieldDataType = self.__getStringAttribute(xmlReader.attributes(), 'dataSourceFieldDataType')
 		encoding.enableInference = self.__getBooleanAttribute(xmlReader.attributes(), 'enableInference')
 		encoding.encoderModule = self.__getStringAttribute(xmlReader.attributes(), 'encoderModule')
 		encoding.encoderClass = self.__getStringAttribute(xmlReader.attributes(), 'encoderClass')
@@ -332,8 +332,8 @@ class Project:
 
 		# Write encoding parameters
 		xmlWriter.writeStartElement('Encoding')
-		xmlWriter.writeAttribute('recordFieldName', encoding.recordFieldName)
-		xmlWriter.writeAttribute('recordFieldDataType', encoding.recordFieldDataType)
+		xmlWriter.writeAttribute('dataSourceFieldName', encoding.dataSourceFieldName)
+		xmlWriter.writeAttribute('dataSourceFieldDataType', encoding.dataSourceFieldDataType)
 		xmlWriter.writeAttribute('enableInference', str(encoding.enableInference))
 		xmlWriter.writeAttribute('encoderModule', encoding.encoderModule)
 		xmlWriter.writeAttribute('encoderClass', encoding.encoderClass)

@@ -150,7 +150,7 @@ class Sensor(Node):
 			encoding.encoder.name = encoding.encoderFieldName.split('.')[0]
 
 			# Add sub-encoder to multi-encoder list
-			self.encoder.addEncoder(encoding.recordFieldName, encoding.encoder)
+			self.encoder.addEncoder(encoding.dataSourceFieldName, encoding.encoder)
 
 		# If encoder size is not the same to sensor size then throws exception
 		encoderSize = self.encoder.getWidth()
@@ -183,19 +183,6 @@ class Sensor(Node):
 		if not data:
 			self.dataSource.rewind()
 			data = self.dataSource.getNextRecordDict()
-
-		for i in range(len(self.encodings)):
-			encoding = self.encodings[i]
-
-			if encoding.recordFieldDataType == FieldDataType.binaryArray:
-				strValue = data[encoding.recordFieldName]
-				currValue = []
-				for c in strValue:
-					if c == '1':
-						currValue.append(1)
-					else:
-						currValue.append(0)
-				data[encoding.recordFieldName] = currValue
 
 		# Pass raw values to encoder and get a concatenated array
 		outputArray = numpy.zeros(self.encoder.getWidth())

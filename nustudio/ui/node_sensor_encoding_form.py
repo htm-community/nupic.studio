@@ -34,28 +34,27 @@ class EncodingForm(QtGui.QDialog):
 
 	def initUI(self):
 
-		# labelRecordFieldName
-		self.labelRecordFieldName = QtGui.QLabel()
-		self.labelRecordFieldName.setText("Record Field Name:")
-		self.labelRecordFieldName.setAlignment(QtCore.Qt.AlignRight)
+		# labelDataSourceFieldName
+		self.labelDataSourceFieldName = QtGui.QLabel()
+		self.labelDataSourceFieldName.setText("Datasource Field Name:")
+		self.labelDataSourceFieldName.setAlignment(QtCore.Qt.AlignRight)
 
-		# textBoxRecordFieldName
-		self.textBoxRecordFieldName = QtGui.QLineEdit()
-		self.textBoxRecordFieldName.setAlignment(QtCore.Qt.AlignLeft)
+		# textBoxDataSourceFieldName
+		self.textBoxDataSourceFieldName = QtGui.QLineEdit()
+		self.textBoxDataSourceFieldName.setAlignment(QtCore.Qt.AlignLeft)
 
-		# labelRecordFieldDataType
-		self.labelRecordFieldDataType = QtGui.QLabel()
-		self.labelRecordFieldDataType.setText("Field Data Type:")
-		self.labelRecordFieldDataType.setAlignment(QtCore.Qt.AlignRight)
+		# labelDataSourceFieldDataType
+		self.labelDataSourceFieldDataType = QtGui.QLabel()
+		self.labelDataSourceFieldDataType.setText("Field Data Type:")
+		self.labelDataSourceFieldDataType.setAlignment(QtCore.Qt.AlignRight)
 
-		# comboBoxRecordFieldDataType
-		self.comboBoxRecordFieldDataType = QtGui.QComboBox()
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.boolean)
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.integer)
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.decimal)
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.dateTime)
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.string)
-		self.comboBoxRecordFieldDataType.addItem(FieldDataType.binaryArray)
+		# comboBoxDataSourceFieldDataType
+		self.comboBoxDataSourceFieldDataType = QtGui.QComboBox()
+		self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.boolean)
+		self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.integer)
+		self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.decimal)
+		self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.dateTime)
+		self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.string)
 
 		# checkBoxEnableInference
 		self.checkBoxEnableInference = QtGui.QCheckBox()
@@ -121,7 +120,6 @@ class EncodingForm(QtGui.QDialog):
 		self.comboBoxEncoderFieldDataType.addItem(FieldDataType.decimal)
 		self.comboBoxEncoderFieldDataType.addItem(FieldDataType.dateTime)
 		self.comboBoxEncoderFieldDataType.addItem(FieldDataType.string)
-		self.comboBoxEncoderFieldDataType.addItem(FieldDataType.binaryArray)
 
 		# groupBoxEncoderLayout
 		groupBoxEncoderLayout = QtGui.QGridLayout()
@@ -143,10 +141,10 @@ class EncodingForm(QtGui.QDialog):
 
 		# groupBoxMainLayout
 		groupBoxMainLayout = QtGui.QGridLayout()
-		groupBoxMainLayout.addWidget(self.labelRecordFieldName, 0, 0)
-		groupBoxMainLayout.addWidget(self.textBoxRecordFieldName, 0, 1)
-		groupBoxMainLayout.addWidget(self.labelRecordFieldDataType, 1, 0)
-		groupBoxMainLayout.addWidget(self.comboBoxRecordFieldDataType, 1, 1)
+		groupBoxMainLayout.addWidget(self.labelDataSourceFieldName, 0, 0)
+		groupBoxMainLayout.addWidget(self.textBoxDataSourceFieldName, 0, 1)
+		groupBoxMainLayout.addWidget(self.labelDataSourceFieldDataType, 1, 0)
+		groupBoxMainLayout.addWidget(self.comboBoxDataSourceFieldDataType, 1, 1)
 		groupBoxMainLayout.addWidget(self.checkBoxEnableInference, 2, 1)
 		groupBoxMainLayout.addWidget(self.groupBoxEncoder, 3, 1)
 
@@ -181,8 +179,8 @@ class EncodingForm(QtGui.QDialog):
 		if self.encodingIdx >= 0:
 			encoding = self.encodings[self.encodingIdx]
 			self.checkBoxEnableInference.setChecked(encoding.enableInference)
-			self.textBoxRecordFieldName.setText(encoding.recordFieldName)
-			self.comboBoxRecordFieldDataType.setCurrentIndex(self.comboBoxRecordFieldDataType.findText(encoding.recordFieldDataType, QtCore.Qt.MatchFixedString))
+			self.textBoxDataSourceFieldName.setText(encoding.dataSourceFieldName)
+			self.comboBoxDataSourceFieldDataType.setCurrentIndex(self.comboBoxDataSourceFieldDataType.findText(encoding.dataSourceFieldDataType, QtCore.Qt.MatchFixedString))
 
 			# Set encoding parameters
 			self.textBoxEncoderModule.setText(encoding.encoderModule)
@@ -221,7 +219,7 @@ class EncodingForm(QtGui.QDialog):
 		"""
 
 		encoderParamsDict = collections.OrderedDict()
-		if self.textBoxRecordFieldName.text() == '':
+		if self.textBoxDataSourceFieldName.text() == '':
 			QtGui.QMessageBox.warning(self, "Warning", "Record field name was not specified.")
 			return
 		elif self.textBoxEncoderModule.text() == '':
@@ -264,8 +262,8 @@ class EncodingForm(QtGui.QDialog):
 					# Add param name and its value to dictionary
 					encoderParamsDict[param] = value
 
-		recordFieldName = str(self.textBoxRecordFieldName.text())
-		recordFieldDataType = str(self.comboBoxRecordFieldDataType.currentText())
+		dataSourceFieldName = str(self.textBoxDataSourceFieldName.text())
+		dataSourceFieldDataType = str(self.comboBoxDataSourceFieldDataType.currentText())
 		enableInference = self.checkBoxEnableInference.isChecked()
 		encoderModule = str(self.textBoxEncoderModule.text())
 		encoderClass = str(self.textBoxEncoderClass.text())
@@ -286,10 +284,10 @@ class EncodingForm(QtGui.QDialog):
 			self.encodings.append(encoding)
 
 		# If anything has changed
-		if encoding.recordFieldName != recordFieldName or encoding.recordFieldDataType != recordFieldDataType or encoding.enableInference != enableInference or encoding.encoderModule != encoderModule or encoding.encoderClass != encoderClass or encoding.encoderParams != encoderParams or encoding.encoderFieldName != encoderFieldName or encoding.encoderFieldDataType != encoderFieldDataType:
+		if encoding.dataSourceFieldName != dataSourceFieldName or encoding.dataSourceFieldDataType != dataSourceFieldDataType or encoding.enableInference != enableInference or encoding.encoderModule != encoderModule or encoding.encoderClass != encoderClass or encoding.encoderParams != encoderParams or encoding.encoderFieldName != encoderFieldName or encoding.encoderFieldDataType != encoderFieldDataType:
 			# Set encoding params with controls values
-			encoding.recordFieldName = recordFieldName
-			encoding.recordFieldDataType = recordFieldDataType
+			encoding.dataSourceFieldName = dataSourceFieldName
+			encoding.dataSourceFieldDataType = dataSourceFieldDataType
 			encoding.enableInference = enableInference
 			encoding.encoderModule = encoderModule
 			encoding.encoderClass = encoderClass

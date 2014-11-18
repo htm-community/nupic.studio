@@ -4,10 +4,10 @@
     <Net>
         <Node name="Top" type="Region" width="15" height="10" enableSpatialPooling="True" potentialRadius="8" potentialPct="1.0" globalInhibition="True" localAreaDensity="-1.0" numActiveColumnsPerInhArea="8.0" stimulusThreshold="0" proximalSynConnectedPerm="0.15" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.05" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="1.0" spSeed="1956" enableTemporalPooling="True" numCellsPerColumn="5" learningRadius="10" distalSynInitialPerm="0.15" distalSynConnectedPerm="0.1" distalSynPermIncrement="0.05" distalSynPermDecrement="0.05" minThreshold="1" activationThreshold="3" maxNumNewSynapses="3" tpSeed="1960"/>
         <Node name="LeftMirror" type="Sensor" width="16" height="6" dataSourceType="File" fileName="squares_left.csv" predictionsMethod="Reconstruction">
-            <Encoding recordFieldName="Square" recordFieldDataType="BinaryArray" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="BinaryArray"/>
+            <Encoding dataSourceFieldName="Square" dataSourceFieldDataType="String" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="String"/>
         </Node>
         <Node name="RightMirror" type="Sensor" width="16" height="6" dataSourceType="File" fileName="squares_right.csv" predictionsMethod="Reconstruction">
-            <Encoding recordFieldName="Square" recordFieldDataType="BinaryArray" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="BinaryArray"/>
+            <Encoding dataSourceFieldName="Square" dataSourceFieldDataType="String" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="String"/>
         </Node>
         <Link outNode="LeftMirror" inNode="Top"/>
         <Link outNode="RightMirror" inNode="Top"/>

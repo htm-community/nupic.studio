@@ -200,15 +200,15 @@ class NodeInformationForm(QtGui.QWidget):
 		self.textBoxRegionPrecisionRate.setEnabled(False)
 		self.textBoxRegionPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
-		# checkBoxEnableSpatialPooling
-		self.checkBoxEnableSpatialPooling = QtGui.QCheckBox()
-		self.checkBoxEnableSpatialPooling.setText("Enable Spatial Pooling")
-		self.checkBoxEnableSpatialPooling.toggled.connect(self.__checkBoxEnableSpatialPooling_Toggled)
+		# checkBoxEnableSpatialLearning
+		self.checkBoxEnableSpatialLearning = QtGui.QCheckBox()
+		self.checkBoxEnableSpatialLearning.setText("Enable Spatial Learning")
+		self.checkBoxEnableSpatialLearning.toggled.connect(self.__checkBoxEnableSpatialLearning_Toggled)
 
-		# checkBoxEnableTemporalPooling
-		self.checkBoxEnableTemporalPooling = QtGui.QCheckBox()
-		self.checkBoxEnableTemporalPooling.setText("Enable Temporal Pooling")
-		self.checkBoxEnableTemporalPooling.toggled.connect(self.__checkBoxEnableTemporalPooling_Toggled)
+		# checkBoxEnableTemporalLearning
+		self.checkBoxEnableTemporalLearning = QtGui.QCheckBox()
+		self.checkBoxEnableTemporalLearning.setText("Enable Temporal Learning")
+		self.checkBoxEnableTemporalLearning.toggled.connect(self.__checkBoxEnableTemporalLearning_Toggled)
 
 		# tabPageRegionsLayout
 		tabPageRegionsLayout = QtGui.QGridLayout()
@@ -216,8 +216,8 @@ class NodeInformationForm(QtGui.QWidget):
 		tabPageRegionsLayout.addWidget(self.textBoxRegionName, 0, 1)
 		tabPageRegionsLayout.addWidget(self.labelRegionPrecisionRate, 1, 0)
 		tabPageRegionsLayout.addWidget(self.textBoxRegionPrecisionRate, 1, 1)
-		tabPageRegionsLayout.addWidget(self.checkBoxEnableSpatialPooling, 2, 1)
-		tabPageRegionsLayout.addWidget(self.checkBoxEnableTemporalPooling, 3, 1)
+		tabPageRegionsLayout.addWidget(self.checkBoxEnableSpatialLearning, 2, 1)
+		tabPageRegionsLayout.addWidget(self.checkBoxEnableTemporalLearning, 3, 1)
 		tabPageRegionsLayout.setRowStretch(4, 100)
 		tabPageRegionsLayout.setColumnStretch(2, 100)
 
@@ -351,8 +351,8 @@ class NodeInformationForm(QtGui.QWidget):
 				self.selectedRegion = selectedNode
 
 				self.textBoxRegionName.setText(self.selectedRegion.name)
-				self.checkBoxEnableSpatialPooling.setChecked(self.selectedRegion.enableSpatialPooling)
-				self.checkBoxEnableTemporalPooling.setChecked(self.selectedRegion.enableTemporalPooling)
+				self.checkBoxEnableSpatialLearning.setChecked(self.selectedRegion.enableSpatialLearning)
+				self.checkBoxEnableTemporalLearning.setChecked(self.selectedRegion.enableTemporalLearning)
 				self.showTab(self.tabPageRegions, "Region")
 				self.showTab(self.tabPageColumns, "Columns")
 				self.dataGridColumns.clearSelection()
@@ -597,11 +597,11 @@ class NodeInformationForm(QtGui.QWidget):
 			self.selectedEncoding = self.selectedSensor.encodings[encodingIdx]
 			self.updateEncodingControls()
 
-	def __checkBoxEnableSpatialPooling_Toggled(self, event):
-		self.selectedRegion.enableSpatialPooling = self.checkBoxEnableSpatialPooling.isChecked()
+	def __checkBoxEnableSpatialLearning_Toggled(self, event):
+		self.selectedRegion.enableSpatialLearning = self.checkBoxEnableSpatialLearning.isChecked()
 
-	def __checkBoxEnableTemporalPooling_Toggled(self, event):
-		self.selectedRegion.enableTemporalPooling = self.checkBoxEnableTemporalPooling.isChecked()
+	def __checkBoxEnableTemporalLearning_Toggled(self, event):
+		self.selectedRegion.enableTemporalLearning = self.checkBoxEnableTemporalLearning.isChecked()
 
 	def __checkBoxEnableClassificationLearning_Toggled(self, event):
 		self.selectedSensor.enableClassificationLearning = self.checkBoxEnableClassificationLearning.isChecked()

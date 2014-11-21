@@ -35,8 +35,8 @@ class Region(Node):
 
 		#region Spatial Parameters
 
-		self.enableSpatialPooling = True
-		"""Switch for spatial pooling"""
+		self.enableSpatialLearning = True
+		"""Switch for spatial learning"""
 
 		self.potentialRadius = 0
 		"""This parameter determines the extent of the input that each column can potentially be connected to. This can be thought of as the input bits that are visible to each column, or a 'receptiveField' of the field of vision. A large enough value will result in 'global coverage', meaning that each column can potentially be connected to every input bit. This parameter defines a square (or hyper square) area: a column will have a max square potential pool with sides of length 2 * potentialRadius + 1."""
@@ -88,8 +88,8 @@ class Region(Node):
 
 		#region Temporal Parameters
 
-		self.enableTemporalPooling = True
-		"""Switch for temporal pooling"""
+		self.enableTemporalLearning = True
+		"""Switch for temporal learning"""
 
 		self.numCellsPerColumn = 10
 		"""Number of cells per column. More cells, more contextual information"""
@@ -264,7 +264,7 @@ class Region(Node):
 		columnDimensions = (self.width, self.height)
 		columnNumber = numpy.array(columnDimensions).prod()
 		activeColumns = numpy.zeros(columnNumber)
-		self.spatialPooler.compute(input, self.enableSpatialPooling, activeColumns)
+		self.spatialPooler.compute(input, self.enableSpatialLearning, activeColumns)
 
 		# Send active columns to Temporal Pooler and get processed output (i.e. the predicting cells)
 		# First convert active columns from float array to integer set
@@ -272,7 +272,7 @@ class Region(Node):
 		for colIdx in range(len(activeColumns)):
 			if activeColumns[colIdx] == 1:
 				activeColumnsSet.add(colIdx)
-		self.temporalPooler.compute(activeColumnsSet, self.enableTemporalPooling)
+		self.temporalPooler.compute(activeColumnsSet, self.enableTemporalLearning)
 
 		# Update elements regarding spatial pooler
 		self.updateSpatialElements(activeColumns)

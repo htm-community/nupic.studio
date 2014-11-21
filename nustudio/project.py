@@ -144,7 +144,7 @@ class Project:
 
 		# Read specific parameters according to node type
 		if type == 'Region':
-			node.enableSpatialPooling = self.__getBooleanAttribute(xmlReader.attributes(), 'enableSpatialPooling')
+			node.enableSpatialLearning = self.__getBooleanAttribute(xmlReader.attributes(), 'enableSpatialLearning')
 			node.potentialRadius = self.__getIntegerAttribute(xmlReader.attributes(), 'potentialRadius')
 			node.potentialPct = self.__getFloatAttribute(xmlReader.attributes(), 'potentialPct')
 			node.globalInhibition = self.__getBooleanAttribute(xmlReader.attributes(), 'globalInhibition')
@@ -159,7 +159,7 @@ class Project:
 			node.dutyCyclePeriod = self.__getIntegerAttribute(xmlReader.attributes(), 'dutyCyclePeriod')
 			node.maxBoost = self.__getFloatAttribute(xmlReader.attributes(), 'maxBoost')
 			node.spSeed = self.__getIntegerAttribute(xmlReader.attributes(), 'spSeed')
-			node.enableTemporalPooling = self.__getBooleanAttribute(xmlReader.attributes(), 'enableTemporalPooling')
+			node.enableTemporalLearning = self.__getBooleanAttribute(xmlReader.attributes(), 'enableTemporalLearning')
 			node.numCellsPerColumn = self.__getIntegerAttribute(xmlReader.attributes(), 'numCellsPerColumn')
 			node.learningRadius = self.__getIntegerAttribute(xmlReader.attributes(), 'learningRadius')
 			node.distalSynInitialPerm = self.__getFloatAttribute(xmlReader.attributes(), 'distalSynInitialPerm')
@@ -280,7 +280,7 @@ class Project:
 			xmlWriter.writeAttribute('type', 'Region')
 			xmlWriter.writeAttribute('width', str(node.width))
 			xmlWriter.writeAttribute('height', str(node.height))
-			xmlWriter.writeAttribute('enableSpatialPooling', str(node.enableSpatialPooling))
+			xmlWriter.writeAttribute('enableSpatialLearning', str(node.enableSpatialLearning))
 			xmlWriter.writeAttribute('potentialRadius', str(node.potentialRadius))
 			xmlWriter.writeAttribute('potentialPct', str(node.potentialPct))
 			xmlWriter.writeAttribute('globalInhibition', str(node.globalInhibition))
@@ -295,7 +295,7 @@ class Project:
 			xmlWriter.writeAttribute('dutyCyclePeriod', str(node.dutyCyclePeriod))
 			xmlWriter.writeAttribute('maxBoost', str(node.maxBoost))
 			xmlWriter.writeAttribute('spSeed', str(node.spSeed))
-			xmlWriter.writeAttribute('enableTemporalPooling', str(node.enableTemporalPooling))
+			xmlWriter.writeAttribute('enableTemporalLearning', str(node.enableTemporalLearning))
 			xmlWriter.writeAttribute('numCellsPerColumn', str(node.numCellsPerColumn))
 			xmlWriter.writeAttribute('learningRadius', str(node.learningRadius))
 			xmlWriter.writeAttribute('distalSynInitialPerm', str(node.distalSynInitialPerm))

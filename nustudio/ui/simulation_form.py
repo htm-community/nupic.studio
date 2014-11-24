@@ -744,7 +744,7 @@ class SimulationForm(QtGui.QWidget):
 		"""
 
 		sumK = 0.
-		numXBellow = 0
+		numXBelow = 0
 		numXAbove = 0
 		for synapse in segment.synapses:
 			xSyn = synapse.inputElem.tree3d_x
@@ -762,10 +762,10 @@ class SimulationForm(QtGui.QWidget):
 			if xSyn >= xSeg1:
 				numXAbove += 1
 			else:
-				numXBellow += 1
+				numXBelow += 1
 
-		# Calculate direction of the straight line with base on the number of synapses X's bellow or above the segment X's
-		if numXAbove >= numXBellow:
+		# Calculate direction of the straight line with base on the number of synapses X's below or above the segment X's
+		if numXAbove >= numXBelow:
 			direction = 1
 		else:
 			direction = -1

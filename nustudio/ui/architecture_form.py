@@ -387,7 +387,7 @@ class DesignPanel(QtGui.QWidget):
 
 			Global.mainForm.markProjectChanges(True)
 
-			# Add new region bellow highlighted region
+			# Add new region below highlighted region
 			newRegion = Region(enteredText)
 			Global.project.network.addFeederNode(newRegion, self.underMouseNode)
 
@@ -410,7 +410,7 @@ class DesignPanel(QtGui.QWidget):
 
 			Global.mainForm.markProjectChanges(True)
 
-			# Add new sensor bellow highlighted region
+			# Add new sensor below highlighted region
 			newSensor = Sensor(enteredText)
 			Global.project.network.addFeederNode(newSensor, self.underMouseNode)
 

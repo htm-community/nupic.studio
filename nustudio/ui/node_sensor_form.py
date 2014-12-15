@@ -302,7 +302,7 @@ class SensorForm(QtGui.QDialog):
 
 	def __buttonBrowseFile_Click(self, event):
 		# Ask user for an existing file
-		selectedFile = QtGui.QFileDialog().getOpenFileName(self, "Open File", Global.appPath + '/projects', "Input files (*.txt)")
+		selectedFile = QtGui.QFileDialog().getOpenFileName(self, "Open File", Global.appPath + '/projects', "Input files (*.csv)")
 
 		# If file exists, set data source file
 		if selectedFile != '':

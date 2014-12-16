@@ -442,10 +442,10 @@ class MainForm(QtGui.QMainWindow):
 		self.dockOutputForm.show()
 
 	def __menuUserWiki_Click(self, event):
-		webbrowser.open('https://github.com/numenta/nupic.studio/wiki')
+		webbrowser.open('https://github.com/nupic-community/nupic.studio/wiki')
 
 	def __menuGoToWebsite_Click(self, event):
-		webbrowser.open('https://github.com/numenta/nupic.studio')
+		webbrowser.open('https://github.com/nupic-community/nupic.studio')
 
 	def __menuAbout_Click(self, event):
 		QtGui.QMessageBox.information(self, "Information", "v. " + Global.version + "\nGet more info at our home page.")

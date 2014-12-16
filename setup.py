@@ -39,7 +39,7 @@ setup(
 	description = 'NuPIC Studio is a virtual studio that allows developers to create, debug, and visualize HTM networks from NuPIC library',
 	author='David Ragazzi',
 	author_email='david_ragazzi@hotmail.com',
-	url='https://github.com/numenta/nupic.studio',
+	url='https://github.com/nupic-community/nupic.studio',
 	classifiers=[
 		'Programming Language :: Python',
 		'Programming Language :: Python :: 2',
@@ -61,5 +61,5 @@ setup(
 * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.
 * Users can create their own encoders and sensors to feed the HTM network.
 * Any changes in the nupic source can be immediatedly viewed. This helps users that wish test improvements like hierarchy, attention, and motor integration.
-For more information, see numenta.org or the NuPIC wiki (https://github.com/numenta/nupic.studio/wiki)."""
+For more information, see numenta.org or the NuPIC wiki (https://github.com/nupic-community/nupic.studio/wiki)."""
 )

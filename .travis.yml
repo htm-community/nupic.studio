@@ -1,0 +1,37 @@
+branches:
+  except:
+    - gh-pages
+
+language: python
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  global:
+    - PATH=$TRAVIS_BUILD_DIR/python/bin:$PATH
+
+matrix:
+  # This excludes OSX GCC builds.
+  exclude:
+    - os: osx
+      compiler: gcc
+
+git:
+  submodules: false
+
+before_install:
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . ./ci/travis/before_install-linux.sh; fi"
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then . ./ci/travis/before_install-osx.sh; fi"
+
+install:
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . ./ci/travis/install-linux.sh; fi"
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then . ./ci/travis/install-osx.sh; fi"
+
+script:
+  - nustudio

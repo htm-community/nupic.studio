@@ -1,4 +1,4 @@
-## ![NuStudio Logo](https://github.com/DavidRagazzi/nupic.studio/blob/master/nustudio/images/logo.png) NuPIC Studio [![Build Status](https://travis-ci.org/DavidRagazzi/nupic.studio.png?branch=master)](https://travis-ci.org/DavidRagazzi/nupic.studio)
+﻿## ![NuStudio Logo](https://github.com/DavidRagazzi/nupic.studio/blob/master/nustudio/images/logo.png) NuPIC Studio [![*nix Build Status](https://travis-ci.org/nupic-community/nupic.studio.svg?branch=master)]
 
 NuPIC Studio is an all­-in-­one tool that allows users create a HTM neural network from scratch, train it, collect statistics, and share it among the members of the community. It is not just a visualization tool but an HTM builder, debugger and laboratory for experiments. It is ideal for newbies with little intimacy with NuPIC code as well as experts that wish a better productivity. Among its features and advantages:
  * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.

@@ -12,7 +12,6 @@ from nustudio.ui.simulation_form import SimulationForm
 from nustudio.ui.output_form import OutputForm
 
 def main():
-	print sys.argv # TODO: Remove this
 	Global.app = QtGui.QApplication(sys.argv)
 	Global.app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 

@@ -23,7 +23,6 @@ Dependencies:
  * NuPIC
  * NumPy
  * PyOpenGL
- * PyOpenGL-accelerate
  * PyQt4
  * PyQtGraph
 

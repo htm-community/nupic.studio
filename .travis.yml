@@ -2,7 +2,7 @@ branches:
   except:
     - gh-pages
 
-language: python
+language: cpp
 
 os:
   - linux
@@ -15,12 +15,7 @@ compiler:
 env:
   global:
     - PATH=$TRAVIS_BUILD_DIR/python/bin:$PATH
-
-matrix:
-  # This excludes OSX GCC builds.
-  exclude:
-    - os: osx
-      compiler: gcc
+    - NUPIC_STUDIO_DEPLOYMENT_BUILD=true
 
 git:
   submodules: false
@@ -34,4 +29,8 @@ install:
   - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then . ./ci/travis/install-osx.sh; fi"
 
 script:
-  - nustudio
+  # Check whether all dependencies were installed
+  - "python -c 'import nupic;import numpy;from PyQt4 import Qt, QtGui, QtCore;import pyqtgraph;import pyqtgraph.opengl'"
+
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . ./ci/travis/script-linux.sh; fi"
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then . ./ci/travis/script-osx.sh; fi"

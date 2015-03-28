@@ -4,18 +4,17 @@ echo
 echo Running before_install-linux.sh...
 echo
 
-echo ">>> Configuring environment..."
-sudo add-apt-repository -y ppa:fkrull/deadsnakes
-sudo apt-get update
+echo ">>> Preparing environment..."
 
-# TODO: remove when Travis has gcc>=4.8
+# TODO: remove when Travis has gcc>=4.8, gcc-4.8 is used for C++11 compatibility
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-sudo apt-get -qq update
-sudo apt-get -qq install g++-4.8
-alias gcc='gcc-4.8'        
-alias g++='g++-4.8'
+sudo apt-get update -qq
+sudo apt-get install -qq gcc-4.8 g++-4.8
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 
-if [ $CC == 'gcc' ]; then
-    export CC='gcc-4.8'
-    export CXX='g++-4.8'
-fi
+# Install virtual display
+sudo apt-get install xvfb
+
+# Install NuPIC
+sudo pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl

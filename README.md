@@ -1,13 +1,13 @@
-﻿## ![NuStudio Logo](https://github.com/DavidRagazzi/nupic.studio/blob/master/nustudio/images/logo.png) NuPIC Studio ![*nix Build Status](https://travis-ci.org/nupic-community/nupic.studio.svg?branch=master)
+## ![NuStudio Logo](https://github.com/nupic-community/nupic.studio/blob/master/nustudio/images/logo.png) NuPIC Studio ![*nix Build Status](https://travis-ci.org/nupic-community/nupic.studio.svg?branch=master)
 
 NuPIC Studio is an all­-in-­one tool that allows users create a HTM neural network from scratch, train it, collect statistics, and share it among the members of the community. It is not just a visualization tool but an HTM builder, debugger and laboratory for experiments. It is ideal for newbies with little intimacy with NuPIC code as well as experts that wish a better productivity. Among its features and advantages:
  * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.
  * The HTM engine is the own original NuPIC libray (Python distribution). This means no port, no bindings, no re-implementation, etc. So any changes in the original nupic source can be immediatedly viewed. This helps users that wish test improvements like new encoders or even hierarchy, attention, and motor integration.
 
-![Screenshot](https://github.com/DavidRagazzi/nupic.studio/blob/master/doc/main_form.png)
+![Screenshot](https://github.com/nupic-community/nupic.studio/blob/master/doc/main_form.png)
  
 
-For more information, see [numenta.org](http://numenta.org) or the [NuPIC Studio wiki](https://github.com/DavidRagazzi/nupic.studio/wiki).
+For more information, see [numenta.org](http://numenta.org) or the [NuPIC Studio wiki](https://github.com/nupic-community/nupic.studio/wiki).
 
 ## Installation
 
@@ -20,19 +20,14 @@ Dependencies:
 
  * Python (2.7 or later) (with development headers)
  * PIP
- * Nupic
+ * NuPIC
  * NumPy
- * SciPy
  * PyOpenGL
  * PyOpenGL-accelerate
  * PyQt4
  * PyQtGraph
 
-_Note_: Except Python, PIP and NuPIC, all dependencies above are already automatically installed by PIP package. However some packages like SciPy and PyQt4 might present errors due to conflicts specific to each system environment. In this case, you will have to install these packages manually using a package manager like apt, yum, or brew:
-
-    apt-get install python-scipy
-    yum install scipy
-    brew install scipy
+_Note_: Except Python, PIP and NuPIC, all dependencies above are already automatically installed by PIP package. However some packages like PyQt4 might present errors due to conflicts specific to each system environment. In this case, you will have to install these packages manually using a package manager like apt, yum, or brew:
 
     apt-get install python-qt4 python-qt4-gl
     yum install PyQt4

@@ -40,7 +40,11 @@ def main():
 	startForm = StartForm()
 	startForm.show()
 
-	sys.exit(Global.app.exec_())
+	deploymentBuild = os.getenv("NUPIC_STUDIO_DEPLOYMENT_BUILD", False)
+	if deploymentBuild:
+		sys.exit(0)
+	else:
+		sys.exit(Global.app.exec_())
 
 
 if __name__ == '__main__':

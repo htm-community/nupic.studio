@@ -23,5 +23,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # IDE files
-*.csproj
-.idea
+*.idea
+*.pyproj
+*.sln
+*.suo

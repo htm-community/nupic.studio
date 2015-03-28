@@ -26,7 +26,7 @@ Dependencies:
  * PyQt4
  * PyQtGraph
 
-_Note_: Except Python, PIP and NuPIC, all dependencies above are already automatically installed by PIP package. However some packages like PyQt4 might present errors due to conflicts specific to each system environment. In this case, you will have to install these packages manually using a package manager like apt, yum, or brew:
+_Note_: Except Python, PIP and NuPIC, all dependencies above are already automatically installed by PIP package. However some packages like PyQt4 might present errors due to conflicts specific to each system environment. In this case, you will have to install this package manually using a package manager like apt, yum, or brew:
 
     apt-get install python-qt4 python-qt4-gl
     yum install PyQt4

@@ -1,10 +1,10 @@
 ﻿from PyQt4 import QtGui, QtCore
-from nustudio.htm.network import Network
-from nustudio.htm.node import NodeType, Node
-from nustudio.htm.node_region import Region
-from nustudio.htm.node_sensor import Sensor, DataSourceType, PredictionsMethod
-from nustudio.htm.encoding import Encoding
-from nustudio.htm.link import Link
+from nupic_studio.htm.network import Network
+from nupic_studio.htm.node import NodeType, Node
+from nupic_studio.htm.node_region import Region
+from nupic_studio.htm.node_sensor import Sensor, DataSourceType, PredictionsMethod
+from nupic_studio.htm.encoding import Encoding
+from nupic_studio.htm.link import Link
 
 """
 Loads and saves the Elements of the .nuproj file, that contains user entries for project properties

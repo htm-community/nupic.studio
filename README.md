@@ -1,4 +1,4 @@
-## ![NuStudio Logo](https://github.com/nupic-community/nupic.studio/blob/master/nustudio/images/logo.png) NuPIC Studio ![*nix Build Status](https://travis-ci.org/nupic-community/nupic.studio.svg?branch=master)
+## ![NuPIC Studio Logo](https://github.com/nupic-community/nupic.studio/blob/master/nupic_studio/images/logo.png) NuPIC Studio ![*nix Build Status](https://travis-ci.org/nupic-community/nupic.studio.svg?branch=master)
 
 NuPIC Studio is an all­-in-­one tool that allows users create a HTM neural network from scratch, train it, collect statistics, and share it among the members of the community. It is not just a visualization tool but an HTM builder, debugger and laboratory for experiments. It is ideal for newbies with little intimacy with NuPIC code as well as experts that wish a better productivity. Among its features and advantages:
  * Users can open, save, or change their "HTM projects" or of other developers. A typical project contains data to be trained, neural network configuration, statistics, etc, which can be shared to be analysed or integrated with other projects.
@@ -37,13 +37,13 @@ _Note_: Except Python, PIP and NuPIC, all dependencies above are already automat
 
 If you want only use it, simply do this:
 
-    pip install nustudio
+    pip install nupic_studio
 
 _Note_: If you get a "permission denied" error when using pip, you may add the --user flag to install to a location in your home directory, which should resolve any permissions issues. Doing this, you may need to add this location to your PATH and PYTHONPATH. Alternatively, you can run pip with 'sudo'.
 
 Once it is installed, you can execute the app using:
 
-    nustudio
+    nupic_studio
 
 and then click on `Open Project` button to open any example to getting started with NuPIC.
 

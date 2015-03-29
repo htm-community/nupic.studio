@@ -1,5 +1,5 @@
 ﻿from PyQt4 import Qt, QtGui, QtCore
-from nustudio.ui import Global
+from nupic_studio.ui import Global
 
 class OutputForm(QtGui.QWidget):
 

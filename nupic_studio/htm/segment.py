@@ -1,40 +1,39 @@
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps
-from nustudio.ui import Global
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.ui import Global
 
-class Bit:
+class SegmentType:
+  proximal = 0
+  distal = 1
+
+class Segment:
   """
-  A class only to group properties related to input bits of sensors.
+  A class only to group properties related to segments.
   """
 
   #region Constructor
 
-  def __init__(self):
+  def __init__(self, type):
     """
     Initializes a new instance of this class.
     """
 
-    self.initialize()
+    #region Instance fields
 
-  #endregion
+    self.type = type
+    """Determine if this segment is proximal or distal."""
 
-  #region Methods
+    self.indexTP = -1
+    """Index of this segment in the temporal pooler."""
 
-  def initialize(self):
-    """
-    Initialize this bit.
-    """
-
-    self.x = -1
-    """Position on X axis"""
-
-    self.y = -1
-    """Position on Y axis"""
+    self.synapses = []
+    """List of distal synapses of this segment."""
 
     # States of this element
     self.isActive = MachineState(False, maxPreviousSteps)
     self.isPredicted = MachineState(False, maxPreviousSteps)
     self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
+    self.isRemoved = MachineState(False, maxPreviousSteps)
 
     #region Statistics properties
 
@@ -48,13 +47,32 @@ class Bit:
     #region 3d-tree properties (simulation form)
 
     self.tree3d_initialized = False
-    self.tree3d_x = 0
-    self.tree3d_y = 0
-    self.tree3d_z = 0
+    self.tree3d_x1 = 0
+    self.tree3d_y1 = 0
+    self.tree3d_z1 = 0
+    self.tree3d_x2 = 0
+    self.tree3d_y2 = 0
+    self.tree3d_z2 = 0
     self.tree3d_item = None
     self.tree3d_selected = False
 
     #endregion
+
+    #endregion
+
+  #endregion
+
+  #region Methods
+
+  def getSynapse(self, indexSP):
+    """
+    Return the synapse connected to a given cell or sensor bit
+    """
+
+    synapse = None
+    for synapse in self.synapses:
+      if synapse.indexSP == indexSP:
+        return synapse
 
   def nextStep(self):
     """
@@ -65,6 +83,16 @@ class Bit:
     self.isActive.rotate()
     self.isPredicted.rotate()
     self.isFalselyPredicted.rotate()
+    self.isRemoved.rotate()
+
+    # Remove synapses that are marked to be removed
+    for synapse in self.synapses:
+      if synapse.isRemoved.atFirstStep():
+        self.synapses.remove(synapse)
+        del synapse
+
+    for synapse in self.synapses:
+      synapse.nextStep()
 
   def calculateStatistics(self):
     """
@@ -80,5 +108,8 @@ class Bit:
       self.statsActivationRate = self.statsActivationCount / float(Global.currStep)
     if self.statsActivationCount > 0:
       self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
+
+    for synapse in self.synapses:
+      synapse.calculateStatistics()
 
   #endregion

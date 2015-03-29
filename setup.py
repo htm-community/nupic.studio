@@ -251,21 +251,21 @@ checkPyQtInstalled()
 
 # Get properties of the project like version, notes, etc
 properties = {}
-execfile(os.path.join(REPO_DIR, "nustudio", "__init__.py"), {}, properties)
+execfile(os.path.join(REPO_DIR, "nupic_studio", "__init__.py"), {}, properties)
 
 # Call the setup process
 os.chdir(REPO_DIR)
 setup(
-  name = 'nustudio',
+  name = 'nupic_studio',
   version = properties["__version__"],
   packages = find_packages(),
   package_data = {
     '': ['README.md', 'LICENSE'],
-    'nustudio': ['nustudio.config'],
-    'nustudio.images': ['*'],
-    'nustudio.projects': ['*']},
+    'nupic_studio': ['nupic_studio.config'],
+    'nupic_studio.images': ['*'],
+    'nupic_studio.projects': ['*']},
   entry_points = {
-    'gui_scripts': ['nustudio = nustudio.program:main']},
+    'gui_scripts': ['nupic_studio = nupic_studio.program:main']},
   description = 'NuPIC Studio is a virtual studio that allows developers to create, debug, and visualize HTM networks from NuPIC library',
   author='David Ragazzi',
   author_email='david_ragazzi@hotmail.com',

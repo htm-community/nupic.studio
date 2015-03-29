@@ -1,9 +1,9 @@
 ﻿import collections
 import json
 from PyQt4 import QtGui, QtCore
-from nustudio import ArrayTableModel
-from nustudio.ui import Global
-from nustudio.htm.encoding import Encoding, FieldDataType
+from nupic_studio import ArrayTableModel
+from nupic_studio.ui import Global
+from nupic_studio.htm.encoding import Encoding, FieldDataType
 
 class EncodingForm(QtGui.QDialog):
 

@@ -5,12 +5,12 @@ import operator
 import math
 import dateutil.parser
 from PyQt4 import QtGui, QtCore
-from nustudio import getInstantiatedClass
-from nustudio.ui import Global
-from nustudio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
-from nustudio.htm.node import Node, NodeType
-from nustudio.htm.bit import Bit
-from nustudio.htm.encoding import FieldDataType
+from nupic_studio import getInstantiatedClass
+from nupic_studio.ui import Global
+from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
+from nupic_studio.htm.node import Node, NodeType
+from nupic_studio.htm.bit import Bit
+from nupic_studio.htm.encoding import FieldDataType
 from nupic.encoders import MultiEncoder
 from nupic.data.file_record_stream import FileRecordStream
 

@@ -1,10 +1,10 @@
 ﻿from PyQt4 import QtGui, QtCore
-from nustudio.ui import Global
-from nustudio.htm.node import NodeType, Node
-from nustudio.htm.node_region import Region
-from nustudio.htm.node_sensor import Sensor
-from nustudio.ui.node_region_form import RegionForm
-from nustudio.ui.node_sensor_form import SensorForm
+from nupic_studio.ui import Global
+from nupic_studio.htm.node import NodeType, Node
+from nupic_studio.htm.node_region import Region
+from nupic_studio.htm.node_sensor import Sensor
+from nupic_studio.ui.node_region_form import RegionForm
+from nupic_studio.ui.node_sensor_form import SensorForm
 
 class ArchitectureForm(QtGui.QWidget):
 

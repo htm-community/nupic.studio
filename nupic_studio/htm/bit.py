@@ -1,10 +1,10 @@
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps
-from nustudio.ui import Global
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.ui import Global
 
-class Cell:
+class Bit:
   """
-  A class only to group properties related to cells.
+  A class only to group properties related to input bits of sensors.
   """
 
   #region Constructor
@@ -14,19 +14,24 @@ class Cell:
     Initializes a new instance of this class.
     """
 
-    #region Instance fields
+    self.initialize()
 
-    self.index = -1
-    """Index of this cell in the temporal pooler."""
+  #endregion
 
-    self.z = -1
-    """Position on Z axis"""
+  #region Methods
 
-    self.segments = []
-    """List of distal segments of this cell."""
+  def initialize(self):
+    """
+    Initialize this bit.
+    """
+
+    self.x = -1
+    """Position on X axis"""
+
+    self.y = -1
+    """Position on Y axis"""
 
     # States of this element
-    self.isLearning = MachineState(False, maxPreviousSteps)
     self.isActive = MachineState(False, maxPreviousSteps)
     self.isPredicted = MachineState(False, maxPreviousSteps)
     self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
@@ -51,34 +56,15 @@ class Cell:
 
     #endregion
 
-    #endregion
-
-  #endregion
-
-  #region Methods
-
   def nextStep(self):
     """
     Perfoms actions related to time step progression.
     """
 
     # Update states machine by remove the first element and add a new element in the end
-    self.isLearning.rotate()
     self.isActive.rotate()
     self.isPredicted.rotate()
     self.isFalselyPredicted.rotate()
-
-    # Remove segments (and their synapses) that are marked to be removed
-    for segment in self.segments:
-      if segment.isRemoved.atFirstStep():
-        for synapse in segment.synapses:
-          segment.synapses.remove(synapse)
-          del synapse
-        self.segments.remove(segment)
-        del segment
-
-    for segment in self.segments:
-      segment.nextStep()
 
   def calculateStatistics(self):
     """
@@ -94,8 +80,5 @@ class Cell:
       self.statsActivationRate = self.statsActivationCount / float(Global.currStep)
     if self.statsActivationCount > 0:
       self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
-
-    for segment in self.segments:
-      segment.calculateStatistics()
 
   #endregion

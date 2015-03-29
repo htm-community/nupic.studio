@@ -3,10 +3,10 @@ import numpy
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 from PyQt4 import QtGui, QtCore
-from nustudio.htm.node import Node, NodeType
-from nustudio.htm.segment import SegmentType
-from nustudio.ui import Global, View
-from nustudio.ui.simulation_legend_form import SimulationLegendForm
+from nupic_studio.htm.node import Node, NodeType
+from nupic_studio.htm.segment import SegmentType
+from nupic_studio.ui import Global, View
+from nupic_studio.ui.simulation_legend_form import SimulationLegendForm
 
 class SimulationForm(QtGui.QWidget):
 

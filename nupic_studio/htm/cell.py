@@ -1,39 +1,35 @@
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps
-from nustudio.ui import Global
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.ui import Global
 
-class SegmentType:
-  proximal = 0
-  distal = 1
-
-class Segment:
+class Cell:
   """
-  A class only to group properties related to segments.
+  A class only to group properties related to cells.
   """
 
   #region Constructor
 
-  def __init__(self, type):
+  def __init__(self):
     """
     Initializes a new instance of this class.
     """
 
     #region Instance fields
 
-    self.type = type
-    """Determine if this segment is proximal or distal."""
+    self.index = -1
+    """Index of this cell in the temporal pooler."""
 
-    self.indexTP = -1
-    """Index of this segment in the temporal pooler."""
+    self.z = -1
+    """Position on Z axis"""
 
-    self.synapses = []
-    """List of distal synapses of this segment."""
+    self.segments = []
+    """List of distal segments of this cell."""
 
     # States of this element
+    self.isLearning = MachineState(False, maxPreviousSteps)
     self.isActive = MachineState(False, maxPreviousSteps)
     self.isPredicted = MachineState(False, maxPreviousSteps)
     self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
-    self.isRemoved = MachineState(False, maxPreviousSteps)
 
     #region Statistics properties
 
@@ -47,12 +43,9 @@ class Segment:
     #region 3d-tree properties (simulation form)
 
     self.tree3d_initialized = False
-    self.tree3d_x1 = 0
-    self.tree3d_y1 = 0
-    self.tree3d_z1 = 0
-    self.tree3d_x2 = 0
-    self.tree3d_y2 = 0
-    self.tree3d_z2 = 0
+    self.tree3d_x = 0
+    self.tree3d_y = 0
+    self.tree3d_z = 0
     self.tree3d_item = None
     self.tree3d_selected = False
 
@@ -64,35 +57,28 @@ class Segment:
 
   #region Methods
 
-  def getSynapse(self, indexSP):
-    """
-    Return the synapse connected to a given cell or sensor bit
-    """
-
-    synapse = None
-    for synapse in self.synapses:
-      if synapse.indexSP == indexSP:
-        return synapse
-
   def nextStep(self):
     """
     Perfoms actions related to time step progression.
     """
 
     # Update states machine by remove the first element and add a new element in the end
+    self.isLearning.rotate()
     self.isActive.rotate()
     self.isPredicted.rotate()
     self.isFalselyPredicted.rotate()
-    self.isRemoved.rotate()
 
-    # Remove synapses that are marked to be removed
-    for synapse in self.synapses:
-      if synapse.isRemoved.atFirstStep():
-        self.synapses.remove(synapse)
-        del synapse
+    # Remove segments (and their synapses) that are marked to be removed
+    for segment in self.segments:
+      if segment.isRemoved.atFirstStep():
+        for synapse in segment.synapses:
+          segment.synapses.remove(synapse)
+          del synapse
+        self.segments.remove(segment)
+        del segment
 
-    for synapse in self.synapses:
-      synapse.nextStep()
+    for segment in self.segments:
+      segment.nextStep()
 
   def calculateStatistics(self):
     """
@@ -109,7 +95,7 @@ class Segment:
     if self.statsActivationCount > 0:
       self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
 
-    for synapse in self.synapses:
-      synapse.calculateStatistics()
+    for segment in self.segments:
+      segment.calculateStatistics()
 
   #endregion

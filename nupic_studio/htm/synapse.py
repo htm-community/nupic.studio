@@ -1,6 +1,6 @@
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps
-from nustudio.ui import Global
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.ui import Global
 
 class Synapse:
   """

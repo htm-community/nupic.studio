@@ -1,4 +1,4 @@
-from nustudio.htm.segment import Segment, SegmentType
+from nupic_studio.htm.segment import Segment, SegmentType
 
 class Column:
   """

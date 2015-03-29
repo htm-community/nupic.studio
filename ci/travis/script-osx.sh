@@ -5,4 +5,4 @@ echo Running script-osx.sh...
 echo
 
 # Run NuPIC Studio
-nustudio
+nupic_studio

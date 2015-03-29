@@ -1,9 +1,9 @@
 import os
 import collections
 import json
-from nustudio.htm.node import NodeType
-from nustudio.htm.link import Link
-from nustudio.ui import Global
+from nupic_studio.htm.node import NodeType
+from nupic_studio.htm.link import Link
+from nupic_studio.ui import Global
 
 class Network:
   """

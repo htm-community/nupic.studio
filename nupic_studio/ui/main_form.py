@@ -2,10 +2,10 @@ import sys
 import time
 import webbrowser
 from PyQt4 import QtGui, QtCore
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps, maxPreviousStepsWithInference
-from nustudio.ui import Global
-from nustudio.ui.project_properties_form import ProjectPropertiesForm
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps, maxPreviousStepsWithInference
+from nupic_studio.ui import Global
+from nupic_studio.ui.project_properties_form import ProjectPropertiesForm
 
 class MainForm(QtGui.QMainWindow):
 

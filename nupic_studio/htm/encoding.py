@@ -1,5 +1,5 @@
-from nustudio import MachineState
-from nustudio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
+from nupic_studio import MachineState
+from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
 from nupic.algorithms.CLAClassifier import CLAClassifier
 
 class FieldDataType:

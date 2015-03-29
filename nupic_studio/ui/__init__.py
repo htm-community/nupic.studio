@@ -1,7 +1,7 @@
 import os
 import collections
 from PyQt4 import QtGui, QtCore
-from nustudio.htm import maxPreviousStepsWithInference
+from nupic_studio.htm import maxPreviousStepsWithInference
 
 class View:
   """
@@ -73,7 +73,7 @@ class Global:
     Loads the content from XML file to config the program.
     """
 
-    fileName = os.path.join(Global.appPath, "nustudio.config")
+    fileName = os.path.join(Global.appPath, "nupic_studio.config")
     file = QtCore.QFile(fileName)
     if (file.open(QtCore.QIODevice.ReadOnly)):
       xmlReader = QtCore.QXmlStreamReader()
@@ -149,7 +149,7 @@ class Global:
     Saves the content from current program's configuration.
     """
 
-    fileName = os.path.join(Global.appPath, "nustudio.config")
+    fileName = os.path.join(Global.appPath, "nupic_studio.config")
     file = QtCore.QFile(fileName)
     file.open(QtCore.QIODevice.WriteOnly)
     xmlWriter = QtCore.QXmlStreamWriter(file)

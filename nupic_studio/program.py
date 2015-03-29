@@ -2,14 +2,14 @@ import os
 import sys
 import time
 from PyQt4 import QtGui, QtCore
-from nustudio.project import Project
-from nustudio.ui import Global
-from nustudio.ui.start_form import StartForm
-from nustudio.ui.main_form import MainForm
-from nustudio.ui.architecture_form import ArchitectureForm
-from nustudio.ui.node_information_form import NodeInformationForm
-from nustudio.ui.simulation_form import SimulationForm
-from nustudio.ui.output_form import OutputForm
+from nupic_studio.project import Project
+from nupic_studio.ui import Global
+from nupic_studio.ui.start_form import StartForm
+from nupic_studio.ui.main_form import MainForm
+from nupic_studio.ui.architecture_form import ArchitectureForm
+from nupic_studio.ui.node_information_form import NodeInformationForm
+from nupic_studio.ui.simulation_form import SimulationForm
+from nupic_studio.ui.output_form import OutputForm
 
 def main():
   Global.app = QtGui.QApplication(sys.argv)

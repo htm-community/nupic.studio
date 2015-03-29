@@ -1,8 +1,8 @@
 ﻿import copy
 from PyQt4 import QtGui, QtCore
-from nustudio.htm.node_sensor import DataSourceType, PredictionsMethod
-from nustudio.ui import Global
-from nustudio.ui.node_sensor_encoding_form import EncodingForm
+from nupic_studio.htm.node_sensor import DataSourceType, PredictionsMethod
+from nupic_studio.ui import Global
+from nupic_studio.ui.node_sensor_encoding_form import EncodingForm
 
 class SensorForm(QtGui.QDialog):
 

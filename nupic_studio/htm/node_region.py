@@ -1,13 +1,13 @@
 import numpy
 import time
 from PyQt4 import QtGui, QtCore
-from nustudio.htm import maxPreviousSteps
-from nustudio.htm.node import Node, NodeType
-from nustudio.htm.column import Column
-from nustudio.htm.cell import Cell
-from nustudio.htm.segment import Segment, SegmentType
-from nustudio.htm.synapse import Synapse
-from nustudio.ui import Global
+from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.htm.node import Node, NodeType
+from nupic_studio.htm.column import Column
+from nupic_studio.htm.cell import Cell
+from nupic_studio.htm.segment import Segment, SegmentType
+from nupic_studio.htm.synapse import Synapse
+from nupic_studio.ui import Global
 from nupic.research.spatial_pooler import SpatialPooler
 from nupic.research.temporal_memory import TemporalMemory as TemporalPooler
 

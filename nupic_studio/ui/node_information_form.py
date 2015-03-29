@@ -1,11 +1,11 @@
 ﻿import pyqtgraph as pg
 from PyQt4 import Qt, QtGui, QtCore
-from nustudio import ArrayTableModel
-from nustudio.ui import Global
-from nustudio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
-from nustudio.htm.node import NodeType, Node
-from nustudio.htm.node_sensor import PredictionsMethod
-from nustudio.htm.encoding import FieldDataType
+from nupic_studio import ArrayTableModel
+from nupic_studio.ui import Global
+from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
+from nupic_studio.htm.node import NodeType, Node
+from nupic_studio.htm.node_sensor import PredictionsMethod
+from nupic_studio.htm.encoding import FieldDataType
 
 class NodeInformationForm(QtGui.QWidget):
 

@@ -1,33 +1,17 @@
 import os
 import sys
 import time
+from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
+from nupic_studio.project import Project
+from nupic_studio.ui import Global
+from nupic_studio.ui.start_form import StartForm
+from nupic_studio.ui.main_form import MainForm
+from nupic_studio.ui.architecture_form import ArchitectureForm
+from nupic_studio.ui.node_information_form import NodeInformationForm
+from nupic_studio.ui.simulation_form import SimulationForm
+from nupic_studio.ui.output_form import OutputForm
 
 def main():
-
-  try:
-    import nupic
-  except ImportError:
-    raise ImportError("NuPIC library not found! Access https://github.com/numenta/nupic/ for get help on how install it.")
-
-  try:
-    from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
-  except ImportError:
-    msg = "PyQt4 library not found! Access http://pyqt.sourceforge.net/Docs/PyQt4/installation.html for get help on how install it" \
-      "...or use a package manager like apt, yum, or brew:\n" \
-      "  apt-get install python-qt4 python-qt4-gl\n" \
-      "  yum install PyQt4\n" \
-      "  brew install pyqt"
-    raise ImportError(msg)
-
-  from nupic_studio.project import Project
-  from nupic_studio.ui import Global
-  from nupic_studio.ui.start_form import StartForm
-  from nupic_studio.ui.main_form import MainForm
-  from nupic_studio.ui.architecture_form import ArchitectureForm
-  from nupic_studio.ui.node_information_form import NodeInformationForm
-  from nupic_studio.ui.simulation_form import SimulationForm
-  from nupic_studio.ui.output_form import OutputForm
-
   Global.app = QtGui.QApplication(sys.argv)
   Global.app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 

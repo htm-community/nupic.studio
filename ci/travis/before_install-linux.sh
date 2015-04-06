@@ -18,3 +18,6 @@ sudo apt-get install xvfb
 
 # Install NuPIC
 sudo pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
+
+# Install PyQt4
+apt-get install python-qt4 python-qt4-gl

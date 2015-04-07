@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from PyQt4 import QtGui, QtCore
+from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
 from nupic_studio.project import Project
 from nupic_studio.ui import Global
 from nupic_studio.ui.start_form import StartForm

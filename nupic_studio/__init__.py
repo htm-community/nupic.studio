@@ -1,8 +1,22 @@
 import collections
 import json
-from PyQt4 import QtGui, QtCore
 
 __version__ = "1.1.0"
+
+try:
+  import nupic
+except ImportError:
+  raise ImportError("NuPIC library not found! Access https://github.com/numenta/nupic/ for get help on how install it.")
+
+try:
+  from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
+except ImportError:
+  msg = "PyQt4 library not found! Access http://pyqt.sourceforge.net/Docs/PyQt4/installation.html for get help on how install it" \
+    "...or use a package manager like apt, yum, or brew:\n" \
+    "  apt-get install python-qt4 python-qt4-gl\n" \
+    "  yum install PyQt4\n" \
+    "  brew install pyqt"
+  raise ImportError(msg)
 
 class MachineState(object):
   """

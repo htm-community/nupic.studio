@@ -17,7 +17,7 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 sudo apt-get install xvfb
 
 # Install NuPIC
-sudo pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
+sudo pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.2-cp27-none-linux_x86_64.whl
 
 # Install PyQt4
 sudo apt-get install python-qt4 python-qt4-gl

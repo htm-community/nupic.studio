@@ -257,7 +257,6 @@ class Network:
           tpParams += "\"columnCount\": " + str(node.width * node.height) + ", "
           tpParams += "\"inputWidth\": " + str(node.getInputSize()) + ", "
           tpParams += "\"cellsPerColumn\": " + str(node.numCellsPerColumn) + ", "
-          #TODO: tpParams += "\"learningRadius\": " + str(node.learningRadius) + ", "
           tpParams += "\"initialPerm\": " + str(node.distalSynInitialPerm) + ", "
           tpParams += "\"connectedPerm\": " + str(node.distalSynConnectedPerm) + ", "
           tpParams += "\"minThreshold\": " + str(node.minThreshold) + ", "

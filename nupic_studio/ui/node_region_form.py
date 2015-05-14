@@ -282,19 +282,6 @@ class RegionForm(QtGui.QDialog):
     self.spinnerNumCellsPerColumn.setEnabled(not Global.simulationInitialized)
     self.spinnerNumCellsPerColumn.setToolTip("Number of cells per column. More cells, more contextual information")
 
-    # labelLearningRadius
-    self.labelLearningRadius = QtGui.QLabel()
-    self.labelLearningRadius.setText("Learning Radius")
-    self.labelLearningRadius.setAlignment(QtCore.Qt.AlignRight)
-
-    # spinnerLearningRadius
-    self.spinnerLearningRadius = QtGui.QSpinBox()
-    self.spinnerLearningRadius.setAlignment(QtCore.Qt.AlignRight)
-    self.spinnerLearningRadius.setMinimum(1)
-    self.spinnerLearningRadius.setMaximum(10000)
-    self.spinnerLearningRadius.setEnabled(not Global.simulationInitialized)
-    self.spinnerLearningRadius.setToolTip("Radius around cell from which it can sample to form distal dendrite connections")
-
     # labelDistalSynInitialPerm
     self.labelDistalSynInitialPerm = QtGui.QLabel()
     self.labelDistalSynInitialPerm.setText("Initial")
@@ -414,18 +401,16 @@ class RegionForm(QtGui.QDialog):
     tabPageTemporalLayout = QtGui.QGridLayout()
     tabPageTemporalLayout.addWidget(self.labelNumCellsPerColumn, 0, 0)
     tabPageTemporalLayout.addWidget(self.spinnerNumCellsPerColumn, 0, 1)
-    tabPageTemporalLayout.addWidget(self.labelLearningRadius, 1, 0)
-    tabPageTemporalLayout.addWidget(self.spinnerLearningRadius, 1, 1)
-    tabPageTemporalLayout.addWidget(self.groupBoxDistalSynPerm, 2, 1)
-    tabPageTemporalLayout.addWidget(self.labelMinThreshold, 3, 0)
-    tabPageTemporalLayout.addWidget(self.spinnerMinThreshold, 3, 1)
-    tabPageTemporalLayout.addWidget(self.labelActivationThreshold, 4, 0)
-    tabPageTemporalLayout.addWidget(self.spinnerActivationThreshold, 4, 1)
-    tabPageTemporalLayout.addWidget(self.labelMaxNumNewSynapses, 5, 0)
-    tabPageTemporalLayout.addWidget(self.spinnerMaxNumNewSynapses, 5, 1)
-    tabPageTemporalLayout.addWidget(self.labelTpSeed, 6, 0)
-    tabPageTemporalLayout.addWidget(self.spinnerTpSeed, 6, 1)
-    tabPageTemporalLayout.setRowStretch(7, 100)
+    tabPageTemporalLayout.addWidget(self.groupBoxDistalSynPerm, 1, 1)
+    tabPageTemporalLayout.addWidget(self.labelMinThreshold, 2, 0)
+    tabPageTemporalLayout.addWidget(self.spinnerMinThreshold, 2, 1)
+    tabPageTemporalLayout.addWidget(self.labelActivationThreshold, 3, 0)
+    tabPageTemporalLayout.addWidget(self.spinnerActivationThreshold, 3, 1)
+    tabPageTemporalLayout.addWidget(self.labelMaxNumNewSynapses, 4, 0)
+    tabPageTemporalLayout.addWidget(self.spinnerMaxNumNewSynapses, 4, 1)
+    tabPageTemporalLayout.addWidget(self.labelTpSeed, 5, 0)
+    tabPageTemporalLayout.addWidget(self.spinnerTpSeed, 5, 1)
+    tabPageTemporalLayout.setRowStretch(6, 100)
 
     # tabPageTemporal
     self.tabPageTemporal = QtGui.QWidget()
@@ -479,7 +464,6 @@ class RegionForm(QtGui.QDialog):
     self.spinnerMaxBoost.setValue(node.maxBoost)
     self.spinnerSpSeed.setValue(node.spSeed)
     self.spinnerNumCellsPerColumn.setValue(node.numCellsPerColumn)
-    self.spinnerLearningRadius.setValue(node.learningRadius)
     self.spinnerDistalSynInitialPerm.setValue(node.distalSynInitialPerm)
     self.spinnerDistalSynConnectedPerm.setValue(node.distalSynConnectedPerm)
     self.spinnerDistalSynPermIncrement.setValue(node.distalSynPermIncrement)
@@ -515,7 +499,6 @@ class RegionForm(QtGui.QDialog):
     maxBoost = self.spinnerMaxBoost.value()
     spSeed = self.spinnerSpSeed.value()
     numCellsPerColumn = self.spinnerNumCellsPerColumn.value()
-    learningRadius = self.spinnerLearningRadius.value()
     distalSynInitialPerm = self.spinnerDistalSynInitialPerm.value()
     distalSynConnectedPerm = self.spinnerDistalSynConnectedPerm.value()
     distalSynPermIncrement = self.spinnerDistalSynPermIncrement.value()
@@ -529,7 +512,7 @@ class RegionForm(QtGui.QDialog):
     node = Global.architectureForm.designPanel.underMouseNode
     if  node.width != width or node.height != height or node.potentialRadius != potentialRadius or node.potentialPct != potentialPct or node.globalInhibition != globalInhibition or node.localAreaDensity != localAreaDensity or node.numActiveColumnsPerInhArea != numActiveColumnsPerInhArea or node.stimulusThreshold != stimulusThreshold\
       or node.proximalSynConnectedPerm != proximalSynConnectedPerm or node.proximalSynPermIncrement != proximalSynPermIncrement or node.proximalSynPermDecrement != proximalSynPermDecrement or node.minPctOverlapDutyCycle != minPctOverlapDutyCycle or node.minPctActiveDutyCycle != minPctActiveDutyCycle or node.dutyCyclePeriod != dutyCyclePeriod or node.maxBoost != maxBoost or node.spSeed != spSeed\
-       or node.numCellsPerColumn != numCellsPerColumn or node.learningRadius != learningRadius or node.distalSynInitialPerm != distalSynInitialPerm or node.distalSynConnectedPerm != distalSynConnectedPerm or node.distalSynPermIncrement != distalSynPermIncrement or node.distalSynPermDecrement != distalSynPermDecrement or node.minThreshold != minThreshold or node.activationThreshold != activationThreshold or node.maxNumNewSynapses != maxNumNewSynapses or node.tpSeed != tpSeed:
+       or node.numCellsPerColumn != numCellsPerColumn or node.distalSynInitialPerm != distalSynInitialPerm or node.distalSynConnectedPerm != distalSynConnectedPerm or node.distalSynPermIncrement != distalSynPermIncrement or node.distalSynPermDecrement != distalSynPermDecrement or node.minThreshold != minThreshold or node.activationThreshold != activationThreshold or node.maxNumNewSynapses != maxNumNewSynapses or node.tpSeed != tpSeed:
 
       # Set region params with controls values
       node.width = width
@@ -549,7 +532,6 @@ class RegionForm(QtGui.QDialog):
       node.maxBoost = maxBoost
       node.spSeed = spSeed
       node.numCellsPerColumn = numCellsPerColumn
-      node.learningRadius = learningRadius
       node.distalSynInitialPerm = distalSynInitialPerm
       node.distalSynConnectedPerm = distalSynConnectedPerm
       node.distalSynPermIncrement = distalSynPermIncrement

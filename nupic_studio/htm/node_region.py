@@ -94,9 +94,6 @@ class Region(Node):
     self.numCellsPerColumn = 10
     """Number of cells per column. More cells, more contextual information"""
 
-    self.learningRadius = min(self.width, self.height)
-    """Radius around cell from which it can sample to form distal dendrite connections."""
-
     self.distalSynInitialPerm = 0.11
     """The initial permanence of an distal synapse."""
 
@@ -235,7 +232,6 @@ class Region(Node):
     self.temporalPooler = TemporalPooler(
       columnDimensions = (self.width, self.height),
       cellsPerColumn = self.numCellsPerColumn,
-      learningRadius = self.learningRadius,
       initialPermanence = self.distalSynInitialPerm,
       connectedPermanence = self.distalSynConnectedPerm,
       minThreshold = self.minThreshold,

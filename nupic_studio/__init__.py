@@ -1,7 +1,8 @@
 import collections
 import json
+import pkg_resources
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 
 def versionList(versionString):
@@ -25,11 +26,11 @@ try:
   import nupic
 except ImportError:
   raise ImportError("NuPIC library not found! Access https://github.com/numenta/nupic/ for get help on how install it.")
+foundNupic = pkg_resources.get_distribution("nupic")
 versionRequiredMin = "0.2.2"
 versionRequiredMax = "99.99.99"
-versionFound = nupic.__version__
-if not (versionList(versionRequiredMin) <= versionList(versionFound) <= versionList(versionRequiredMax)):
-  raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s." % (versionRequiredMin, versionRequiredMax, versionFound))
+if not (versionList(versionRequiredMin) <= versionList(foundNupic.version) <= versionList(versionRequiredMax)):
+  raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s in %s." % (versionRequiredMin, versionRequiredMax, foundNupic.version, foundNupic.location))
 
 try:
   from PyQt4 import Qt, QtCore, QtGui, QtOpenGL

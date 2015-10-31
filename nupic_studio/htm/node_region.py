@@ -469,16 +469,16 @@ class Region(Node):
               if synIdx in synapsesForSegment:
 
                 # Update synapse's state
-                (_, sourceCellAbsIdx, permanence) = self.temporalPooler.connections.dataForSynapse(synIdx)
-                synapse.permanence.setForCurrStep(permanence)
-                if permanence >= self.distalSynConnectedPerm:
+                synapseData = self.temporalPooler.connections.dataForSynapse(synIdx)
+                synapse.permanence.setForCurrStep(synapseData.permanence)
+                if synapseData.permanence >= self.distalSynConnectedPerm:
                   synapse.isConnected.setForCurrStep(True)
                 else:
                   synapse.isConnected.setForCurrStep(False)
 
                 # Get cell given cell's index
-                sourceColIdx = sourceCellAbsIdx / self.numCellsPerColumn
-                sourceCellRelIdx = sourceCellAbsIdx % self.numCellsPerColumn
+                sourceColIdx = synapseData.presynapticCell / self.numCellsPerColumn
+                sourceCellRelIdx = synapseData.presynapticCell % self.numCellsPerColumn
                 sourceCell = self.columns[sourceColIdx].cells[sourceCellRelIdx]
                 synapse.inputElem = sourceCell
               else:
@@ -487,3 +487,4 @@ class Region(Node):
             segment.isRemoved.setForCurrStep(True)
 
   #endregion
+

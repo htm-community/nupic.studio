@@ -1,24 +1,24 @@
 
 class Link:
-  """
-  A class only to group properties related to links among nodes in hierarchy.
-  """
-
-  #region Constructor
-
-  def __init__(self):
     """
-    Initializes a new instance of this class.
+    A class only to group properties related to links among nodes in hierarchy.
     """
 
-    #region Instance fields
+    #region Constructor
 
-    self.outNode = None
-    """Node which its output will be used as input to the second node."""
+    def __init__(self):
+        """
+        Initializes a new instance of this class.
+        """
 
-    self.inNode = None
-    """Target region to receive the input."""
+        #region Instance fields
+
+        self.outNode = None
+        """Node which its output will be used as input to the second node."""
+
+        self.inNode = None
+        """Target region to receive the input."""
+
+        #endregion
 
     #endregion
-
-  #endregion

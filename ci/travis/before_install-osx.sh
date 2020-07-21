@@ -9,5 +9,5 @@ echo ">>> Preparing environment..."
 # Install NuPIC
 sudo pip install nupic
 
-# Install PyQt4
-brew install pyqt
+# Install PyQt5
+pip install pyqt5

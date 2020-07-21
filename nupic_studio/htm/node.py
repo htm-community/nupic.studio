@@ -1,81 +1,81 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 class NodeType:
-  """
-  Types of nodes in the hierarchy.
-  """
+    """
+    Types of nodes in the hierarchy.
+    """
 
-  region = 1
-  sensor = 2
+    region = 1
+    sensor = 2
 
 class Node:
-  """
-  Node that represents region/sensors and their params.
-  """
-
-  #region Constructor
-
-  def __init__(self, name, type):
     """
-    Initializes a new instance of this class.
+    Node that represents region/sensors and their params.
     """
 
-    #region Instance fields
+    #region Constructor
 
-    self.name = name
-    """The name of the Node."""
+    def __init__(self, name, type):
+        """
+        Initializes a new instance of this class.
+        """
 
-    self.type = type
-    """Type of the node (Region or Sensor)"""
+        #region Instance fields
 
-    self.width = 64
-    """Width determines the number of columns in the X axis"""
+        self.name = name
+        """The name of the Node."""
 
-    self.height = 64
-    """Height determines the number of columns in the Y axis"""
+        self.type = type
+        """Type of the node (Region or Sensor)"""
 
-    self._output = []
-    """An array representing the current output from this node."""
+        self.width = 64
+        """Width determines the number of columns in the X axis"""
 
-    #region 2d-tree properties (node tree form)
+        self.height = 64
+        """Height determines the number of columns in the Y axis"""
 
-    self.tree2d_x = 0.
-    self.tree2d_y = 0.
-    self.tree2d_polygon = QtGui.QPolygon()
+        self._output = []
+        """An array representing the current output from this node."""
+
+        #region 2d-tree properties (node tree form)
+
+        self.tree2d_x = 0.
+        self.tree2d_y = 0.
+        self.tree2d_polygon = QtGui.QPolygon()
+
+        #endregion
+
+        #region 3d-tree properties (simulation form)
+
+        self.tree3d_pos = (0, 0, 0)
+
+        #endregion
+
+        #endregion
 
     #endregion
 
-    #region 3d-tree properties (simulation form)
+    #region Methods
 
-    self.tree3d_pos = (0, 0, 0)
+    def initialize(self):
+        """
+        Initialize this node.
+        """
+
+        pass
+
+    def nextStep(self):
+        """
+        Perfoms actions related to time step progression.
+        """
+
+        pass
+
+    def getOutput(self):
+        """
+        Get output from this node.
+        """
+
+        return self._output
 
     #endregion
-
-    #endregion
-
-  #endregion
-
-  #region Methods
-
-  def initialize(self):
-    """
-    Initialize this node.
-    """
-
-    pass
-
-  def nextStep(self):
-    """
-    Perfoms actions related to time step progression.
-    """
-
-    pass
-
-  def getOutput(self):
-    """
-    Get output from this node.
-    """
-
-    return self._output
-
-  #endregion

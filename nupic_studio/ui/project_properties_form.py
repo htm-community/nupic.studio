@@ -53,8 +53,8 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
 
         # buttonBox
         self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_click)
 
         # layout
         layout = QtWidgets.QVBoxLayout()
@@ -78,7 +78,7 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
         self.textBoxAuthor.setText(Global.project.author)
         self.textBoxDescription.setText(Global.project.description)
 
-    def __buttonOk_Click(self, event):
+    def __buttonOk_click(self, event):
         name = self.textBoxName.text()
         author = self.textBoxAuthor.text()
         description = self.textBoxDescription.toPlainText()
@@ -93,6 +93,6 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
 
         self.close()
 
-    def __buttonCancel_Click(self, event):
+    def __buttonCancel_click(self, event):
         self.reject()
         self.close()

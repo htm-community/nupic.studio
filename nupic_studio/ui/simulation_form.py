@@ -51,7 +51,7 @@ class SimulationForm(QtWidgets.QWidget):
         """
         Refresh controls for each time step.
         """
-        self.viewer_3d.update_3d_elements()
+        self.viewer_3d.updateElements3d()
 
 class Viewer3D(QtWidgets.QLabel):
 
@@ -79,14 +79,14 @@ class Viewer3D(QtWidgets.QLabel):
         # Vertical space between two cells
         self.offsetCells = 5
 
-        self.init_ui()
+        self.initUI()
 
         # Create views menus
         for view in Global.views:
             view.menu = QtWidgets.QAction(self)
             view.menu.setText(view.name)
             view.menu.setCheckable(True)
-            view.menu.triggered.connect(self.menuView_Click)
+            view.menu.triggered.connect(self.menuView_click)
             self.menuViews.addAction(view.menu)
 
             # If this is the first menu, set it as default
@@ -96,22 +96,22 @@ class Viewer3D(QtWidgets.QLabel):
         # Load default view
         self.selectView(self.defaultViewMenu)
 
-    def init_ui(self):
+    def initUI(self):
 
         # menuViewsNew
         self.menuViewsNew = QtWidgets.QAction(self)
         self.menuViewsNew.setText("Create new view")
-        self.menuViewsNew.triggered.connect(self.menuViewsNew_Click)
+        self.menuViewsNew.triggered.connect(self.menuViewsNew_click)
 
         # menuViewsSave
         self.menuViewsSave = QtWidgets.QAction(self)
         self.menuViewsSave.setText("Save selected view")
-        self.menuViewsSave.triggered.connect(self.menuViewsSave_Click)
+        self.menuViewsSave.triggered.connect(self.menuViewsSave_click)
 
         # menuViewsDelete
         self.menuViewsDelete = QtWidgets.QAction(self)
         self.menuViewsDelete.setText("Delete selected view")
-        self.menuViewsDelete.triggered.connect(self.menuViewsDelete_Click)
+        self.menuViewsDelete.triggered.connect(self.menuViewsDelete_click)
 
         # menuViews
         self.menuViews = QtWidgets.QMenu()
@@ -125,25 +125,25 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowBitsNone = QtWidgets.QAction(self)
         self.menuShowBitsNone.setText("&None")
         self.menuShowBitsNone.setCheckable(True)
-        self.menuShowBitsNone.triggered.connect(self.menuShowBits_Click)
+        self.menuShowBitsNone.triggered.connect(self.menuShowBits_click)
 
         # menuShowBitsActive
         self.menuShowBitsActive = QtWidgets.QAction(self)
         self.menuShowBitsActive.setText("&Active")
         self.menuShowBitsActive.setCheckable(True)
-        self.menuShowBitsActive.triggered.connect(self.menuShowBits_Click)
+        self.menuShowBitsActive.triggered.connect(self.menuShowBits_click)
 
         # menuShowBitsPredicted
         self.menuShowBitsPredicted = QtWidgets.QAction(self)
         self.menuShowBitsPredicted.setText("&Predicted")
         self.menuShowBitsPredicted.setCheckable(True)
-        self.menuShowBitsPredicted.triggered.connect(self.menuShowBits_Click)
+        self.menuShowBitsPredicted.triggered.connect(self.menuShowBits_click)
 
         # menuShowBitsFalselyPredicted
         self.menuShowBitsFalselyPredicted = QtWidgets.QAction(self)
         self.menuShowBitsFalselyPredicted.setText("&Falsely Predicted")
         self.menuShowBitsFalselyPredicted.setCheckable(True)
-        self.menuShowBitsFalselyPredicted.triggered.connect(self.menuShowBits_Click)
+        self.menuShowBitsFalselyPredicted.triggered.connect(self.menuShowBits_click)
 
         # menuShowBits
         self.menuShowBits = QtWidgets.QMenu()
@@ -157,37 +157,37 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowCellsNone = QtWidgets.QAction(self)
         self.menuShowCellsNone.setText("&None")
         self.menuShowCellsNone.setCheckable(True)
-        self.menuShowCellsNone.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsNone.triggered.connect(self.menuShowCells_click)
 
         # menuShowCellsLearning
         self.menuShowCellsLearning = QtWidgets.QAction(self)
         self.menuShowCellsLearning.setText("&Learning")
         self.menuShowCellsLearning.setCheckable(True)
-        self.menuShowCellsLearning.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsLearning.triggered.connect(self.menuShowCells_click)
 
         # menuShowCellsActive
         self.menuShowCellsActive = QtWidgets.QAction(self)
         self.menuShowCellsActive.setText("&Active")
         self.menuShowCellsActive.setCheckable(True)
-        self.menuShowCellsActive.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsActive.triggered.connect(self.menuShowCells_click)
 
         # menuShowCellsInactive
         self.menuShowCellsInactive = QtWidgets.QAction(self)
         self.menuShowCellsInactive.setText("&Inactive")
         self.menuShowCellsInactive.setCheckable(True)
-        self.menuShowCellsInactive.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsInactive.triggered.connect(self.menuShowCells_click)
 
         # menuShowCellsPredicted
         self.menuShowCellsPredicted = QtWidgets.QAction(self)
         self.menuShowCellsPredicted.setText("&Predicted")
         self.menuShowCellsPredicted.setCheckable(True)
-        self.menuShowCellsPredicted.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsPredicted.triggered.connect(self.menuShowCells_click)
 
         # menuShowCellsFalselyPredicted
         self.menuShowCellsFalselyPredicted = QtWidgets.QAction(self)
         self.menuShowCellsFalselyPredicted.setText("&Falsely Predicted")
         self.menuShowCellsFalselyPredicted.setCheckable(True)
-        self.menuShowCellsFalselyPredicted.triggered.connect(self.menuShowCells_Click)
+        self.menuShowCellsFalselyPredicted.triggered.connect(self.menuShowCells_click)
 
         # menuShowCells
         self.menuShowCells = QtWidgets.QMenu()
@@ -203,25 +203,25 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowProximalSegmentsNone = QtWidgets.QAction(self)
         self.menuShowProximalSegmentsNone.setText("&None")
         self.menuShowProximalSegmentsNone.setCheckable(True)
-        self.menuShowProximalSegmentsNone.triggered.connect(self.menuShowProximalSegments_Click)
+        self.menuShowProximalSegmentsNone.triggered.connect(self.menuShowProximalSegments_click)
 
         # menuShowProximalSegmentsActive
         self.menuShowProximalSegmentsActive = QtWidgets.QAction(self)
         self.menuShowProximalSegmentsActive.setText("&Active")
         self.menuShowProximalSegmentsActive.setCheckable(True)
-        self.menuShowProximalSegmentsActive.triggered.connect(self.menuShowProximalSegments_Click)
+        self.menuShowProximalSegmentsActive.triggered.connect(self.menuShowProximalSegments_click)
 
         # menuShowProximalSegmentsPredicted
         self.menuShowProximalSegmentsPredicted = QtWidgets.QAction(self)
         self.menuShowProximalSegmentsPredicted.setText("&Predicted")
         self.menuShowProximalSegmentsPredicted.setCheckable(True)
-        self.menuShowProximalSegmentsPredicted.triggered.connect(self.menuShowProximalSegments_Click)
+        self.menuShowProximalSegmentsPredicted.triggered.connect(self.menuShowProximalSegments_click)
 
         # menuShowProximalSegmentsFalselyPredicted
         self.menuShowProximalSegmentsFalselyPredicted = QtWidgets.QAction(self)
         self.menuShowProximalSegmentsFalselyPredicted.setText("&Falsely Predicted")
         self.menuShowProximalSegmentsFalselyPredicted.setCheckable(True)
-        self.menuShowProximalSegmentsFalselyPredicted.triggered.connect(self.menuShowProximalSegments_Click)
+        self.menuShowProximalSegmentsFalselyPredicted.triggered.connect(self.menuShowProximalSegments_click)
 
         # menuShowProximalSegments
         self.menuShowProximalSegments = QtWidgets.QMenu()
@@ -235,31 +235,31 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowProximalSynapsesNone = QtWidgets.QAction(self)
         self.menuShowProximalSynapsesNone.setText("&None")
         self.menuShowProximalSynapsesNone.setCheckable(True)
-        self.menuShowProximalSynapsesNone.triggered.connect(self.menuShowProximalSynapses_Click)
+        self.menuShowProximalSynapsesNone.triggered.connect(self.menuShowProximalSynapses_click)
 
         # menuShowProximalSynapsesConnected
         self.menuShowProximalSynapsesConnected = QtWidgets.QAction(self)
         self.menuShowProximalSynapsesConnected.setText("&Connected")
         self.menuShowProximalSynapsesConnected.setCheckable(True)
-        self.menuShowProximalSynapsesConnected.triggered.connect(self.menuShowProximalSynapses_Click)
+        self.menuShowProximalSynapsesConnected.triggered.connect(self.menuShowProximalSynapses_click)
 
         # menuShowProximalSynapsesActive
         self.menuShowProximalSynapsesActive = QtWidgets.QAction(self)
         self.menuShowProximalSynapsesActive.setText("&Active")
         self.menuShowProximalSynapsesActive.setCheckable(True)
-        self.menuShowProximalSynapsesActive.triggered.connect(self.menuShowProximalSynapses_Click)
+        self.menuShowProximalSynapsesActive.triggered.connect(self.menuShowProximalSynapses_click)
 
         # menuShowProximalSynapsesPredicted
         self.menuShowProximalSynapsesPredicted = QtWidgets.QAction(self)
         self.menuShowProximalSynapsesPredicted.setText("&Predicted")
         self.menuShowProximalSynapsesPredicted.setCheckable(True)
-        self.menuShowProximalSynapsesPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
+        self.menuShowProximalSynapsesPredicted.triggered.connect(self.menuShowProximalSynapses_click)
 
         # menuShowProximalSynapsesFalselyPredicted
         self.menuShowProximalSynapsesFalselyPredicted = QtWidgets.QAction(self)
         self.menuShowProximalSynapsesFalselyPredicted.setText("&Falsely Predicted")
         self.menuShowProximalSynapsesFalselyPredicted.setCheckable(True)
-        self.menuShowProximalSynapsesFalselyPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
+        self.menuShowProximalSynapsesFalselyPredicted.triggered.connect(self.menuShowProximalSynapses_click)
 
         # menuShowProximalSynapses
         self.menuShowProximalSynapses = QtWidgets.QMenu()
@@ -280,13 +280,13 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowDistalSegmentsNone = QtWidgets.QAction(self)
         self.menuShowDistalSegmentsNone.setText("&None")
         self.menuShowDistalSegmentsNone.setCheckable(True)
-        self.menuShowDistalSegmentsNone.triggered.connect(self.menuShowDistalSegments_Click)
+        self.menuShowDistalSegmentsNone.triggered.connect(self.menuShowDistalSegments_click)
 
         # menuShowDistalSegmentsActive
         self.menuShowDistalSegmentsActive = QtWidgets.QAction(self)
         self.menuShowDistalSegmentsActive.setText("&Active")
         self.menuShowDistalSegmentsActive.setCheckable(True)
-        self.menuShowDistalSegmentsActive.triggered.connect(self.menuShowDistalSegments_Click)
+        self.menuShowDistalSegmentsActive.triggered.connect(self.menuShowDistalSegments_click)
 
         # menuShowDistalSegments
         self.menuShowDistalSegments = QtWidgets.QMenu()
@@ -298,19 +298,19 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuShowDistalSynapsesNone = QtWidgets.QAction(self)
         self.menuShowDistalSynapsesNone.setText("&None")
         self.menuShowDistalSynapsesNone.setCheckable(True)
-        self.menuShowDistalSynapsesNone.triggered.connect(self.menuShowDistalSynapses_Click)
+        self.menuShowDistalSynapsesNone.triggered.connect(self.menuShowDistalSynapses_click)
 
         # menuShowDistalSynapsesConnected
         self.menuShowDistalSynapsesConnected = QtWidgets.QAction(self)
         self.menuShowDistalSynapsesConnected.setText("&Connected")
         self.menuShowDistalSynapsesConnected.setCheckable(True)
-        self.menuShowDistalSynapsesConnected.triggered.connect(self.menuShowDistalSynapses_Click)
+        self.menuShowDistalSynapsesConnected.triggered.connect(self.menuShowDistalSynapses_click)
 
         # menuShowDistalSynapsesActive
         self.menuShowDistalSynapsesActive = QtWidgets.QAction(self)
         self.menuShowDistalSynapsesActive.setText("&Active")
         self.menuShowDistalSynapsesActive.setCheckable(True)
-        self.menuShowDistalSynapsesActive.triggered.connect(self.menuShowDistalSynapses_Click)
+        self.menuShowDistalSynapsesActive.triggered.connect(self.menuShowDistalSynapses_click)
 
         # menuShowDistalSynapses
         self.menuShowDistalSynapses = QtWidgets.QMenu()
@@ -336,7 +336,7 @@ class Viewer3D(QtWidgets.QLabel):
         # menuLegend
         self.menuLegend = QtWidgets.QAction(self)
         self.menuLegend.setText("&Legend")
-        self.menuLegend.triggered.connect(self.menuLegend_Click)
+        self.menuLegend.triggered.connect(self.menuLegend_click)
 
         # menuSimulation
         self.menuSimulation = QtWidgets.QMenu()
@@ -418,7 +418,7 @@ class Viewer3D(QtWidgets.QLabel):
         """
         Refresh controls for each time step.
         """
-        if Global.mainForm.is_running():
+        if Global.mainForm.isRunning():
 
             # Get the image to be draw on this viewer.
             image = None
@@ -431,14 +431,14 @@ class Viewer3D(QtWidgets.QLabel):
                 else:
                     image = Image.new(format, size)
             elif Global.mainForm.state == State.Playbacking:
-                playback_file = os.path.join(Global.mainForm.get_record_path(), "main_camera_" + "{:08d}".format(Global.mainForm.get_step()) + ".png")
+                playback_file = os.path.join(Global.mainForm.getRecordPath(), "main_camera_" + "{:08d}".format(Global.mainForm.get_step()) + ".png")
                 if os.path.isfile(playback_file):
                     image = Image.open(playback_file)
 
             # Draw the image.
             _image = image.toqimage()
             self.pixel_map = QtGui.QPixmap.fromImage(_image)
-            self.adjust_mouse_working_area()
+            self.adjustMouseWorkingArea()
 
     def showContextMenu(self, pos):
         """
@@ -450,7 +450,7 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             QtWidgets.QMessageBox.information(self, "Information", "Context menu available only during the simulation.")
 
-    def adjust_mouse_working_area(self):
+    def adjustMouseWorkingArea(self):
         viewer_size = self.size()
         self.setPixmap(self.pixel_map.scaled(viewer_size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         image_size = self.pixmap().size()
@@ -461,9 +461,9 @@ class Viewer3D(QtWidgets.QLabel):
 
     def resizeEvent(self, event):
         if self.mouse_working_area is not None:
-            self.adjust_mouse_working_area()
+            self.adjustMouseWorkingArea()
 
-    def handle_key_event(self, event, event_state):
+    def handleKeyEvent(self, event, event_state):
         # Inform Panda to start (or continue) the action associated with the key pressed
         # or stop it if key is released
         key_pressed = event.key()
@@ -480,18 +480,18 @@ class Viewer3D(QtWidgets.QLabel):
                 func(*args)
                 break
 
-    def is_simulating(self):
+    def isSimulating(self):
         return (Global.mainForm.state == State.Simulating and not Global.mainForm.paused) and Global.mainForm.simulation is not None
 
     def keyPressEvent(self, event):
-        if self.is_simulating():
-            self.handle_key_event(event, "")
+        if self.isSimulating():
+            self.handleKeyEvent(event, "")
 
     def keyReleaseEvent(self, event):
-        if self.is_simulating():
-            self.handle_key_event(event, "up")
+        if self.isSimulating():
+            self.handleKeyEvent(event, "up")
 
-    def create_start_mouse_work_fn(self, x, y):
+    def createStartMouseWorkFn(self, x, y):
         def fn():
             width = self.pivot_image.width()
             height = self.pivot_image.height()
@@ -499,18 +499,18 @@ class Viewer3D(QtWidgets.QLabel):
             self.pivot.setVisible(True)
         return fn
 
-    def create_stop_mouse_work_fn(self):
+    def createStopMouseWorkFn(self):
         def fn():
             self.pivot.setVisible(False)
         return fn
 
     def mouseDoubleClickEvent(self, event):
-        if self.is_simulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.LeftButton:
-            Global.mainForm.simulation.reset_camera()
+        if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.LeftButton:
+            Global.mainForm.simulation.resetCamera()
 
     def mouseMoveEvent(self, event):
-        if self.is_simulating() and self.mouse_working_area is not None:
-            def pyqt_to_panda(val, max):
+        if self.isSimulating() and self.mouse_working_area is not None:
+            def pyqtToPanda(val, max):
                 mid = max / 2
                 return (val - mid) / float(mid)
 
@@ -530,8 +530,8 @@ class Viewer3D(QtWidgets.QLabel):
             height = yn - y0
 
             # Transform coordinates from PyQt (0, n) to Panda (-1, 1)
-            Global.mainForm.simulation.mouse_x = pyqt_to_panda(x, width)
-            Global.mainForm.simulation.mouse_y = pyqt_to_panda(y, height) * (-1)
+            Global.mainForm.simulation.mouse_x = pyqtToPanda(x, width)
+            Global.mainForm.simulation.mouse_y = pyqtToPanda(y, height) * (-1)
 
             # Pass the movement commands to Panda
             if self.mouse_inside_working_area and Global.mainForm.simulation.mouse_feature == "":
@@ -541,27 +541,27 @@ class Viewer3D(QtWidgets.QLabel):
                 elif event.buttons() == QtCore.Qt.MiddleButton:
                     feature = "pan"
                 if feature != "":
-                    start_fn = self.create_start_mouse_work_fn(self.width() / 2, self.height() / 2)
-                    stop_fn = self.create_stop_mouse_work_fn()
-                    Global.mainForm.simulation.start_mouse_work(feature, start_fn, stop_fn)
+                    start_fn = self.createStartMouseWorkFn(self.width() / 2, self.height() / 2)
+                    stop_fn = self.createStopMouseWorkFn()
+                    Global.mainForm.simulation.startMouseWork(feature, start_fn, stop_fn)
 
     def mousePressEvent(self, event):
-        if self.is_simulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.RightButton:
+        if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.RightButton:
             self.showContextMenu(event.pos())
 
     def mouseReleaseEvent(self, event):
-        if self.is_simulating() and Global.mainForm.simulation.mouse_feature != "":
-            Global.mainForm.simulation.stop_mouse_work()
+        if self.isSimulating() and Global.mainForm.simulation.mouse_feature != "":
+            Global.mainForm.simulation.stopMouseWork()
 
     def wheelEvent(self, event):
-        if self.is_simulating()and self.mouse_inside_working_area:
+        if self.isSimulating()and self.mouse_inside_working_area:
             mouse_pos = event.pos()
-            start_fn = self.create_start_mouse_work_fn(mouse_pos.x(), mouse_pos.y())
-            stop_fn = self.create_stop_mouse_work_fn()
-            Global.mainForm.simulation.start_mouse_work("zoom", start_fn, stop_fn)
+            start_fn = self.createStartMouseWorkFn(mouse_pos.x(), mouse_pos.y())
+            stop_fn = self.createStopMouseWorkFn()
+            Global.mainForm.simulation.startMouseWork("zoom", start_fn, stop_fn)
             Global.mainForm.simulation.mouse_steps = event.angleDelta().y()
 
-    def update_3d_elements(self):
+    def updateElements3d(self):
         """
         Refresh controls for each time step.
         """
@@ -749,7 +749,7 @@ class Viewer3D(QtWidgets.QLabel):
         if isVisible:
             # Draw the input bit
             if not bit.tree3d_initialized:
-                bit.tree3d_item_np = Global.mainForm.simulation.create_bit(bit.tree3d_pos)
+                bit.tree3d_item_np = Global.mainForm.simulation.createBit(bit.tree3d_pos)
                 bit.tree3d_initialized = True
 
             # Update the color
@@ -789,7 +789,7 @@ class Viewer3D(QtWidgets.QLabel):
         if isVisible:
             # Draw the cell
             if not cell.tree3d_initialized:
-                cell.tree3d_item_np = Global.mainForm.simulation.create_cell(cell.tree3d_pos)
+                cell.tree3d_item_np = Global.mainForm.simulation.createCell(cell.tree3d_pos)
                 cell.tree3d_initialized = True
 
             # Update the color
@@ -894,7 +894,7 @@ class Viewer3D(QtWidgets.QLabel):
         if isVisible:
             # Draw the segment
             if not segment.tree3d_initialized:
-                segment.tree3d_item_np = Global.mainForm.simulation.create_segment(segment.tree3d_start_pos, segment.tree3d_end_pos)
+                segment.tree3d_item_np = Global.mainForm.simulation.createSegment(segment.tree3d_start_pos, segment.tree3d_end_pos)
                 segment.tree3d_initialized = True
 
             # Update the color
@@ -904,7 +904,7 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             segment.tree3d_initialized = False
             if segment.tree3d_item_np is not None:
-                Global.mainForm.simulation.remove_element(segment.tree3d_item_np)
+                Global.mainForm.simulation.removeElement(segment.tree3d_item_np)
 
         # Draw/update all synapses of this segment
         for synapse in segment.synapses:
@@ -941,7 +941,7 @@ class Viewer3D(QtWidgets.QLabel):
         if isVisible and segmentIsVisible:
             # Draw the synapse
             if not synapse.tree3d_initialized:
-                synapse.tree3d_item_np = Global.mainForm.simulation.create_synapse(segment.tree3d_end_pos, synapse.inputElem.tree3d_pos)
+                synapse.tree3d_item_np = Global.mainForm.simulation.createSynapse(segment.tree3d_end_pos, synapse.inputElem.tree3d_pos)
                 synapse.tree3d_initialized = True
 
             # Update the color
@@ -951,7 +951,7 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             synapse.tree3d_initialized = False
             if synapse.tree3d_item_np is not None:
-                Global.mainForm.simulation.remove_element(synapse.tree3d_item_np)
+                Global.mainForm.simulation.removeElement(synapse.tree3d_item_np)
 
     def selectView(self, viewMenu):
         """
@@ -994,7 +994,7 @@ class Viewer3D(QtWidgets.QLabel):
                 self.menuShowDistalSynapsesActive.setChecked(view.showDistalSynapsesActive)
 
                 # Update simulation
-                self.update_3d_elements()
+                self.updateElements3d()
 
                 break
 
@@ -1005,11 +1005,11 @@ class Viewer3D(QtWidgets.QLabel):
         self.menuViewsSave.setEnabled(not defaultViewSelected)
         self.menuViewsDelete.setEnabled(not defaultViewSelected)
 
-    def menuLegend_Click(self, event):
+    def menuLegend_click(self, event):
         simulationLegendForm = SimulationLegendForm()
         simulationLegendForm.exec_()
 
-    def menuShowBits_Click(self, event):
+    def menuShowBits_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowBitsNone:
@@ -1020,9 +1020,9 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowBitsNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuShowCells_Click(self, event):
+    def menuShowCells_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowCellsNone:
@@ -1035,9 +1035,9 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowCellsNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuShowProximalSegments_Click(self, event):
+    def menuShowProximalSegments_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowProximalSegmentsNone:
@@ -1048,9 +1048,9 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowProximalSegmentsNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuShowProximalSynapses_Click(self, event):
+    def menuShowProximalSynapses_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowProximalSynapsesNone:
@@ -1062,9 +1062,9 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowProximalSynapsesNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuShowDistalSegments_Click(self, event):
+    def menuShowDistalSegments_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowDistalSegmentsNone:
@@ -1073,9 +1073,9 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowDistalSegmentsNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuShowDistalSynapses_Click(self, event):
+    def menuShowDistalSynapses_click(self, event):
         menuClicked = self.sender()
 
         if menuClicked == self.menuShowDistalSynapsesNone:
@@ -1085,13 +1085,13 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             self.menuShowDistalSynapsesNone.setChecked(False)
 
-        self.update_3d_elements()
+        self.updateElements3d()
 
-    def menuView_Click(self, event):
+    def menuView_click(self, event):
         menuClicked = self.sender()
         self.selectView(menuClicked)
 
-    def menuViewsNew_Click(self, event):
+    def menuViewsNew_click(self, event):
 
         # Ask for views's name
         enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter views' name:")
@@ -1101,14 +1101,14 @@ class Viewer3D(QtWidgets.QLabel):
             view.menu = QtWidgets.QAction(self)
             view.menu.setText(view.name)
             view.menu.setCheckable(True)
-            view.menu.triggered.connect(self.menuView_Click)
+            view.menu.triggered.connect(self.menuView_click)
 
             Global.views.append(view)
             self.menuViews.addAction(view.menu)
 
             self.selectView(view.menu)
 
-    def menuViewsSave_Click(self, event):
+    def menuViewsSave_click(self, event):
 
         # Find the specified view in the views list
         for view in Global.views:
@@ -1142,7 +1142,7 @@ class Viewer3D(QtWidgets.QLabel):
 
                 break
 
-    def menuViewsDelete_Click(self, event):
+    def menuViewsDelete_click(self, event):
 
         # Find the specified view in the views list
         for view in Global.views:

@@ -50,7 +50,7 @@ class SensorForm(QtWidgets.QDialog):
         # radioButtonDataSourceFile
         self.radioButtonDataSourceFile = QtWidgets.QRadioButton()
         self.radioButtonDataSourceFile.setText("File")
-        self.radioButtonDataSourceFile.toggled.connect(self.__radioButtonDataSource_Click)
+        self.radioButtonDataSourceFile.toggled.connect(self.__radioButtonDataSource_click)
 
         # labelFile
         self.labelFile = QtWidgets.QLabel()
@@ -63,12 +63,12 @@ class SensorForm(QtWidgets.QDialog):
         # buttonBrowseFile
         self.buttonBrowseFile = QtWidgets.QPushButton()
         self.buttonBrowseFile.setText("Browse...")
-        self.buttonBrowseFile.clicked.connect(self.__buttonBrowseFile_Click)
+        self.buttonBrowseFile.clicked.connect(self.__buttonBrowseFile_click)
 
         # radioButtonDataSourceDatabase
         self.radioButtonDataSourceDatabase = QtWidgets.QRadioButton()
         self.radioButtonDataSourceDatabase.setText("Database")
-        self.radioButtonDataSourceDatabase.toggled.connect(self.__radioButtonDataSource_Click)
+        self.radioButtonDataSourceDatabase.toggled.connect(self.__radioButtonDataSource_click)
 
         # labelDatabaseConnectionString
         self.labelDatabaseConnectionString = QtWidgets.QLabel()
@@ -118,19 +118,19 @@ class SensorForm(QtWidgets.QDialog):
         # buttonNewEncoding
         self.buttonNewEncoding = QtWidgets.QPushButton()
         self.buttonNewEncoding.setText("New...")
-        self.buttonNewEncoding.clicked.connect(self.__buttonNewEncoding_Click)
+        self.buttonNewEncoding.clicked.connect(self.__buttonNewEncoding_click)
         self.buttonNewEncoding.setEnabled(not Global.simulationInitialized)
 
         # buttonEditEncoding
         self.buttonEditEncoding = QtWidgets.QPushButton()
         self.buttonEditEncoding.setText("Edit...")
-        self.buttonEditEncoding.clicked.connect(self.__buttonEditEncoding_Click)
+        self.buttonEditEncoding.clicked.connect(self.__buttonEditEncoding_click)
         self.buttonEditEncoding.setEnabled(not Global.simulationInitialized)
 
         # buttonDeleteEncoding
         self.buttonDeleteEncoding = QtWidgets.QPushButton()
         self.buttonDeleteEncoding.setText("Delete")
-        self.buttonDeleteEncoding.clicked.connect(self.__buttonDeleteEncoding_Click)
+        self.buttonDeleteEncoding.clicked.connect(self.__buttonDeleteEncoding_click)
         self.buttonDeleteEncoding.setEnabled(not Global.simulationInitialized)
 
         # listBoxEncodings
@@ -170,9 +170,9 @@ class SensorForm(QtWidgets.QDialog):
 
         # buttonBox
         self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_click)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulationInitialized)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_click)
 
         # layout
         layout = QtWidgets.QVBoxLayout()
@@ -227,7 +227,7 @@ class SensorForm(QtWidgets.QDialog):
             self.buttonEditEncoding.setEnabled(False)
             self.buttonDeleteEncoding.setEnabled(False)
 
-    def __buttonOk_Click(self, event):
+    def __buttonOk_click(self, event):
         """
         Check if values changed and save the,.
         """
@@ -282,11 +282,11 @@ class SensorForm(QtWidgets.QDialog):
 
         self.close()
 
-    def __buttonCancel_Click(self, event):
+    def __buttonCancel_click(self, event):
         self.reject()
         self.close()
 
-    def __buttonBrowseFile_Click(self, event):
+    def __buttonBrowseFile_click(self, event):
         # Ask user for an existing file
         selectedFile = QtWidgets.QFileDialog().getOpenFileName(self, "Open File", Global.appPath + '/projects', "Input files (*.csv)")
 
@@ -295,7 +295,7 @@ class SensorForm(QtWidgets.QDialog):
             # Set file
             self.textBoxFile.setText(selectedFile)
 
-    def __radioButtonDataSource_Click(self, event):
+    def __radioButtonDataSource_click(self, event):
         if not Global.simulationInitialized:
             flag = self.radioButtonDataSourceFile.isChecked()
             self.textBoxFile.setEnabled(flag)
@@ -303,7 +303,7 @@ class SensorForm(QtWidgets.QDialog):
             self.textBoxDatabaseConnectionString.setEnabled(not flag)
             self.textBoxDatabaseTable.setEnabled(not flag)
 
-    def __buttonNewEncoding_Click(self, event):
+    def __buttonNewEncoding_click(self, event):
         encodingForm = EncodingForm()
         encodingForm.encodingIdx = -1
         encodingForm.encodings = self.encodings
@@ -312,7 +312,7 @@ class SensorForm(QtWidgets.QDialog):
             self.encodingsChanged = True
             self.__updateEncodingsListBox()
 
-    def __buttonEditEncoding_Click(self, event):
+    def __buttonEditEncoding_click(self, event):
         encodingForm = EncodingForm()
         encodingForm.encodingIdx = self.listBoxEncodings.currentRow()
         encodingForm.encodings = self.encodings
@@ -322,7 +322,7 @@ class SensorForm(QtWidgets.QDialog):
             self.encodingsChanged = True
             self.__updateEncodingsListBox()
 
-    def __buttonDeleteEncoding_Click(self, event):
+    def __buttonDeleteEncoding_click(self, event):
         self.encodings.remove(self.encodings[self.listBoxEncodings.currentRow()])
         self.encodingsChanged = True
         self.__updateEncodingsListBox()

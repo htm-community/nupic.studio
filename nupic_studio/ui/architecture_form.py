@@ -99,22 +99,22 @@ class DesignPanel(QtWidgets.QWidget):
         # menuNodeProperties
         self.menuNodeProperties = QtWidgets.QAction(self)
         self.menuNodeProperties.setText("&Properties")
-        self.menuNodeProperties.triggered.connect(self.__menuNodeProperties_Click)
+        self.menuNodeProperties.triggered.connect(self.__menuNodeProperties_click)
 
         # menuNodeAddRegion
         self.menuNodeAddRegion = QtWidgets.QAction(self)
         self.menuNodeAddRegion.setText("&Add region under this node...")
-        self.menuNodeAddRegion.triggered.connect(self.__menuNodeAddRegion_Click)
+        self.menuNodeAddRegion.triggered.connect(self.__menuNodeAddRegion_click)
 
         # menuNodeAddSensor
         self.menuNodeAddSensor = QtWidgets.QAction(self)
         self.menuNodeAddSensor.setText("&Add sensor under this node...")
-        self.menuNodeAddSensor.triggered.connect(self.__menuNodeAddSensor_Click)
+        self.menuNodeAddSensor.triggered.connect(self.__menuNodeAddSensor_click)
 
         # menuNodeDelete
         self.menuNodeDelete = QtWidgets.QAction(self)
         self.menuNodeDelete.setText("&Delete this node...")
-        self.menuNodeDelete.triggered.connect(self.__menuNodeDelete_Click)
+        self.menuNodeDelete.triggered.connect(self.__menuNodeDelete_click)
 
         # menuNode
         self.menuNode = QtWidgets.QMenu()
@@ -326,7 +326,7 @@ class DesignPanel(QtWidgets.QWidget):
                 # Display the context menu.
                 self.menuNode.exec_(self.mapToGlobal(event.pos()))
 
-    def __menuNodeProperties_Click(self, event):
+    def __menuNodeProperties_click(self, event):
         """
         View node propeerties.
         """
@@ -350,7 +350,7 @@ class DesignPanel(QtWidgets.QWidget):
                 Global.mainForm.markProjectChanges(True)
                 Global.architectureForm.updateCode()
 
-    def __menuNodeAddRegion_Click(self, event):
+    def __menuNodeAddRegion_click(self, event):
         """
         Add a feeder region to the selected region.
         """
@@ -373,7 +373,7 @@ class DesignPanel(QtWidgets.QWidget):
             self.repaint()
             Global.architectureForm.updateCode()
 
-    def __menuNodeAddSensor_Click(self, event):
+    def __menuNodeAddSensor_click(self, event):
         """
         Add a feeder sensor to the selected region.
         """
@@ -396,7 +396,7 @@ class DesignPanel(QtWidgets.QWidget):
             self.repaint()
             Global.architectureForm.updateCode()
 
-    def __menuNodeDelete_Click(self, event):
+    def __menuNodeDelete_click(self, event):
         """
         Delete this node from the tree.
         """

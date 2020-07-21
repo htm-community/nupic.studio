@@ -23,8 +23,8 @@ class Texture3D:
     Gray = None
 
 
-def create_axes_cross(name, size, has_labels):
-    def create_axis_line(label, color, draw_to):
+def createAxesCross(name, size, has_labels):
+    def createAxisLine(label, color, draw_to):
         coords.setColor(color)
         coords.moveTo(0, 0, 0)
         coords.drawTo(draw_to)
@@ -43,9 +43,9 @@ def create_axes_cross(name, size, has_labels):
     coords_np = NodePath(name)
     coords = LineSegs()
     coords.setThickness(2)
-    axis_x_np = create_axis_line("X" if has_labels else "", Color3D.Red, (size, 0, 0))
-    axis_y_np = create_axis_line("Y" if has_labels else "", Color3D.Green, (0, size, 0))
-    axis_z_np = create_axis_line("Z" if has_labels else "", Color3D.Blue, (0, 0, size))
+    axis_x_np = createAxisLine("X" if has_labels else "", Color3D.Red, (size, 0, 0))
+    axis_y_np = createAxisLine("Y" if has_labels else "", Color3D.Green, (0, size, 0))
+    axis_z_np = createAxisLine("Z" if has_labels else "", Color3D.Blue, (0, 0, size))
     np = coords.create(True)
     coords_np.attachNewNode(np)
     return coords_np, axis_x_np, axis_y_np, axis_z_np

@@ -32,7 +32,7 @@ from panda3d.bullet import BulletCylinderShape
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.bullet import BulletDebugNode
 from nupic_studio import REPO_DIR
-from nupic_studio.util import create_axes_cross, Color3D, Texture3D
+from nupic_studio.util import createAxesCross, Color3D, Texture3D
 
 VIEW_RADIUS = 1000
 
@@ -128,9 +128,9 @@ class Simulation(ShowBase):
         # TODO: When implement project uncomment
         #if self.project['shared']:
         #    system = platform.system().lower()
-        #    ip = self.get_ip()
+        #    ip = self.getIp()
         #    port = 11211
-        #    if not self.process_exists("memcached"):
+        #    if not self.processExists("memcached"):
         #        raise Exception("Memcached service is not runnning!")
         #    self.memcached_client = pymemcache.client.base.Client((ip, port))
         #    print("Sharing objects in " + ip + ":" + str(port) + " ...")
@@ -162,7 +162,7 @@ class Simulation(ShowBase):
         self.cam.setPos(0, -VIEW_RADIUS*0.99, 0)
         self.cam.lookAt(0, 0, 0)
         self.camera_pivot_np = self.render.attachNewNode("camera_pivot")
-        #self.camera_pivot_np.setPos(self.get_point_from_cam_lens((0, 0))[1])
+        #self.camera_pivot_np.setPos(self.getPointFromCamLens((0, 0))[1])
         self.camera_pivot_np.setPos(0, 0, 0)
         self.cam_pos = None
         self.cam_hpr = None
@@ -179,9 +179,9 @@ class Simulation(ShowBase):
 
         # Create the coords widget for indicating axes directions
         self.coords_np, self.axis_x_np, self.axis_y_np, self.axis_z_np, self.cam_label_np, self.cam_pos_np, self.cam_hpr_np, \
-        self.touched_label_np, self.touched_object_np, self.touched_pos_np = self.create_screen_widgets()
+        self.touched_label_np, self.touched_object_np, self.touched_pos_np = self.createScreenWidgets()
 
-        self.is_simulating = True
+        self.isSimulating = True
         print("Simulation running!")
         print("(See 'output.log' to more details)")
 
@@ -189,7 +189,7 @@ class Simulation(ShowBase):
         self.start = time.time()
         self.taskMgr.add(self.update, "update")
 
-    def process_exists(self, process_name):
+    def processExists(self, process_name):
         for proc in psutil.process_iter():
             try:
                 # Check if process name contains the given name string.
@@ -201,19 +201,19 @@ class Simulation(ShowBase):
 
     def destroy(self):
         print("Cleaning memory...")
-        self.is_simulating = False
+        self.isSimulating = False
         ShowBase.destroy(self)
         print("Simulation stopped!")
 
     def update(self, task):
         # Don't update if simulating is stopping! Risk of null objects raise exceptions.
-        if self.is_simulating:
-            self.update_camera()
-            time_per_frame = self.get_time_per_frame()
+        if self.isSimulating:
+            self.updateCamera()
+            time_per_frame = self.getTimePerFrame()
             self.physics_manager.doPhysics(time_per_frame)
         return Task.cont
 
-    def get_ip(self):
+    def getIp(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # doesn't even have to be reachable
@@ -225,10 +225,10 @@ class Simulation(ShowBase):
             s.close()
         return IP
 
-    def get_time_per_frame(self):
+    def getTimePerFrame(self):
         return globalClock.getDt()
 
-    def start_mouse_work(self, feature, start_mouse_work_fn, stop_mouse_work_fn):
+    def startMouseWork(self, feature, start_mouse_work_fn, stop_mouse_work_fn):
         self.mouse_feature = feature
         self.start_mouse_work_fn = start_mouse_work_fn
         self.stop_mouse_work_fn = stop_mouse_work_fn
@@ -244,7 +244,7 @@ class Simulation(ShowBase):
             target_pos = (self.mouse_x, self.mouse_y)
         else:
             target_pos = (0, 0)
-        self.touched_object, self.touched_pos = self.get_point_from_cam_lens(target_pos)
+        self.touched_object, self.touched_pos = self.getPointFromCamLens(target_pos)
         if self.touched_pos is None:
             self.touched_object = None
             self.touched_pos = (0, 0, 0)
@@ -258,7 +258,7 @@ class Simulation(ShowBase):
 
         self.start_mouse_work_fn()
 
-    def stop_mouse_work(self):
+    def stopMouseWork(self):
         self.mouse_feature = ""
         self.last_mouse_x = None
         self.last_mouse_y = None
@@ -271,12 +271,12 @@ class Simulation(ShowBase):
 
         self.stop_mouse_work_fn()
 
-    def reset_camera(self):
+    def resetCamera(self):
         self.camera_pivot_np.setPos(0, 0, 0)
         self.camera_pivot_np.setHpr(0, 0, 0)
         self.cam.setPos(self.render, (0, -VIEW_RADIUS*0.99, 0))
 
-    def update_camera(self):
+    def updateCamera(self):
         """
         Use mouse input to turn/move the camera.
         """
@@ -286,18 +286,18 @@ class Simulation(ShowBase):
             self.last_mouse_x = self.mouse_x
             self.last_mouse_y = self.mouse_y
             if self.mouse_feature == "rotate":
-                offset = 5000 * self.get_time_per_frame()
+                offset = 5000 * self.getTimePerFrame()
                 self.camera_pivot_np.setH(self.camera_pivot_np.getH() + diff_x * offset)    # horizontal plane
                 self.camera_pivot_np.setP(self.camera_pivot_np.getP() - diff_y * offset)    # vertical plane
             elif self.mouse_feature == "pan":
-                offset = 15000 * self.get_time_per_frame()
+                offset = 15000 * self.getTimePerFrame()
                 self.camera_pivot_np.setZ(self.cam, self.camera_pivot_np.getZ(self.cam) + diff_y * offset)    # horizontal plane
                 self.camera_pivot_np.setX(self.cam, self.camera_pivot_np.getX(self.cam) + diff_x * offset)    # vertical plane
             elif self.mouse_feature == "zoom":
-                offset = 0.1 * self.get_time_per_frame()
+                offset = 0.1 * self.getTimePerFrame()
                 diff = self.cam.getPos(self.render) - self.camera_pivot_np.getPos(self.render)
                 self.cam.setPos(self.render, self.cam.getPos(self.render) - diff * self.mouse_steps * offset)
-                self.stop_mouse_work()
+                self.stopMouseWork()
 
             # Format the camera info text
             self.cam_pos = tuple([round(n, 2) for n in self.cam.getPos(self.render)])
@@ -327,7 +327,7 @@ class Simulation(ShowBase):
             self.touched_object_np.node().setText(touched_object_text)
             self.touched_pos_np.node().setText(touched_pos_text)
 
-    def get_point_from_cam_lens(self, target_pos):
+    def getPointFromCamLens(self, target_pos):
 
         # Get to and from pos in camera coordinates and transform to global coordinates
         p_from, p_to = Point3(), Point3()
@@ -342,11 +342,11 @@ class Simulation(ShowBase):
         else:
             return None, None
 
-    def create_screen_widgets(self):
+    def createScreenWidgets(self):
 
         # Pin the coords in left-bottom of the screen
         origin = [-1.4, 5, -0.85]
-        coords_np, axis_x_np, axis_y_np, axis_z_np = create_axes_cross("coords", 3, True)
+        coords_np, axis_x_np, axis_y_np, axis_z_np = createAxesCross("coords", 3, True)
         coords_np.reparentTo(self.cam)
         coords_np.setPos(self.cam, tuple(origin))
         coords_np.setScale(0.1)
@@ -443,27 +443,27 @@ class Simulation(ShowBase):
         self.physics_manager.attachRigidBody(body_node)
         return body_np
 
-    def create_bit(self, position):
+    def createBit(self, position):
         name = "bit_" + str(self.last_bit_idx)
         self.last_bit_idx += 1
         return self._create_element(name, "bit", position)
 
-    def create_cell(self, position):
+    def createCell(self, position):
         name = "cell_" + str(self.last_cell_idx)
         self.last_cell_idx += 1
         return self._create_element(name, "cell", position)
 
-    def create_segment(self, start, end):
+    def createSegment(self, start, end):
         name = "segment_" + str(self.last_segment_idx)
         self.last_segment_idx += 1
         return self._create_element(name, "segment", start, end)
 
-    def create_synapse(self, start, end):
+    def createSynapse(self, start, end):
         name = "synapse_" + str(self.last_synapse_idx)
         self.last_synapse_idx += 1
         return self._create_element(name, "synapse", start, end)
 
-    def remove_element(self, element_np):
+    def removeElement(self, element_np):
         if len(element_np.children) > 0:
             geo_np = element_np.children[0]
             geo_np.detachNode()

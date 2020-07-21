@@ -144,9 +144,9 @@ class EncodingForm(QtWidgets.QDialog):
 
         # buttonBox
         self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_click)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulationInitialized)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_click)
 
         # layout
         layout = QtWidgets.QVBoxLayout()
@@ -199,7 +199,7 @@ class EncodingForm(QtWidgets.QDialog):
 
         return duplicated
 
-    def __buttonOk_Click(self, event):
+    def __buttonOk_click(self, event):
         """
         Check if values changed and save the,.
         """
@@ -285,6 +285,6 @@ class EncodingForm(QtWidgets.QDialog):
 
         self.close()
 
-    def __buttonCancel_Click(self, event):
+    def __buttonCancel_click(self, event):
         self.reject()
         self.close()

@@ -54,7 +54,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.menuFileExit = QtWidgets.QAction(self)
         self.menuFileExit.setText("&Exit")
         self.menuFileExit.setShortcut('Ctrl+Q')
-        self.menuFileExit.triggered.connect(self.__menuFileExit_Click)
+        self.menuFileExit.triggered.connect(self.__menuFileExit_click)
 
         # menuFile
         self.menuFile = QtWidgets.QMenu()
@@ -68,22 +68,22 @@ class MainForm(QtWidgets.QMainWindow):
         # menuViewArchitecture
         self.menuViewArchitecture = QtWidgets.QAction(self)
         self.menuViewArchitecture.setText("&Network Architecture")
-        self.menuViewArchitecture.triggered.connect(self.__menuViewArchitecture_Click)
+        self.menuViewArchitecture.triggered.connect(self.__menuViewArchitecture_click)
 
         # menuViewSimulation
         self.menuViewSimulation = QtWidgets.QAction(self)
         self.menuViewSimulation.setText("&Simulation")
-        self.menuViewSimulation.triggered.connect(self.__menuViewSimulation_Click)
+        self.menuViewSimulation.triggered.connect(self.__menuViewSimulation_click)
 
         # menuViewNodeInformation
         self.menuViewNodeInformation = QtWidgets.QAction(self)
         self.menuViewNodeInformation.setText("Node &Information")
-        self.menuViewNodeInformation.triggered.connect(self.__menuViewNodeInformation_Click)
+        self.menuViewNodeInformation.triggered.connect(self.__menuViewNodeInformation_click)
 
         # menuViewOutput
         self.menuViewOutput = QtWidgets.QAction(self)
         self.menuViewOutput.setText("&Output")
-        self.menuViewOutput.triggered.connect(self.__menuViewOutput_Click)
+        self.menuViewOutput.triggered.connect(self.__menuViewOutput_click)
 
         # menuViewToolWindows
         self.menuViewToolWindows = QtWidgets.QMenu()
@@ -105,7 +105,7 @@ class MainForm(QtWidgets.QMainWindow):
         # menuProjectProperties
         self.menuProjectProperties = QtWidgets.QAction(self)
         self.menuProjectProperties.setText("Properties...")
-        self.menuProjectProperties.triggered.connect(self.__menuProjectProperties_Click)
+        self.menuProjectProperties.triggered.connect(self.__menuProjectProperties_click)
 
         # menuProject
         self.menuProject = QtWidgets.QMenu()
@@ -119,17 +119,17 @@ class MainForm(QtWidgets.QMainWindow):
         # menuUserWiki
         self.menuUserWiki = QtWidgets.QAction(self)
         self.menuUserWiki.setText("User Wiki")
-        self.menuUserWiki.triggered.connect(self.__menuUserWiki_Click)
+        self.menuUserWiki.triggered.connect(self.__menuUserWiki_click)
 
         # menuGoToWebsite
         self.menuGoToWebsite = QtWidgets.QAction(self)
         self.menuGoToWebsite.setText("Project Website")
-        self.menuGoToWebsite.triggered.connect(self.__menuGoToWebsite_Click)
+        self.menuGoToWebsite.triggered.connect(self.__menuGoToWebsite_click)
 
         # menuAbout
         self.menuAbout = QtWidgets.QAction(self)
         self.menuAbout.setText("About")
-        self.menuAbout.triggered.connect(self.__menuAbout_Click)
+        self.menuAbout.triggered.connect(self.__menuAbout_click)
 
         # menuHelp
         self.menuHelp = QtWidgets.QMenu()
@@ -150,28 +150,28 @@ class MainForm(QtWidgets.QMainWindow):
         self.buttonInitHTM.setEnabled(False)
         self.buttonInitHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonInitializeHTM.png'))
         self.buttonInitHTM.setToolTip("Initialize simulation")
-        self.buttonInitHTM.triggered.connect(self.__buttonInitHTM_Click)
+        self.buttonInitHTM.triggered.connect(self.__buttonInitHTM_click)
 
         # buttonStepHTM
         self.buttonStepHTM = QtWidgets.QAction(self)
         self.buttonStepHTM.setEnabled(False)
         self.buttonStepHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStepHTM.png'))
         self.buttonStepHTM.setToolTip("Forward one time step")
-        self.buttonStepHTM.triggered.connect(self.__buttonStepHTM_Click)
+        self.buttonStepHTM.triggered.connect(self.__buttonStepHTM_click)
 
         # buttonMultipleStepsHTM
         self.buttonMultipleStepsHTM = QtWidgets.QAction(self)
         self.buttonMultipleStepsHTM.setEnabled(False)
         self.buttonMultipleStepsHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStepFastHTM.png'))
         self.buttonMultipleStepsHTM.setToolTip("Forward a specific number of time steps")
-        self.buttonMultipleStepsHTM.triggered.connect(self.__buttonMultipleStepsHTM_Click)
+        self.buttonMultipleStepsHTM.triggered.connect(self.__buttonMultipleStepsHTM_click)
 
         # buttonStopHTM
         self.buttonStopHTM = QtWidgets.QAction(self)
         self.buttonStopHTM.setEnabled(False)
         self.buttonStopHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStopHTM.png'))
         self.buttonStopHTM.setToolTip("Stop simulation")
-        self.buttonStopHTM.triggered.connect(self.__buttonStopHTM_Click)
+        self.buttonStopHTM.triggered.connect(self.__buttonStopHTM_click)
 
         # textBoxStep
         self.textBoxStep = QtWidgets.QLineEdit()
@@ -281,11 +281,11 @@ class MainForm(QtWidgets.QMainWindow):
             self.simulation.taskMgr.step()
             Global.simulationForm.update()
 
-    def get_project_path(self):
+    def getProjectPath(self):
         return os.path.dirname(Global.project.fileName)
 
-    def get_record_path(self):
-        return os.path.join(self.get_project_path(), "record")
+    def getRecordPath(self):
+        return os.path.join(self.getProjectPath(), "record")
 
     def refreshControls(self):
         """
@@ -416,8 +416,8 @@ class MainForm(QtWidgets.QMainWindow):
         # Reset controls
         self.clearControls()
 
-    def is_running(self):
-            return self.state == State.Simulating or self.state == State.Playbacking
+    def isRunning(self):
+        return self.state == State.Simulating or self.state == State.Playbacking
 
     def closeEvent(self, event):
         if self.__checkCurrentConfigChanges() == QtWidgets.QMessageBox.Cancel:
@@ -427,10 +427,10 @@ class MainForm(QtWidgets.QMainWindow):
                 self.stopSimulation()
             sys.exit()
 
-    def __menuFileExit_Click(self, event):
+    def __menuFileExit_click(self, event):
         self.close()
 
-    def __menuProjectProperties_Click(self, event):
+    def __menuProjectProperties_click(self, event):
         # Open Project properties form
         projectPropertiesForm = ProjectPropertiesForm()
         projectPropertiesForm.setControlsValues()
@@ -439,30 +439,30 @@ class MainForm(QtWidgets.QMainWindow):
         if dialogResult == QtWidgets.QDialog.Accepted:
             Global.mainForm.markProjectChanges(True)
 
-    def __menuViewArchitecture_Click(self, event):
+    def __menuViewArchitecture_click(self, event):
         self.dockArchitectureForm.show()
 
-    def __menuViewSimulation_Click(self, event):
+    def __menuViewSimulation_click(self, event):
         self.dockSimulationForm.show()
         Global.simulationForm.refreshControls()
 
-    def __menuViewNodeInformation_Click(self, event):
+    def __menuViewNodeInformation_click(self, event):
         self.dockNodeInformationForm.show()
         Global.nodeInformationForm.refreshControls()
 
-    def __menuViewOutput_Click(self, event):
+    def __menuViewOutput_click(self, event):
         self.dockOutputForm.show()
 
-    def __menuUserWiki_Click(self, event):
+    def __menuUserWiki_click(self, event):
         webbrowser.open('https://github.com/nupic-community/nupic.studio/wiki')
 
-    def __menuGoToWebsite_Click(self, event):
+    def __menuGoToWebsite_click(self, event):
         webbrowser.open('https://github.com/nupic-community/nupic.studio')
 
-    def __menuAbout_Click(self, event):
+    def __menuAbout_click(self, event):
         QtWidgets.QMessageBox.information(self, "Information", "v. " + Global.version + "\nGet more info at our home page.")
 
-    def __buttonInitHTM_Click(self, event):
+    def __buttonInitHTM_click(self, event):
         """
         Initializes the HTM-Network by creating the htm-controller to connect to events database
         """
@@ -476,7 +476,7 @@ class MainForm(QtWidgets.QMainWindow):
             self.state = State.Simulating
 
             # Create a simulation
-            #TODO: self.simulation = Simulation(self.project, self.get_project_path())
+            #TODO: self.simulation = Simulation(self.project, self.getProjectPath())
             self.simulation = Simulation(None, None)
 
             # Initialize time steps parameters
@@ -506,7 +506,7 @@ class MainForm(QtWidgets.QMainWindow):
             self.update_timer.setInterval(1)
             self.update_timer.start()
 
-    def __buttonStepHTM_Click(self, event):
+    def __buttonStepHTM_click(self, event):
         """
         Performs a single simulation step.
         """
@@ -529,7 +529,7 @@ class MainForm(QtWidgets.QMainWindow):
         # Update controls
         self.refreshControls()
 
-    def __buttonMultipleStepsHTM_Click(self, event):
+    def __buttonMultipleStepsHTM_click(self, event):
         """
         Performs full HTM simulation.
         """
@@ -544,11 +544,11 @@ class MainForm(QtWidgets.QMainWindow):
                 self._numStepsPending = enteredInteger
 
         while self._numStepsPending > 0:
-            self.__buttonStepHTM_Click(event)
+            self.__buttonStepHTM_click(event)
             Global.app.processEvents()
             self._numStepsPending -= 1
 
-    def __buttonStopHTM_Click(self, event):
+    def __buttonStopHTM_click(self, event):
         # If multiple steps processing is running just stop the loop
         # otherwise, ask user to stop the simulation
         if self._numStepsPending > 0:

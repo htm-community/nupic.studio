@@ -16,14 +16,10 @@ class View:
     A class only to group properties related to pre-defined views.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.menu = None
         self.name = ""
@@ -51,10 +47,6 @@ class View:
         self.showDistalSynapsesNone = False
         self.showDistalSynapsesConnected = True
         self.showDistalSynapsesActive = True
-
-        #endregion
-
-    #endregion
 
 class Global:
     appPath = ''

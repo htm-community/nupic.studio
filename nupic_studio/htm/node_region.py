@@ -16,8 +16,6 @@ class Region(Node):
     A class only to group properties related to regions.
     """
 
-    #region Constructor
-
     def __init__(self, name):
         """
         Initializes a new instance of this class.
@@ -25,15 +23,11 @@ class Region(Node):
 
         Node.__init__(self, name, NodeType.region)
 
-        #region Instance fields
-
         self.columns = []
         """List of columns that compose this region"""
 
         self._inputMap = []
         """An array representing the input map for this region."""
-
-        #region Spatial Parameters
 
         self.enableSpatialLearning = True
         """Switch for spatial learning"""
@@ -84,10 +78,6 @@ class Region(Node):
         self.spSeed = -1
         """Seed for generate random values"""
 
-        #endregion
-
-        #region Temporal Parameters
-
         self.enableTemporalLearning = True
         """Switch for temporal learning"""
 
@@ -118,25 +108,13 @@ class Region(Node):
         self.tpSeed = 42
         """Seed for generate random values"""
 
-        #endregion
-
         self.spatialPooler = None
         """Spatial Pooler instance"""
 
         self.temporalPooler = None
         """Temporal Pooler instance"""
 
-        #endregion
-
-        #region Statistics properties
-
         self.statsPrecisionRate = 0.
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def getColumn(self, x, y):
         """
@@ -485,5 +463,3 @@ class Region(Node):
                                 synapse.isRemoved.setForCurrStep(True)
                     else:
                         segment.isRemoved.setForCurrStep(True)
-
-    #endregion

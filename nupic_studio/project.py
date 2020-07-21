@@ -17,14 +17,10 @@ class Project:
     Provides loaded elements as a structure to return.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.fileName = ''
         """Project file"""
@@ -40,12 +36,6 @@ class Project:
 
         self.network = Network()
         """The network created for the project."""
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def new(self):
         """
@@ -347,5 +337,3 @@ class Project:
         xmlWriter.writeAttribute('outNode', link.outNode.name)
         xmlWriter.writeAttribute('inNode', link.inNode.name)
         xmlWriter.writeEndElement()
-
-    #endregion

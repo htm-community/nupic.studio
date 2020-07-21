@@ -5,14 +5,10 @@ class Column:
     A class only to group properties related to columns.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.x = -1
         """Position on X axis"""
@@ -26,17 +22,7 @@ class Column:
         self.cells = []
         """List of cells that compose this column."""
 
-        #region 3d-tree properties (simulation form)
-
         self.tree3d_pos = (0, 0, 0)
-
-        #endregion
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def getCell(self, z):
         """
@@ -64,5 +50,3 @@ class Column:
         self.segment.calculateStatistics()
         for cell in self.cells:
             cell.calculateStatistics()
-
-    #endregion

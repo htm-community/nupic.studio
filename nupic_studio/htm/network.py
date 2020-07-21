@@ -10,14 +10,10 @@ class Network:
     The mains class for represent a HTM network composed by nodes and the links among them.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.nodes = []
         """All regions/sensors in hierarchy which compose this network."""
@@ -31,17 +27,7 @@ class Network:
         In turn, in the phase #1 all regions that are fed by the processed nodes in the previous phase also are processed.
         The last phase is the phase where top nodes (that do not feed nothing but only receive inputs) are processed."""
 
-        #endregion
-
-        #region Statistics properties
-
         self.statsPrecisionRate = 0.
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def initialize(self):
         """
@@ -484,5 +470,3 @@ class Network:
         code = code.replace("[DOUBLE_QUOTE]", "'")
 
         return code
-
-    #endregion

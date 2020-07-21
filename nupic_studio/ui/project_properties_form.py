@@ -3,8 +3,6 @@ from nupic_studio.ui import Global
 
 class ProjectPropertiesForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -13,10 +11,6 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -84,10 +78,6 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
         self.textBoxAuthor.setText(Global.project.author)
         self.textBoxDescription.setText(Global.project.description)
 
-    #endregion
-
-    #region Events
-
     def __buttonOk_Click(self, event):
         name = self.textBoxName.text()
         author = self.textBoxAuthor.text()
@@ -106,5 +96,3 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
     def __buttonCancel_Click(self, event):
         self.reject()
         self.close()
-
-    #endregion

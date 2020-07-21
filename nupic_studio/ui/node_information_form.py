@@ -9,16 +9,12 @@ from nupic_studio.htm.encoding import FieldDataType
 
 class NodeInformationForm(QtWidgets.QWidget):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
 
         QtWidgets.QWidget.__init__(self)
-
-        #region Instance fields
 
         self.previousSelectedNode = None
         self.selectedSensor = None
@@ -34,13 +30,7 @@ class NodeInformationForm(QtWidgets.QWidget):
         self.currentValuesPlotItem = None
         self.predictedValuesPlotItem = None
 
-        #endregion
-
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -579,10 +569,6 @@ class NodeInformationForm(QtWidgets.QWidget):
         if not tabFound:
             self.tabControlMain.addTab(tab, title)
 
-    #endregion
-
-    #region Events
-
     def closeEvent(self, event):
         self.Hide()
         self.Parent = None
@@ -698,5 +684,3 @@ class NodeInformationForm(QtWidgets.QWidget):
             self.selectedDistalSynapse.tree3d_selected = True
 
         Global.simulationForm.refreshControls()
-
-    #endregion

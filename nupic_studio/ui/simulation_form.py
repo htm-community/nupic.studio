@@ -11,18 +11,12 @@ from nupic_studio.util import Texture3D
 
 class SimulationForm(QtWidgets.QWidget):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QWidget.__init__(self)
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -58,8 +52,6 @@ class SimulationForm(QtWidgets.QWidget):
         Refresh controls for each time step.
         """
         self.viewer_3d.update_3d_elements()
-
-    #endregion
 
 class Viewer3D(QtWidgets.QLabel):
 
@@ -1012,10 +1004,6 @@ class Viewer3D(QtWidgets.QLabel):
             defaultViewSelected = True
         self.menuViewsSave.setEnabled(not defaultViewSelected)
         self.menuViewsDelete.setEnabled(not defaultViewSelected)
-
-    #endregion
-
-    #region Events
 
     def menuLegend_Click(self, event):
         simulationLegendForm = SimulationLegendForm()

@@ -3,8 +3,6 @@ from nupic_studio.ui import Global
 
 class SimulationLegendForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -13,10 +11,6 @@ class SimulationLegendForm(QtWidgets.QDialog):
         QtWidgets.QWidget.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -96,5 +90,3 @@ class SimulationLegendForm(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
         self.setMinimumWidth(100)
         self.setMinimumHeight(150)
-
-    #endregion

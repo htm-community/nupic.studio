@@ -7,18 +7,12 @@ class Bit:
     A class only to group properties related to input bits of sensors.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
 
         self.initialize()
-
-    #endregion
-
-    #region Methods
 
     def initialize(self):
         """
@@ -36,23 +30,15 @@ class Bit:
         self.isPredicted = MachineState(False, maxPreviousSteps)
         self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
 
-        #region Statistics properties
-
         self.statsActivationCount = 0
         self.statsActivationRate = 0.
         self.statsPreditionCount = 0
         self.statsPrecisionRate = 0.
 
-        #endregion
-
-        #region 3d-tree properties (simulation form)
-
         self.tree3d_initialized = False
         self.tree3d_pos = (0, 0, 0)
         self.tree3d_item_np = None
         self.tree3d_selected = False
-
-        #endregion
 
     def nextStep(self):
         """
@@ -78,5 +64,3 @@ class Bit:
             self.statsActivationRate = self.statsActivationCount / float(Global.currStep)
         if self.statsActivationCount > 0:
             self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
-
-    #endregion

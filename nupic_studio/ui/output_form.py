@@ -3,8 +3,6 @@ from nupic_studio.ui import Global
 
 class OutputForm(QtWidgets.QWidget):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -13,10 +11,6 @@ class OutputForm(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -53,5 +47,3 @@ class OutputForm(QtWidgets.QWidget):
         cursor.movePosition(QtGui.QTextCursor.End)
         self.textBoxOutput.setTextCursor(cursor)
         self.textBoxOutput.ensureCursorVisible()
-
-    #endregion

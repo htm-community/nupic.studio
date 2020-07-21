@@ -35,16 +35,12 @@ class Sensor(Node):
     A super class only to group properties related to sensors.
     """
 
-    #region Constructor
-
     def __init__(self, name):
         """
         Initializes a new instance of this class.
         """
 
         Node.__init__(self, name, NodeType.sensor)
-
-        #region Instance fields
 
         self.bits = []
         """An array of the bit objects that compose the current output of this node."""
@@ -79,17 +75,7 @@ class Sensor(Node):
         self.enableClassificationInference = True
         """Switch for classification inference"""
 
-        #endregion
-
-        #region Statistics properties
-
         self.statsPrecisionRate = 0.
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def getBit(self, x, y):
         """
@@ -359,5 +345,3 @@ class Sensor(Node):
 
         for bit in self.bits:
             bit.calculateStatistics()
-
-    #endregion

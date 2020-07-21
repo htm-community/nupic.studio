@@ -8,8 +8,6 @@ from nupic_studio.ui.node_sensor_form import SensorForm
 
 class ArchitectureForm(QtWidgets.QWidget):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -18,10 +16,6 @@ class ArchitectureForm(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -75,11 +69,7 @@ class ArchitectureForm(QtWidgets.QWidget):
         code = Global.project.network.getSourceCode()
         self.textBoxCode.setText(code)
 
-    #endregion
-
 class DesignPanel(QtWidgets.QWidget):
-
-    #region Constructor
 
     def __init__(self):
         """
@@ -87,8 +77,6 @@ class DesignPanel(QtWidgets.QWidget):
         """
 
         QtWidgets.QWidget.__init__(self)
-
-        #region Instance fields
 
         self.topRegion = Region("TopRegion")
         """Node that is on top of the hierarchy."""
@@ -104,13 +92,7 @@ class DesignPanel(QtWidgets.QWidget):
         self._offsetHorizontal = 15
         self._offsetVertical = 30
 
-        #endregion
-
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -290,10 +272,6 @@ class DesignPanel(QtWidgets.QWidget):
 
         return None
 
-    #endregion
-
-    #region Events
-
     def paintEvent(self, event):
         """
         Draw and center the tree on the form.
@@ -432,5 +410,3 @@ class DesignPanel(QtWidgets.QWidget):
             # Redraw the tree to show the updates.
             self.repaint()
             Global.architectureForm.updateCode()
-
-    #endregion

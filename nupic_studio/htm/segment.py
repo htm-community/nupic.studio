@@ -11,14 +11,10 @@ class Segment:
     A class only to group properties related to segments.
     """
 
-    #region Constructor
-
     def __init__(self, type):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.type = type
         """Determine if this segment is proximal or distal."""
@@ -35,30 +31,16 @@ class Segment:
         self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
         self.isRemoved = MachineState(False, maxPreviousSteps)
 
-        #region Statistics properties
-
         self.statsActivationCount = 0
         self.statsActivationRate = 0.
         self.statsPreditionCount = 0
         self.statsPrecisionRate = 0.
-
-        #endregion
-
-        #region 3d-tree properties (simulation form)
 
         self.tree3d_initialized = False
         self.tree3d_start_pos = (0, 0, 0)
         self.tree3d_end_pos = (0, 0, 0)
         self.tree3d_item_np = None
         self.tree3d_selected = False
-
-        #endregion
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def getSynapse(self, indexSP):
         """
@@ -107,5 +89,3 @@ class Segment:
 
         for synapse in self.synapses:
             synapse.calculateStatistics()
-
-    #endregion

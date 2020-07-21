@@ -11,8 +11,6 @@ from nupic_studio.ui.project_properties_form import ProjectPropertiesForm
 
 class MainForm(QtWidgets.QMainWindow):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -20,21 +18,13 @@ class MainForm(QtWidgets.QMainWindow):
 
         QtWidgets.QMainWindow.__init__(self)
 
-        #region Instance fields
-
         self.state = State.No_Started
         self.paused = False
         self.simulation = None
         self._pendingProjectChanges = False
         self._numStepsPending = 0
 
-        #endregion
-
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -426,12 +416,6 @@ class MainForm(QtWidgets.QMainWindow):
         # Reset controls
         self.clearControls()
 
-    #endregion
-
-    #region Events
-
-    #region Form
-
     def is_running(self):
             return self.state == State.Simulating or self.state == State.Playbacking
 
@@ -442,10 +426,6 @@ class MainForm(QtWidgets.QMainWindow):
             if self.buttonStopHTM.isEnabled():
                 self.stopSimulation()
             sys.exit()
-
-    #endregion
-
-    #region Menus
 
     def __menuFileExit_Click(self, event):
         self.close()
@@ -481,10 +461,6 @@ class MainForm(QtWidgets.QMainWindow):
 
     def __menuAbout_Click(self, event):
         QtWidgets.QMessageBox.information(self, "Information", "v. " + Global.version + "\nGet more info at our home page.")
-
-    #endregion
-
-    #region Toolbar
 
     def __buttonInitHTM_Click(self, event):
         """
@@ -585,7 +561,3 @@ class MainForm(QtWidgets.QMainWindow):
     def __sliderStep_ValueChanged(self, value):
         Global.selStep = Global.selStep = self.sliderStep.maximum() - self.sliderStep.value()
         self.refreshControls()
-
-    #endregion
-
-    #endregion

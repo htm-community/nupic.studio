@@ -4,8 +4,6 @@ from nupic_studio.ui import Global
 
 class StartForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -14,10 +12,6 @@ class StartForm(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -48,10 +42,6 @@ class StartForm(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
         self.resize(350, 50)
 
-    #endregion
-
-    #region Events
-
     def __buttonNew_Click(self, event):
         if Global.mainForm.newProject():
             Global.mainForm.showMaximized()
@@ -65,5 +55,3 @@ class StartForm(QtWidgets.QDialog):
     def __buttonClose_Click(self, event):
         sys.exit()
 
-
-    #endregion

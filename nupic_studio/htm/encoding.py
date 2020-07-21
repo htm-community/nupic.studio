@@ -18,14 +18,10 @@ class Encoding:
     A class only to group properties related to encodings.
     """
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.dataSourceFieldName = ''
         """Target field of the database table or file."""
@@ -63,12 +59,6 @@ class Encoding:
         self.predictedValues = MachineState(None, maxPreviousSteps)
         """Values predicted by network."""
 
-        #endregion
-
-    #endregion
-
-    #region Methods
-
     def initialize(self):
         """
         Initialize this node.
@@ -88,5 +78,3 @@ class Encoding:
         else:
             maxLen = maxPreviousSteps
         self.currentValue = MachineState(0, maxLen)
-
-    #endregion

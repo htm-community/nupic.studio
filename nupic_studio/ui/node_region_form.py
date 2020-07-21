@@ -3,8 +3,6 @@ from nupic_studio.ui import Global
 
 class RegionForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -13,10 +11,6 @@ class RegionForm(QtWidgets.QDialog):
         QtWidgets.QDialog.__init__(self)
 
         self.initUI()
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -473,10 +467,6 @@ class RegionForm(QtWidgets.QDialog):
         self.spinnerMaxNumNewSynapses.setValue(node.maxNumNewSynapses)
         self.spinnerTpSeed.setValue(node.tpSeed)
 
-    #endregion
-
-    #region Events
-
     def __buttonOk_Click(self, event):
         """
         Check if values changed and save the,.
@@ -548,5 +538,3 @@ class RegionForm(QtWidgets.QDialog):
     def __buttonCancel_Click(self, event):
         self.reject()
         self.close()
-
-    #endregion

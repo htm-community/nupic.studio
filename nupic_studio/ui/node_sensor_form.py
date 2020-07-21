@@ -6,8 +6,6 @@ from nupic_studio.ui.node_sensor_encoding_form import EncodingForm
 
 class SensorForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -17,19 +15,11 @@ class SensorForm(QtWidgets.QDialog):
 
         self.initUI()
 
-        #region Instance fields
-
         self.encodings = []
         """Temporary list of encodings that is being edited"""
 
         self.encodingsChanged = False
         """Flag to indicate if encodings list was edited"""
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -237,10 +227,6 @@ class SensorForm(QtWidgets.QDialog):
             self.buttonEditEncoding.setEnabled(False)
             self.buttonDeleteEncoding.setEnabled(False)
 
-    #endregion
-
-    #region Events
-
     def __buttonOk_Click(self, event):
         """
         Check if values changed and save the,.
@@ -340,5 +326,3 @@ class SensorForm(QtWidgets.QDialog):
         self.encodings.remove(self.encodings[self.listBoxEncodings.currentRow()])
         self.encodingsChanged = True
         self.__updateEncodingsListBox()
-
-    #endregion

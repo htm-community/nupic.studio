@@ -7,8 +7,6 @@ from nupic_studio.htm.encoding import Encoding, FieldDataType
 
 class EncodingForm(QtWidgets.QDialog):
 
-    #region Constructor
-
     def __init__(self):
         """
         Initializes a new instance of this class.
@@ -18,19 +16,11 @@ class EncodingForm(QtWidgets.QDialog):
 
         self.initUI()
 
-        #region Instance fields
-
         self.encodingIdx = -1
         """Index of the encoding that is being edited. If index is -1 the user is creating a new encoding."""
 
         self.encodings = []
         """Temporary list of encodings that is being edited"""
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def initUI(self):
 
@@ -209,10 +199,6 @@ class EncodingForm(QtWidgets.QDialog):
 
         return duplicated
 
-    #endregion
-
-    #region Events
-
     def __buttonOk_Click(self, event):
         """
         Check if values changed and save the,.
@@ -302,5 +288,3 @@ class EncodingForm(QtWidgets.QDialog):
     def __buttonCancel_Click(self, event):
         self.reject()
         self.close()
-
-    #endregion

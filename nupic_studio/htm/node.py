@@ -13,14 +13,10 @@ class Node:
     Node that represents region/sensors and their params.
     """
 
-    #region Constructor
-
     def __init__(self, name, type):
         """
         Initializes a new instance of this class.
         """
-
-        #region Instance fields
 
         self.name = name
         """The name of the Node."""
@@ -37,25 +33,11 @@ class Node:
         self._output = []
         """An array representing the current output from this node."""
 
-        #region 2d-tree properties (node tree form)
-
         self.tree2d_x = 0.
         self.tree2d_y = 0.
         self.tree2d_polygon = QtGui.QPolygon()
 
-        #endregion
-
-        #region 3d-tree properties (simulation form)
-
         self.tree3d_pos = (0, 0, 0)
-
-        #endregion
-
-        #endregion
-
-    #endregion
-
-    #region Methods
 
     def initialize(self):
         """
@@ -77,5 +59,3 @@ class Node:
         """
 
         return self._output
-
-    #endregion

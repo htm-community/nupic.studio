@@ -47,13 +47,9 @@ class Segment:
     #region 3d-tree properties (simulation form)
 
     self.tree3d_initialized = False
-    self.tree3d_x1 = 0
-    self.tree3d_y1 = 0
-    self.tree3d_z1 = 0
-    self.tree3d_x2 = 0
-    self.tree3d_y2 = 0
-    self.tree3d_z2 = 0
-    self.tree3d_item = None
+    self.tree3d_start_pos = (0, 0, 0)
+    self.tree3d_end_pos = (0, 0, 0)
+    self.tree3d_item_np = None
     self.tree3d_selected = False
 
     #endregion

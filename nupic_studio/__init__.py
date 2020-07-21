@@ -1,8 +1,10 @@
 import collections
 import json
 import pkg_resources
+from pathlib import Path
 
 __version__ = "1.1.3"
+REPO_DIR = str(Path(__file__).parent)
 
 
 def versionList(versionString):
@@ -33,7 +35,7 @@ if not (versionList(versionRequiredMin) <= versionList(foundNupic.version) <= ve
   raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s in %s." % (versionRequiredMin, versionRequiredMax, foundNupic.version, foundNupic.location))
 
 try:
-  from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
+  from PyQt5 import QtGui, QtCore, QtWidgets, QtOpenGL
 except ImportError:
   msg = "PyQt4 library not found! Access http://pyqt.sourceforge.net/Docs/PyQt4/installation.html for get help on how install it" \
     "...or use a package manager like apt, yum, or brew:\n" \

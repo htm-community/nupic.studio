@@ -1,7 +1,7 @@
-﻿from PyQt4 import Qt, QtGui, QtCore
+﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
-class OutputForm(QtGui.QWidget):
+class OutputForm(QtWidgets.QWidget):
 
   #region Constructor
 
@@ -10,7 +10,7 @@ class OutputForm(QtGui.QWidget):
     Initializes a new instance of this class.
     """
 
-    QtGui.QWidget.__init__(self)
+    QtWidgets.QWidget.__init__(self)
 
     self.initUI()
 
@@ -21,12 +21,12 @@ class OutputForm(QtGui.QWidget):
   def initUI(self):
 
     # textBoxOutput
-    self.textBoxOutput = QtGui.QTextEdit()
+    self.textBoxOutput = QtWidgets.QTextEdit()
     self.textBoxOutput.setReadOnly(True)
     self.textBoxOutput.setAlignment(QtCore.Qt.AlignLeft)
 
     # layout
-    layout = QtGui.QHBoxLayout()
+    layout = QtWidgets.QHBoxLayout()
     layout.addWidget(self.textBoxOutput)
 
     # OutputForm

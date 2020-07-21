@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 class NodeType:
   """
@@ -47,9 +47,7 @@ class Node:
 
     #region 3d-tree properties (simulation form)
 
-    self.tree3d_x = 0
-    self.tree3d_y = 0
-    self.tree3d_z = 0
+    self.tree3d_pos = (0, 0, 0)
 
     #endregion
 

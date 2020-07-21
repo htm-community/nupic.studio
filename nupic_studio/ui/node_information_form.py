@@ -1,5 +1,5 @@
 ﻿import pyqtgraph as pg
-from PyQt4 import Qt, QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import ArrayTableModel
 from nupic_studio.ui import Global
 from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
@@ -7,7 +7,7 @@ from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_sensor import PredictionsMethod
 from nupic_studio.htm.encoding import FieldDataType
 
-class NodeInformationForm(QtGui.QWidget):
+class NodeInformationForm(QtWidgets.QWidget):
 
   #region Constructor
 
@@ -16,7 +16,7 @@ class NodeInformationForm(QtGui.QWidget):
     Initializes a new instance of this class.
     """
 
-    QtGui.QWidget.__init__(self)
+    QtWidgets.QWidget.__init__(self)
 
     #region Instance fields
 
@@ -45,37 +45,37 @@ class NodeInformationForm(QtGui.QWidget):
   def initUI(self):
 
     # labelSensorName
-    self.labelSensorName = QtGui.QLabel()
+    self.labelSensorName = QtWidgets.QLabel()
     self.labelSensorName.setText("Name")
     self.labelSensorName.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxSensorName
-    self.textBoxSensorName = QtGui.QLineEdit()
+    self.textBoxSensorName = QtWidgets.QLineEdit()
     self.textBoxSensorName.setEnabled(False)
     self.textBoxSensorName.setAlignment(QtCore.Qt.AlignLeft)
 
     # labelSensorPrecisionRate
-    self.labelSensorPrecisionRate = QtGui.QLabel()
+    self.labelSensorPrecisionRate = QtWidgets.QLabel()
     self.labelSensorPrecisionRate.setText("Precision Rate (%)")
     self.labelSensorPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxSensorPrecisionRate
-    self.textBoxSensorPrecisionRate = QtGui.QLineEdit()
+    self.textBoxSensorPrecisionRate = QtWidgets.QLineEdit()
     self.textBoxSensorPrecisionRate.setEnabled(False)
     self.textBoxSensorPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
     # checkBoxEnableClassificationLearning
-    self.checkBoxEnableClassificationLearning = QtGui.QCheckBox()
+    self.checkBoxEnableClassificationLearning = QtWidgets.QCheckBox()
     self.checkBoxEnableClassificationLearning.setText("Enable Classification Learning")
     self.checkBoxEnableClassificationLearning.toggled.connect(self.__checkBoxEnableClassificationLearning_Toggled)
 
     # checkBoxEnableClassificationInference
-    self.checkBoxEnableClassificationInference = QtGui.QCheckBox()
+    self.checkBoxEnableClassificationInference = QtWidgets.QCheckBox()
     self.checkBoxEnableClassificationInference.setText("Enable Classification Inference")
     self.checkBoxEnableClassificationInference.toggled.connect(self.__checkBoxEnableClassificationInference_Toggled)
 
     # tabPageSensor1Layout
-    tabPageSensor1Layout = QtGui.QGridLayout()
+    tabPageSensor1Layout = QtWidgets.QGridLayout()
     tabPageSensor1Layout.addWidget(self.labelSensorName, 0, 0)
     tabPageSensor1Layout.addWidget(self.textBoxSensorName, 0, 1)
     tabPageSensor1Layout.addWidget(self.labelSensorPrecisionRate, 1, 0)
@@ -85,63 +85,63 @@ class NodeInformationForm(QtGui.QWidget):
     tabPageSensor1Layout.setRowStretch(4, 100)
 
     # tabPageSensorLayout
-    tabPageSensorLayout = QtGui.QGridLayout()
+    tabPageSensorLayout = QtWidgets.QGridLayout()
     tabPageSensorLayout.addLayout(tabPageSensor1Layout, 0, 0)
     tabPageSensorLayout.setColumnStretch(1, 100)
 
     # tabPageSensor
-    self.tabPageSensor = QtGui.QWidget()
+    self.tabPageSensor = QtWidgets.QWidget()
     self.tabPageSensor.setLayout(tabPageSensorLayout)
 
     # dataGridBits
-    self.dataGridBits = QtGui.QTableView()
+    self.dataGridBits = QtWidgets.QTableView()
     self.dataGridBits.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridBits.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridBits.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridBits.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridBits.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridBits.setToolTip("Click on a row to see more details")
     self.dataGridBits.verticalHeader().setDefaultSectionSize(20)
 
     # tabPageBitsLayout
-    tabPageBitsLayout = QtGui.QHBoxLayout()
+    tabPageBitsLayout = QtWidgets.QHBoxLayout()
     tabPageBitsLayout.addWidget(self.dataGridBits)
 
     # tabPageBits
-    self.tabPageBits = QtGui.QWidget()
+    self.tabPageBits = QtWidgets.QWidget()
     self.tabPageBits.setLayout(tabPageBitsLayout)
 
     # labelEncoding
-    self.labelEncoding = QtGui.QLabel()
+    self.labelEncoding = QtWidgets.QLabel()
     self.labelEncoding.setText("Encoding:")
     self.labelEncoding.setAlignment(QtCore.Qt.AlignRight)
 
     # comboBoxEncoding
-    self.comboBoxEncoding = QtGui.QComboBox()
+    self.comboBoxEncoding = QtWidgets.QComboBox()
     self.comboBoxEncoding.currentIndexChanged.connect(self.__comboBoxEncoding_CurrentIndexChanged)
 
     # labelCurrentValue
-    self.labelCurrentValue = QtGui.QLabel()
+    self.labelCurrentValue = QtWidgets.QLabel()
     self.labelCurrentValue.setText("Current Value")
     self.labelCurrentValue.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxCurrentValue
-    self.textBoxCurrentValue = QtGui.QLineEdit()
+    self.textBoxCurrentValue = QtWidgets.QLineEdit()
     self.textBoxCurrentValue.setEnabled(False)
     self.textBoxCurrentValue.setAlignment(QtCore.Qt.AlignRight)
 
     # labelPredictedValues
-    self.labelPredictedValues = QtGui.QLabel()
+    self.labelPredictedValues = QtWidgets.QLabel()
     self.labelPredictedValues.setText("Predicted Values")
     self.labelPredictedValues.setAlignment(QtCore.Qt.AlignRight)
 
     # dataGridPredictedValues
-    self.dataGridPredictedValues = QtGui.QTableView()
+    self.dataGridPredictedValues = QtWidgets.QTableView()
     self.dataGridPredictedValues.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridPredictedValues.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridPredictedValues.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridPredictedValues.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridPredictedValues.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridPredictedValues.verticalHeader().setDefaultSectionSize(20)
 
     # encoding1Layout
-    encoding1Layout = QtGui.QGridLayout()
+    encoding1Layout = QtWidgets.QGridLayout()
     encoding1Layout.addWidget(self.labelEncoding, 0, 0)
     encoding1Layout.addWidget(self.comboBoxEncoding, 0, 1)
     encoding1Layout.addWidget(self.labelCurrentValue, 1, 0)
@@ -149,14 +149,14 @@ class NodeInformationForm(QtGui.QWidget):
     encoding1Layout.setRowStretch(2, 100)
 
     # sliderStep
-    self.sliderStep = QtGui.QSlider()
+    self.sliderStep = QtWidgets.QSlider()
     self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
     self.sliderStep.setSingleStep(1)
     self.sliderStep.setRange(1, maxFutureSteps)
     self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
 
     # encoding2Layout
-    encoding2Layout = QtGui.QGridLayout()
+    encoding2Layout = QtWidgets.QGridLayout()
     encoding2Layout.addWidget(self.sliderStep, 0, 1)
     encoding2Layout.addWidget(self.labelPredictedValues, 1, 0)
     encoding2Layout.addWidget(self.dataGridPredictedValues, 1, 1)
@@ -167,51 +167,51 @@ class NodeInformationForm(QtGui.QWidget):
     self.predictionsChart.getAxis('left').setGrid(1)
 
     # encoding3Layout
-    encoding3Layout = QtGui.QGridLayout()
+    encoding3Layout = QtWidgets.QGridLayout()
     encoding3Layout.addWidget(self.predictionsChart, 0, 1)
 
     # tabPageEncodingsLayout
-    tabPageEncodingsLayout = QtGui.QHBoxLayout()
+    tabPageEncodingsLayout = QtWidgets.QHBoxLayout()
     tabPageEncodingsLayout.addLayout(encoding1Layout)
     tabPageEncodingsLayout.addLayout(encoding2Layout)
     tabPageEncodingsLayout.addLayout(encoding3Layout)
 
     # tabPageEncodings
-    self.tabPageEncodings = QtGui.QWidget()
+    self.tabPageEncodings = QtWidgets.QWidget()
     self.tabPageEncodings.setLayout(tabPageEncodingsLayout)
 
     # labelRegionName
-    self.labelRegionName = QtGui.QLabel()
+    self.labelRegionName = QtWidgets.QLabel()
     self.labelRegionName.setText("Name")
     self.labelRegionName.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxRegionName
-    self.textBoxRegionName = QtGui.QLineEdit()
+    self.textBoxRegionName = QtWidgets.QLineEdit()
     self.textBoxRegionName.setEnabled(False)
     self.textBoxRegionName.setAlignment(QtCore.Qt.AlignLeft)
 
     # labelRegionPrecisionRate
-    self.labelRegionPrecisionRate = QtGui.QLabel()
+    self.labelRegionPrecisionRate = QtWidgets.QLabel()
     self.labelRegionPrecisionRate.setText("Precision Rate (%)")
     self.labelRegionPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxRegionPrecisionRate
-    self.textBoxRegionPrecisionRate = QtGui.QLineEdit()
+    self.textBoxRegionPrecisionRate = QtWidgets.QLineEdit()
     self.textBoxRegionPrecisionRate.setEnabled(False)
     self.textBoxRegionPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
 
     # checkBoxEnableSpatialLearning
-    self.checkBoxEnableSpatialLearning = QtGui.QCheckBox()
+    self.checkBoxEnableSpatialLearning = QtWidgets.QCheckBox()
     self.checkBoxEnableSpatialLearning.setText("Enable Spatial Learning")
     self.checkBoxEnableSpatialLearning.toggled.connect(self.__checkBoxEnableSpatialLearning_Toggled)
 
     # checkBoxEnableTemporalLearning
-    self.checkBoxEnableTemporalLearning = QtGui.QCheckBox()
+    self.checkBoxEnableTemporalLearning = QtWidgets.QCheckBox()
     self.checkBoxEnableTemporalLearning.setText("Enable Temporal Learning")
     self.checkBoxEnableTemporalLearning.toggled.connect(self.__checkBoxEnableTemporalLearning_Toggled)
 
     # tabPageRegionsLayout
-    tabPageRegionsLayout = QtGui.QGridLayout()
+    tabPageRegionsLayout = QtWidgets.QGridLayout()
     tabPageRegionsLayout.addWidget(self.labelRegionName, 0, 0)
     tabPageRegionsLayout.addWidget(self.textBoxRegionName, 0, 1)
     tabPageRegionsLayout.addWidget(self.labelRegionPrecisionRate, 1, 0)
@@ -222,99 +222,99 @@ class NodeInformationForm(QtGui.QWidget):
     tabPageRegionsLayout.setColumnStretch(2, 100)
 
     # tabPageRegions
-    self.tabPageRegions = QtGui.QWidget()
+    self.tabPageRegions = QtWidgets.QWidget()
     self.tabPageRegions.setLayout(tabPageRegionsLayout)
 
     # dataGridColumns
-    self.dataGridColumns = QtGui.QTableView()
+    self.dataGridColumns = QtWidgets.QTableView()
     self.dataGridColumns.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridColumns.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridColumns.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridColumns.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridColumns.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridColumns.setToolTip("Click on a row to see more details")
     self.dataGridColumns.verticalHeader().setDefaultSectionSize(20)
     self.dataGridColumns.selectionModel().selectionChanged.connect(self.__dataGridColumns_SelectionChanged)
 
     # tabPageColumnsLayout
-    tabPageColumnsLayout = QtGui.QHBoxLayout()
+    tabPageColumnsLayout = QtWidgets.QHBoxLayout()
     tabPageColumnsLayout.addWidget(self.dataGridColumns)
 
     # tabPageColumns
-    self.tabPageColumns = QtGui.QWidget()
+    self.tabPageColumns = QtWidgets.QWidget()
     self.tabPageColumns.setLayout(tabPageColumnsLayout)
 
     # dataGridProximalSynapses
-    self.dataGridProximalSynapses = QtGui.QTableView()
+    self.dataGridProximalSynapses = QtWidgets.QTableView()
     self.dataGridProximalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridProximalSynapses.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridProximalSynapses.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridProximalSynapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridProximalSynapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridProximalSynapses.setToolTip("Click on a row to see more details")
     self.dataGridProximalSynapses.verticalHeader().setDefaultSectionSize(20)
     self.dataGridProximalSynapses.selectionModel().selectionChanged.connect(self.__dataGridProximalSynapses_SelectionChanged)
 
     # tabPageProximalSynapsesLayout
-    tabPageProximalSynapsesLayout = QtGui.QHBoxLayout()
+    tabPageProximalSynapsesLayout = QtWidgets.QHBoxLayout()
     tabPageProximalSynapsesLayout.addWidget(self.dataGridProximalSynapses)
 
     # tabPageProximalSynapses
-    self.tabPageProximalSynapses = QtGui.QWidget()
+    self.tabPageProximalSynapses = QtWidgets.QWidget()
     self.tabPageProximalSynapses.setLayout(tabPageProximalSynapsesLayout)
 
     # dataGridCells
-    self.dataGridCells = QtGui.QTableView()
+    self.dataGridCells = QtWidgets.QTableView()
     self.dataGridCells.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridCells.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridCells.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridCells.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridCells.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridCells.setToolTip("Click on a row to see more details")
     self.dataGridCells.verticalHeader().setDefaultSectionSize(20)
     self.dataGridCells.selectionModel().selectionChanged.connect(self.__dataGridCells_SelectionChanged)
 
     # tabPageCellsLayout
-    tabPageCellsLayout = QtGui.QHBoxLayout()
+    tabPageCellsLayout = QtWidgets.QHBoxLayout()
     tabPageCellsLayout.addWidget(self.dataGridCells)
 
     # tabPageCells
-    self.tabPageCells = QtGui.QWidget()
+    self.tabPageCells = QtWidgets.QWidget()
     self.tabPageCells.setLayout(tabPageCellsLayout)
 
     # dataGridDistalSegments
-    self.dataGridDistalSegments = QtGui.QTableView()
+    self.dataGridDistalSegments = QtWidgets.QTableView()
     self.dataGridDistalSegments.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridDistalSegments.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridDistalSegments.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridDistalSegments.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridDistalSegments.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridDistalSegments.setToolTip("Click on a row to see more details")
     self.dataGridDistalSegments.verticalHeader().setDefaultSectionSize(20)
     self.dataGridDistalSegments.selectionModel().selectionChanged.connect(self.__dataGridDistalSegments_SelectionChanged)
 
     # tabPageDistalSegmentsLayout
-    tabPageDistalSegmentsLayout = QtGui.QHBoxLayout()
+    tabPageDistalSegmentsLayout = QtWidgets.QHBoxLayout()
     tabPageDistalSegmentsLayout.addWidget(self.dataGridDistalSegments)
 
     # tabPageDistalSegments
-    self.tabPageDistalSegments = QtGui.QWidget()
+    self.tabPageDistalSegments = QtWidgets.QWidget()
     self.tabPageDistalSegments.setLayout(tabPageDistalSegmentsLayout)
 
     # dataGridDistalSynapses
-    self.dataGridDistalSynapses = QtGui.QTableView()
+    self.dataGridDistalSynapses = QtWidgets.QTableView()
     self.dataGridDistalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridDistalSynapses.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-    self.dataGridDistalSynapses.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+    self.dataGridDistalSynapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+    self.dataGridDistalSynapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
     self.dataGridDistalSynapses.setToolTip("Click on a row to see more details")
     self.dataGridDistalSynapses.verticalHeader().setDefaultSectionSize(20)
     self.dataGridDistalSynapses.selectionModel().selectionChanged.connect(self.__dataGridDistalSynapses_SelectionChanged)
 
     # tabPageDistalSynapsesLayout
-    tabPageDistalSynapsesLayout = QtGui.QHBoxLayout()
+    tabPageDistalSynapsesLayout = QtWidgets.QHBoxLayout()
     tabPageDistalSynapsesLayout.addWidget(self.dataGridDistalSynapses)
 
     # tabPageDistalSynapses
-    self.tabPageDistalSynapses = QtGui.QWidget()
+    self.tabPageDistalSynapses = QtWidgets.QWidget()
     self.tabPageDistalSynapses.setLayout(tabPageDistalSynapsesLayout)
 
     # tabControlMain
-    self.tabControlMain = QtGui.QTabWidget()
+    self.tabControlMain = QtWidgets.QTabWidget()
 
     # layout
-    layout = QtGui.QHBoxLayout()
+    layout = QtWidgets.QHBoxLayout()
     layout.addWidget(self.tabControlMain)
 
     # NodeInformationForm

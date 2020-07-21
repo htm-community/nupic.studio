@@ -1,6 +1,6 @@
 import numpy
 import time
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.htm import maxPreviousSteps
 from nupic_studio.htm.node import Node, NodeType
 from nupic_studio.htm.column import Column
@@ -166,7 +166,7 @@ class Region(Node):
     # Check if this region has nodes that feed it
     numFeeders = len(Global.project.network.getFeederNodes(self))
     if numFeeders == 0:
-      QtGui.QMessageBox.warning(None, "Warning", "Region '" + self.name + "' does not have any child!")
+      QtWidgets.QMessageBox.warning(None, "Warning", "Region '" + self.name + "' does not have any child!")
       return
 
     # Initialize this node and the nodes that feed it

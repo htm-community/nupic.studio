@@ -1,4 +1,4 @@
-﻿from PyQt4 import QtGui, QtCore
+﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_region import Region
@@ -6,7 +6,7 @@ from nupic_studio.htm.node_sensor import Sensor
 from nupic_studio.ui.node_region_form import RegionForm
 from nupic_studio.ui.node_sensor_form import SensorForm
 
-class ArchitectureForm(QtGui.QWidget):
+class ArchitectureForm(QtWidgets.QWidget):
 
   #region Constructor
 
@@ -15,7 +15,7 @@ class ArchitectureForm(QtGui.QWidget):
     Initializes a new instance of this class.
     """
 
-    QtGui.QWidget.__init__(self)
+    QtWidgets.QWidget.__init__(self)
 
     self.initUI()
 
@@ -29,35 +29,35 @@ class ArchitectureForm(QtGui.QWidget):
     self.designPanel = DesignPanel()
 
     # tabPageDesignLayout
-    tabPageDesignLayout = QtGui.QHBoxLayout()
+    tabPageDesignLayout = QtWidgets.QHBoxLayout()
     tabPageDesignLayout.addWidget(self.designPanel)
 
     # tabPageDesign
-    self.tabPageDesign = QtGui.QWidget()
+    self.tabPageDesign = QtWidgets.QWidget()
     self.tabPageDesign.setLayout(tabPageDesignLayout)
 
     # textBoxCode
-    self.textBoxCode = QtGui.QTextEdit()
+    self.textBoxCode = QtWidgets.QTextEdit()
     self.textBoxCode.setReadOnly(True)
     self.textBoxCode.setAlignment(QtCore.Qt.AlignLeft)
     self.textBoxCode.setWordWrapMode(QtGui.QTextOption.NoWrap)
     self.textBoxCode.setFont(QtGui.QFont("Courier New", 9))
 
     # tabPageCodeLayout
-    tabPageCodeLayout = QtGui.QHBoxLayout()
+    tabPageCodeLayout = QtWidgets.QHBoxLayout()
     tabPageCodeLayout.addWidget(self.textBoxCode)
 
     # tabPageCode
-    self.tabPageCode = QtGui.QWidget()
+    self.tabPageCode = QtWidgets.QWidget()
     self.tabPageCode.setLayout(tabPageCodeLayout)
 
     # tabControlMain
-    self.tabControlMain = QtGui.QTabWidget()
+    self.tabControlMain = QtWidgets.QTabWidget()
     self.tabControlMain.addTab(self.tabPageDesign, "Design")
     self.tabControlMain.addTab(self.tabPageCode, "Code")
 
     # layout
-    layout = QtGui.QHBoxLayout()
+    layout = QtWidgets.QHBoxLayout()
     layout.addWidget(self.tabControlMain)
 
     # ArchitectureForm
@@ -77,7 +77,7 @@ class ArchitectureForm(QtGui.QWidget):
 
   #endregion
 
-class DesignPanel(QtGui.QWidget):
+class DesignPanel(QtWidgets.QWidget):
 
   #region Constructor
 
@@ -86,7 +86,7 @@ class DesignPanel(QtGui.QWidget):
     Initializes a new instance of this class.
     """
 
-    QtGui.QWidget.__init__(self)
+    QtWidgets.QWidget.__init__(self)
 
     #region Instance fields
 
@@ -115,34 +115,34 @@ class DesignPanel(QtGui.QWidget):
   def initUI(self):
 
     # menuNodeProperties
-    self.menuNodeProperties = QtGui.QAction(self)
+    self.menuNodeProperties = QtWidgets.QAction(self)
     self.menuNodeProperties.setText("&Properties")
     self.menuNodeProperties.triggered.connect(self.__menuNodeProperties_Click)
 
     # menuNodeAddRegion
-    self.menuNodeAddRegion = QtGui.QAction(self)
+    self.menuNodeAddRegion = QtWidgets.QAction(self)
     self.menuNodeAddRegion.setText("&Add region under this node...")
     self.menuNodeAddRegion.triggered.connect(self.__menuNodeAddRegion_Click)
 
     # menuNodeAddSensor
-    self.menuNodeAddSensor = QtGui.QAction(self)
+    self.menuNodeAddSensor = QtWidgets.QAction(self)
     self.menuNodeAddSensor.setText("&Add sensor under this node...")
     self.menuNodeAddSensor.triggered.connect(self.__menuNodeAddSensor_Click)
 
     # menuNodeDelete
-    self.menuNodeDelete = QtGui.QAction(self)
+    self.menuNodeDelete = QtWidgets.QAction(self)
     self.menuNodeDelete.setText("&Delete this node...")
     self.menuNodeDelete.triggered.connect(self.__menuNodeDelete_Click)
 
     # menuNode
-    self.menuNode = QtGui.QMenu()
+    self.menuNode = QtWidgets.QMenu()
     self.menuNode.addAction(self.menuNodeProperties)
     self.menuNode.addAction(self.menuNodeAddRegion)
     self.menuNode.addAction(self.menuNodeAddSensor)
     self.menuNode.addAction(self.menuNodeDelete)
 
     # layout
-    layout = QtGui.QHBoxLayout()
+    layout = QtWidgets.QHBoxLayout()
 
     # DesignPanel
     self.setLayout(layout)
@@ -227,7 +227,7 @@ class DesignPanel(QtGui.QWidget):
     """
 
     fontMetrics = self.painter.fontMetrics()
-    width = fontMetrics.width(QtCore.QString(node.name))
+    width = fontMetrics.width(node.name)
 
     return QtCore.QSizeF(30 + width, 30)
 
@@ -359,7 +359,7 @@ class DesignPanel(QtGui.QWidget):
       dialogResult = regionForm.exec_()
 
       # Update controls with the new changes
-      if dialogResult == QtGui.QDialog.Accepted:
+      if dialogResult == QtWidgets.QDialog.Accepted:
         Global.mainForm.markProjectChanges(True)
         Global.architectureForm.updateCode()
     elif self.underMouseNode.type == NodeType.sensor:
@@ -368,7 +368,7 @@ class DesignPanel(QtGui.QWidget):
       dialogResult = sensorForm.exec_()
 
       # Update controls with the new changes
-      if dialogResult == QtGui.QDialog.Accepted:
+      if dialogResult == QtWidgets.QDialog.Accepted:
         Global.mainForm.markProjectChanges(True)
         Global.architectureForm.updateCode()
 
@@ -378,11 +378,11 @@ class DesignPanel(QtGui.QWidget):
     """
 
     # Ask for region's name
-    enteredText, ok = QtGui.QInputDialog.getText(self, "Input Dialog", "Enter region's name:")
+    enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter region's name:")
     if ok:
       validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
       if not validExpr.exactMatch(enteredText):
-        QtGui.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+        QtWidgets.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
         return
 
       Global.mainForm.markProjectChanges(True)
@@ -401,11 +401,11 @@ class DesignPanel(QtGui.QWidget):
     """
 
     # Ask for sensor's name
-    enteredText, ok = QtGui.QInputDialog.getText(self, "Input Dialog", "Enter sensor's name:")
+    enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter sensor's name:")
     if ok:
       validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
       if not validExpr.exactMatch(enteredText):
-        QtGui.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+        QtWidgets.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
         return
 
       Global.mainForm.markProjectChanges(True)
@@ -423,7 +423,7 @@ class DesignPanel(QtGui.QWidget):
     Delete this node from the tree.
     """
 
-    if QtGui.QMessageBox.question(self, "Question", "Are you sure you want to delete this node?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+    if QtWidgets.QMessageBox.question(self, "Question", "Are you sure you want to delete this node?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No) == QtWidgets.QMessageBox.Yes:
       Global.mainForm.markProjectChanges(True)
 
       # Delete the node and its subtree.

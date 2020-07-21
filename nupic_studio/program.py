@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from PyQt4 import Qt, QtCore, QtGui, QtOpenGL
+from PyQt5 import QtGui, QtCore, QtWidgets, QtOpenGL
 from nupic_studio.project import Project
 from nupic_studio.ui import Global
 from nupic_studio.ui.start_form import StartForm
@@ -12,7 +12,7 @@ from nupic_studio.ui.simulation_form import SimulationForm
 from nupic_studio.ui.output_form import OutputForm
 
 def main():
-  Global.app = QtGui.QApplication(sys.argv)
+  Global.app = QtWidgets.QApplication(sys.argv)
   Global.app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 
   Global.appPath = os.path.abspath(os.path.join(__file__, '..'))
@@ -28,7 +28,7 @@ def main():
   # Create and display the splash screen
   start = time.time()
   splash_pix = QtGui.QPixmap(Global.appPath + '/images/splash.png')
-  splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+  splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
   splash.setMask(splash_pix.mask())
   splash.show()
   while time.time() - start < 3:

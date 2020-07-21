@@ -13,24 +13,17 @@ For more information, see [numenta.org](http://numenta.org) or the [NuPIC Studio
 
 Currently supported platforms:
 
+ * Windows
  * Linux (32/64bit)
  * Mac OSX
 
 Dependencies:
 
- * Python (2.7 or later) (with development headers)
+ * Python (2.7 or later)
  * PIP
  * NuPIC
  * NumPy
- * PyOpenGL
- * PyQt4
- * PyQtGraph
-
-_Note_: Except Python, PIP and NuPIC, all dependencies above are already automatically installed by PIP package. However some packages like PyQt4 might present errors due to conflicts specific to each system environment. In this case, you will have to install this package manually using a package manager like apt, yum, or brew:
-
-    apt-get install python-qt4 python-qt4-gl
-    yum install PyQt4
-    brew install pyqt
+ * PyQt5
 
 ## User instructions
 
@@ -38,7 +31,7 @@ If you want only use it, simply do this:
 
     pip install nupic_studio
 
-_Note_: If you get a "permission denied" error when using pip, you may add the --user flag to install to a location in your home directory, which should resolve any permissions issues. Doing this, you may need to add this location to your PATH and PYTHONPATH. Alternatively, you can run pip with 'sudo'.
+_Note_: Dear *nix users, if you get a "permission denied" error when using pip, you may add the --user flag to install to a location in your home directory, which should resolve any permissions issues. Doing this, you may need to add this location to your PATH and PYTHONPATH. Alternatively, you can run pip with 'sudo'.
 
 Once it is installed, you can execute the app using:
 

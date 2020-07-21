@@ -1,7 +1,15 @@
 import os
 import collections
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.htm import maxPreviousStepsWithInference
+
+
+class State:
+    No_Started = 0
+    Simulating = 1
+    Playbacking = 2
+    Stopped = 3
+
 
 class View:
   """
@@ -80,7 +88,7 @@ class Global:
       xmlReader.setDevice(file)
       while (not xmlReader.isEndDocument()):
         if xmlReader.isStartElement():
-          if xmlReader.name().toString() == 'View':
+          if xmlReader.name() == 'View':
             view = View()
             view.name = Global.__getStringAttribute(xmlReader.attributes(), 'name')
             view.showBitsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsNone')
@@ -110,14 +118,14 @@ class Global:
             Global.views.append(view)
         xmlReader.readNext()
       if (xmlReader.hasError()):
-        QtGui.QMessageBox.critical(None, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
+        QtWidgets.QMessageBox.critical(None, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
     else:
-      QtGui.QMessageBox.critical(None, "Critical", "Cannot read the config file!", QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
+      QtWidgets.QMessageBox.critical(None, "Critical", "Cannot read the config file!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
 
   @staticmethod
   def __getStringAttribute(attributes, attributeName):
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = str(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = str(attributes.value(attributeName))
     else:
       attributeValue = ""
     return attributeValue
@@ -125,21 +133,21 @@ class Global:
   @staticmethod
   def __getIntegerAttribute(attributes, attributeName):
     attributeValue = 0
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = int(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = int(attributes.value(attributeName))
     return attributeValue
 
   @staticmethod
   def __getFloatAttribute(attributes, attributeName):
     attributeValue = 0.0
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = float(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = float(attributes.value(attributeName))
     return attributeValue
 
   @staticmethod
   def __getBooleanAttribute(attributes, attributeName):
     attributeValue = False
-    if attributes.value(attributeName).toString() == "True":
+    if attributes.value(attributeName) == "True":
       attributeValue = True
     return attributeValue
 

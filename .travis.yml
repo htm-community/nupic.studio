@@ -30,7 +30,7 @@ install:
 
 script:
   # Check whether all dependencies were installed
-  - "python -c 'import nupic;import numpy;from PyQt4 import Qt, QtGui, QtCore;import pyqtgraph;import pyqtgraph.opengl'"
+  - "python -c 'import nupic;import numpy;from PyQt5 import QtGui, QtCore, QtWidgets'"
 
   - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . ./ci/travis/script-linux.sh; fi"
   - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'osx' ]; then . ./ci/travis/script-osx.sh; fi"

@@ -1,4 +1,4 @@
-﻿from PyQt4 import QtGui, QtCore
+﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.htm.network import Network
 from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_region import Region
@@ -81,49 +81,49 @@ class Project:
       xmlReader.setDevice(file)
       while (not xmlReader.isEndDocument()):
         if xmlReader.isStartElement():
-          if xmlReader.name().toString() == 'MetaData':
+          if xmlReader.name() == 'MetaData':
             self.name = self.__getStringAttribute(xmlReader.attributes(), 'name')
             self.author = self.__getStringAttribute(xmlReader.attributes(), 'author')
             self.description = self.__getStringAttribute(xmlReader.attributes(), 'description')
-          elif xmlReader.name().toString() == 'Net':
+          elif xmlReader.name() == 'Net':
             while xmlReader.readNextStartElement():
-              if xmlReader.name().toString() == 'Node':
+              if xmlReader.name() == 'Node':
                 node = self.__readNode(xmlReader)
                 self.network.nodes.append(node)
-              elif xmlReader.name().toString() == 'Link':
+              elif xmlReader.name() == 'Link':
                 link = self.__readLink(xmlReader)
                 self.network.links.append(link)
 
         xmlReader.readNext()
       if (xmlReader.hasError()):
-        QtGui.QMessageBox.critical(self, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
+        QtWidgets.QMessageBox.critical(None, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
     else:
-      QtGui.QMessageBox.critical(self, "Critical", "Cannot read the project file!", QtGui.QMessageBox.Ok | QtGui.QMessageBox.Default, QtGui.QMessageBox.NoButton)
+      QtWidgets.QMessageBox.critical(None, "Critical", "Cannot read the project file!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
 
     self.network.preparePhases()
 
   def __getStringAttribute(self, attributes, attributeName):
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = str(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = str(attributes.value(attributeName))
     else:
       attributeValue = ""
     return attributeValue
 
   def __getIntegerAttribute(self, attributes, attributeName):
     attributeValue = 0
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = int(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = int(attributes.value(attributeName))
     return attributeValue
 
   def __getFloatAttribute(self, attributes, attributeName):
     attributeValue = 0.0
-    if attributes.value(attributeName).toString() != "":
-      attributeValue = float(attributes.value(attributeName).toString())
+    if attributes.value(attributeName) != "":
+      attributeValue = float(attributes.value(attributeName))
     return attributeValue
 
   def __getBooleanAttribute(self, attributes, attributeName):
     attributeValue = False
-    if attributes.value(attributeName).toString() == "True":
+    if attributes.value(attributeName) == "True":
       attributeValue = True
     return attributeValue
 

@@ -4,7 +4,7 @@ import numpy
 import operator
 import math
 import dateutil.parser
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import getInstantiatedClass
 from nupic_studio.ui import Global
 from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
@@ -129,7 +129,7 @@ class Sensor(Node):
 
       # Check if file really exists
       if not os.path.isfile(fullFileName):
-        QtGui.QMessageBox.warning(None, "Warning", "Input stream file '" + fullFileName + "' was not found or specified.", QtGui.QMessageBox.Ok)
+        QtWidgets.QMessageBox.warning(None, "Warning", "Input stream file '" + fullFileName + "' was not found or specified.", QtWidgets.QMessageBox.Ok)
         return
 
       # Create a data source for read the file
@@ -156,7 +156,7 @@ class Sensor(Node):
     encoderSize = self.encoder.getWidth()
     sensorSize = self.width * self.height
     if encoderSize > sensorSize:
-      QtGui.QMessageBox.warning(None, "Warning", "'" + self.name + "': Encoder size (" + str(encoderSize) + ") is different from sensor size (" + str(self.width) + " x " + str(self.height) + " = " + str(sensorSize) + ").", QtGui.QMessageBox.Ok)
+      QtWidgets.QMessageBox.warning(None, "Warning", "'" + self.name + "': Encoder size (" + str(encoderSize) + ") is different from sensor size (" + str(self.width) + " x " + str(self.height) + " = " + str(sensorSize) + ").", QtWidgets.QMessageBox.Ok)
       return
 
     return True

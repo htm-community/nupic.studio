@@ -1,11 +1,11 @@
 ﻿import collections
 import json
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import ArrayTableModel
 from nupic_studio.ui import Global
 from nupic_studio.htm.encoding import Encoding, FieldDataType
 
-class EncodingForm(QtGui.QDialog):
+class EncodingForm(QtWidgets.QDialog):
 
   #region Constructor
 
@@ -14,7 +14,7 @@ class EncodingForm(QtGui.QDialog):
     Initializes a new instance of this class.
     """
 
-    QtGui.QDialog.__init__(self)
+    QtWidgets.QDialog.__init__(self)
 
     self.initUI()
 
@@ -35,21 +35,21 @@ class EncodingForm(QtGui.QDialog):
   def initUI(self):
 
     # labelDataSourceFieldName
-    self.labelDataSourceFieldName = QtGui.QLabel()
+    self.labelDataSourceFieldName = QtWidgets.QLabel()
     self.labelDataSourceFieldName.setText("Datasource Field Name:")
     self.labelDataSourceFieldName.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxDataSourceFieldName
-    self.textBoxDataSourceFieldName = QtGui.QLineEdit()
+    self.textBoxDataSourceFieldName = QtWidgets.QLineEdit()
     self.textBoxDataSourceFieldName.setAlignment(QtCore.Qt.AlignLeft)
 
     # labelDataSourceFieldDataType
-    self.labelDataSourceFieldDataType = QtGui.QLabel()
+    self.labelDataSourceFieldDataType = QtWidgets.QLabel()
     self.labelDataSourceFieldDataType.setText("Field Data Type:")
     self.labelDataSourceFieldDataType.setAlignment(QtCore.Qt.AlignRight)
 
     # comboBoxDataSourceFieldDataType
-    self.comboBoxDataSourceFieldDataType = QtGui.QComboBox()
+    self.comboBoxDataSourceFieldDataType = QtWidgets.QComboBox()
     self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.boolean)
     self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.integer)
     self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.decimal)
@@ -57,29 +57,29 @@ class EncodingForm(QtGui.QDialog):
     self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.string)
 
     # checkBoxEnableInference
-    self.checkBoxEnableInference = QtGui.QCheckBox()
+    self.checkBoxEnableInference = QtWidgets.QCheckBox()
     self.checkBoxEnableInference.setText("Enable Inference")
 
     # labelEncoderModule
-    self.labelEncoderModule = QtGui.QLabel()
+    self.labelEncoderModule = QtWidgets.QLabel()
     self.labelEncoderModule.setText("Module:")
     self.labelEncoderModule.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxEncoderModule
-    self.textBoxEncoderModule = QtGui.QLineEdit()
+    self.textBoxEncoderModule = QtWidgets.QLineEdit()
     self.textBoxEncoderModule.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9._]+')))
 
     # labelEncoderClass
-    self.labelEncoderClass = QtGui.QLabel()
+    self.labelEncoderClass = QtWidgets.QLabel()
     self.labelEncoderClass.setText("Class:")
     self.labelEncoderClass.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxEncoderClass
-    self.textBoxEncoderClass = QtGui.QLineEdit()
+    self.textBoxEncoderClass = QtWidgets.QLineEdit()
     self.textBoxEncoderClass.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9_]+')))
 
     # labelEncoderParams
-    self.labelEncoderParams = QtGui.QLabel()
+    self.labelEncoderParams = QtWidgets.QLabel()
     self.labelEncoderParams.setText("Params:")
     self.labelEncoderParams.setAlignment(QtCore.Qt.AlignRight)
 
@@ -91,30 +91,30 @@ class EncodingForm(QtGui.QDialog):
     data.append(['', ''])
     data.append(['', ''])
     data.append(['', ''])
-    self.dataGridEncoderParams = QtGui.QTableView()
+    self.dataGridEncoderParams = QtWidgets.QTableView()
     self.dataGridEncoderParams.setModel(ArrayTableModel(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-    self.dataGridEncoderParams.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
+    self.dataGridEncoderParams.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
     self.dataGridEncoderParams.verticalHeader().setDefaultSectionSize(18)
     self.dataGridEncoderParams.model().update(['Parameter', 'Value'], data)
     self.dataGridEncoderParams.resizeColumnsToContents()
     self.dataGridEncoderParams.setMinimumHeight(140)
 
     # labelEncoderFieldName
-    self.labelEncoderFieldName = QtGui.QLabel()
+    self.labelEncoderFieldName = QtWidgets.QLabel()
     self.labelEncoderFieldName.setText("Field Name:")
     self.labelEncoderFieldName.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxEncoderFieldName
-    self.textBoxEncoderFieldName = QtGui.QLineEdit()
+    self.textBoxEncoderFieldName = QtWidgets.QLineEdit()
     self.textBoxEncoderFieldName.setAlignment(QtCore.Qt.AlignLeft)
 
     # labelEncoderFieldDataType
-    self.labelEncoderFieldDataType = QtGui.QLabel()
+    self.labelEncoderFieldDataType = QtWidgets.QLabel()
     self.labelEncoderFieldDataType.setText("Field Data Type:")
     self.labelEncoderFieldDataType.setAlignment(QtCore.Qt.AlignRight)
 
     # comboBoxEncoderFieldDataType
-    self.comboBoxEncoderFieldDataType = QtGui.QComboBox()
+    self.comboBoxEncoderFieldDataType = QtWidgets.QComboBox()
     self.comboBoxEncoderFieldDataType.addItem(FieldDataType.boolean)
     self.comboBoxEncoderFieldDataType.addItem(FieldDataType.integer)
     self.comboBoxEncoderFieldDataType.addItem(FieldDataType.decimal)
@@ -122,7 +122,7 @@ class EncodingForm(QtGui.QDialog):
     self.comboBoxEncoderFieldDataType.addItem(FieldDataType.string)
 
     # groupBoxEncoderLayout
-    groupBoxEncoderLayout = QtGui.QGridLayout()
+    groupBoxEncoderLayout = QtWidgets.QGridLayout()
     groupBoxEncoderLayout.addWidget(self.labelEncoderModule, 0, 0)
     groupBoxEncoderLayout.addWidget(self.textBoxEncoderModule, 0, 1)
     groupBoxEncoderLayout.addWidget(self.labelEncoderClass, 1, 0)
@@ -135,12 +135,12 @@ class EncodingForm(QtGui.QDialog):
     groupBoxEncoderLayout.addWidget(self.comboBoxEncoderFieldDataType, 4, 1)
 
     # groupBoxEncoder
-    self.groupBoxEncoder = QtGui.QGroupBox()
+    self.groupBoxEncoder = QtWidgets.QGroupBox()
     self.groupBoxEncoder.setLayout(groupBoxEncoderLayout)
     self.groupBoxEncoder.setTitle("Encoder")
 
     # groupBoxMainLayout
-    groupBoxMainLayout = QtGui.QGridLayout()
+    groupBoxMainLayout = QtWidgets.QGridLayout()
     groupBoxMainLayout.addWidget(self.labelDataSourceFieldName, 0, 0)
     groupBoxMainLayout.addWidget(self.textBoxDataSourceFieldName, 0, 1)
     groupBoxMainLayout.addWidget(self.labelDataSourceFieldDataType, 1, 0)
@@ -149,17 +149,17 @@ class EncodingForm(QtGui.QDialog):
     groupBoxMainLayout.addWidget(self.groupBoxEncoder, 3, 1)
 
     # groupBoxMain
-    self.groupBoxMain = QtGui.QGroupBox()
+    self.groupBoxMain = QtWidgets.QGroupBox()
     self.groupBoxMain.setLayout(groupBoxMainLayout)
 
     # buttonBox
-    self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
-    self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
-    self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(not Global.simulationInitialized)
-    self.buttonBox.button(QtGui.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
+    self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+    self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
+    self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulationInitialized)
+    self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
 
     # layout
-    layout = QtGui.QVBoxLayout()
+    layout = QtWidgets.QVBoxLayout()
     layout.addWidget(self.groupBoxMain)
     layout.addWidget(self.buttonBox)
 
@@ -220,19 +220,19 @@ class EncodingForm(QtGui.QDialog):
 
     encoderParamsDict = collections.OrderedDict()
     if self.textBoxDataSourceFieldName.text() == '':
-      QtGui.QMessageBox.warning(self, "Warning", "Record field name was not specified.")
+      QtWidgets.QMessageBox.warning(self, "Warning", "Record field name was not specified.")
       return
     elif self.textBoxEncoderModule.text() == '':
-      QtGui.QMessageBox.warning(self, "Warning", "Encoder module was not specified.")
+      QtWidgets.QMessageBox.warning(self, "Warning", "Encoder module was not specified.")
       return
     elif self.textBoxEncoderClass.text() == '':
-      QtGui.QMessageBox.warning(self, "Warning", "Encoder class was not specified.")
+      QtWidgets.QMessageBox.warning(self, "Warning", "Encoder class was not specified.")
       return
     elif self.textBoxEncoderFieldName.text() == '':
-      QtGui.QMessageBox.warning(self, "Warning", "Encoder field name was not specified.")
+      QtWidgets.QMessageBox.warning(self, "Warning", "Encoder field name was not specified.")
       return
     elif self.duplicatedFieldName(self.textBoxEncoderFieldName.text()):
-      QtGui.QMessageBox.warning(self, "Warning", "Encoder field name already is used by other encoding.")
+      QtWidgets.QMessageBox.warning(self, "Warning", "Encoder field name already is used by other encoding.")
       return
     else:
       gridData = self.dataGridEncoderParams.model().data
@@ -246,7 +246,7 @@ class EncodingForm(QtGui.QDialog):
           param = str(gridData[row][0])
           validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
           if not validExpr.exactMatch(param):
-            QtGui.QMessageBox.warning(self, "Warning", "'" + param + "' is not a valid name.")
+            QtWidgets.QMessageBox.warning(self, "Warning", "'" + param + "' is not a valid name.")
             return
 
           # Valid parameter value
@@ -256,7 +256,7 @@ class EncodingForm(QtGui.QDialog):
             pass
           value = str(gridData[row][1])
           if len(value) == 0:
-            QtGui.QMessageBox.warning(self, "Warning", "'" + param + "' value is empty.")
+            QtWidgets.QMessageBox.warning(self, "Warning", "'" + param + "' value is empty.")
             return
 
           # Add param name and its value to dictionary

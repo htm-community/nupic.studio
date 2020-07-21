@@ -43,10 +43,8 @@ class Cell:
     #region 3d-tree properties (simulation form)
 
     self.tree3d_initialized = False
-    self.tree3d_x = 0
-    self.tree3d_y = 0
-    self.tree3d_z = 0
-    self.tree3d_item = None
+    self.tree3d_pos = (0, 0, 0)
+    self.tree3d_item_np = None
     self.tree3d_selected = False
 
     #endregion

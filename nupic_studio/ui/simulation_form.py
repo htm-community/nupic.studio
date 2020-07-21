@@ -1,14 +1,15 @@
-﻿import collections
-import numpy
-import pyqtgraph.opengl as gl
-import pyqtgraph as pg
-from PyQt4 import QtGui, QtCore
+﻿import numpy
+import os
+from PIL import Image
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.htm.node import Node, NodeType
 from nupic_studio.htm.segment import SegmentType
-from nupic_studio.ui import Global, View
+from nupic_studio.ui import Global, State, View
 from nupic_studio.ui.simulation_legend_form import SimulationLegendForm
+from nupic_studio.util import Texture3D
 
-class SimulationForm(QtGui.QWidget):
+
+class SimulationForm(QtWidgets.QWidget):
 
   #region Constructor
 
@@ -16,10 +17,56 @@ class SimulationForm(QtGui.QWidget):
     """
     Initializes a new instance of this class.
     """
+    QtWidgets.QWidget.__init__(self)
+    self.initUI()
 
-    QtGui.QWidget.__init__(self)
+  #endregion
 
-    #region Instance fields
+  #region Methods
+
+  def initUI(self):
+
+    # viewer_3d
+    self.viewer_3d = Viewer3D()
+    self.viewer_3d.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+
+    # layout
+    layout = QtWidgets.QGridLayout()
+    layout.addWidget(self.viewer_3d)
+
+    # Form
+    self.setLayout(layout)
+    self.setWindowTitle("Simulation")
+    self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+    self.setMinimumSize(300, 300)
+    self.setToolTip("Left-Button-Pressed: Rotate\r\nLeft-Button-DoubleClick: Reset observer camera\r\nRight-Button-Pressed: Shows menu\r\nMiddle-Button-Pressed: Pan\r\nWheel: Zoom in/out")
+
+  def clearControls(self):
+    """
+    Reset all controls.
+    """
+    self.viewer_3d.clear()
+
+  def update(self):
+      """
+      Refresh controls for each time step.
+      """
+      self.viewer_3d.update()
+
+  def refreshControls(self):
+    """
+    Refresh controls for each time step.
+    """
+    self.viewer_3d.update_3d_elements()
+
+  #endregion
+
+class Viewer3D(QtWidgets.QLabel):
+
+  def __init__(self):
+    QtWidgets.QWidget.__init__(self)
+
+    self.mouse_working_area = None
 
     # Views
     self.defaultViewMenu = None
@@ -40,46 +87,11 @@ class SimulationForm(QtGui.QWidget):
     # Vertical space between two cells
     self.offsetCells = 5
 
-    # Colors
-    colorGray = QtGui.QColor.fromRgb(190, 190, 190)
-    colorBlue = QtGui.QColor.fromRgb(0, 0, 255)
-    colorGreen = QtGui.QColor.fromRgb(50, 205, 50)
-    colorLightGreen = QtGui.QColor.fromRgb(125, 255, 0)
-    colorYellow = QtGui.QColor.fromRgb(255, 215, 80)
-    colorRed = QtGui.QColor.fromRgb(255, 0, 0)
-
-    # General color scheme
-    self.colorInactive = colorGray
-    self.colorSelected = colorBlue
-
-    # Sensor bit color scheme
-    self.colorBitActive = colorGreen
-    self.colorBitPredicted = colorYellow
-    self.colorBitFalselyPredicted = colorRed
-
-    # Cell color scheme
-    self.colorCellLearning = colorLightGreen
-    self.colorCellActive = colorGreen
-    self.colorCellPredicted = colorYellow
-    self.colorCellFalselyPredicted = colorRed
-
-    # Segment color scheme
-    self.colorSegmentActive = colorGreen
-    self.colorSegmentPredicted = colorYellow
-    self.colorSegmentFalselyPredicted = colorRed
-
-    # Synapse color scheme
-    self.colorSynapseConnected = colorGreen
-    self.colorSynapsePredicted = colorYellow
-    self.colorSynapseFalselyPredicted = colorRed
-
-    #endregion
-
-    self.initUI()
+    self.init_ui()
 
     # Create views menus
     for view in Global.views:
-      view.menu = QtGui.QAction(self)
+      view.menu = QtWidgets.QAction(self)
       view.menu.setText(view.name)
       view.menu.setCheckable(True)
       view.menu.triggered.connect(self.menuView_Click)
@@ -92,98 +104,57 @@ class SimulationForm(QtGui.QWidget):
     # Load default view
     self.selectView(self.defaultViewMenu)
 
-  #endregion
-
-  #region Methods
-
-  def initUI(self):
-
-    # simulationViewer
-    self.simulationViewer = gl.GLViewWidget()
-    self.simulationViewer.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    self.simulationViewer.customContextMenuRequested.connect(self.showContextMenu)
+  def init_ui(self):
 
     # menuViewsNew
-    self.menuViewsNew = QtGui.QAction(self)
+    self.menuViewsNew = QtWidgets.QAction(self)
     self.menuViewsNew.setText("Create new view")
     self.menuViewsNew.triggered.connect(self.menuViewsNew_Click)
 
     # menuViewsSave
-    self.menuViewsSave = QtGui.QAction(self)
+    self.menuViewsSave = QtWidgets.QAction(self)
     self.menuViewsSave.setText("Save selected view")
     self.menuViewsSave.triggered.connect(self.menuViewsSave_Click)
 
     # menuViewsDelete
-    self.menuViewsDelete = QtGui.QAction(self)
+    self.menuViewsDelete = QtWidgets.QAction(self)
     self.menuViewsDelete.setText("Delete selected view")
     self.menuViewsDelete.triggered.connect(self.menuViewsDelete_Click)
 
     # menuViews
-    self.menuViews = QtGui.QMenu()
+    self.menuViews = QtWidgets.QMenu()
     self.menuViews.addAction(self.menuViewsNew)
     self.menuViews.addAction(self.menuViewsSave)
     self.menuViews.addAction(self.menuViewsDelete)
     self.menuViews.addSeparator()
     self.menuViews.setTitle("&View")
 
-    # menuCameraTop
-    self.menuCameraTop = QtGui.QAction(self)
-    self.menuCameraTop.setText("&Top")
-    self.menuCameraTop.setShortcut('Ctrl+PgUp')
-    self.menuCameraTop.triggered.connect(self.__updateCamera)
-
-    # menuCameraBottom
-    self.menuCameraBottom = QtGui.QAction(self)
-    self.menuCameraBottom.setText("&Bottom")
-    self.menuCameraBottom.setShortcut('Ctrl+PgDown')
-    self.menuCameraBottom.triggered.connect(self.__updateCamera)
-
-    # menuCameraPerspective
-    self.menuCameraPerspective = QtGui.QAction(self)
-    self.menuCameraPerspective.setText("&Perspective")
-    self.menuCameraPerspective.setShortcut('Ctrl+End')
-    self.menuCameraPerspective.triggered.connect(self.__updateCamera)
-
-    # menuCameraDefault
-    self.menuCameraDefault = QtGui.QAction(self)
-    self.menuCameraDefault.setText("&Default")
-    self.menuCameraDefault.setShortcut('Ctrl+Home')
-    self.menuCameraDefault.triggered.connect(self.__updateCamera)
-
-    # menuCamera
-    self.menuCamera = QtGui.QMenu()
-    self.menuCamera.addAction(self.menuCameraTop)
-    self.menuCamera.addAction(self.menuCameraBottom)
-    self.menuCamera.addAction(self.menuCameraPerspective)
-    self.menuCamera.addAction(self.menuCameraDefault)
-    self.menuCamera.setTitle("&Camera")
-
     # menuShowBitsNone
-    self.menuShowBitsNone = QtGui.QAction(self)
+    self.menuShowBitsNone = QtWidgets.QAction(self)
     self.menuShowBitsNone.setText("&None")
     self.menuShowBitsNone.setCheckable(True)
     self.menuShowBitsNone.triggered.connect(self.menuShowBits_Click)
 
     # menuShowBitsActive
-    self.menuShowBitsActive = QtGui.QAction(self)
+    self.menuShowBitsActive = QtWidgets.QAction(self)
     self.menuShowBitsActive.setText("&Active")
     self.menuShowBitsActive.setCheckable(True)
     self.menuShowBitsActive.triggered.connect(self.menuShowBits_Click)
 
     # menuShowBitsPredicted
-    self.menuShowBitsPredicted = QtGui.QAction(self)
+    self.menuShowBitsPredicted = QtWidgets.QAction(self)
     self.menuShowBitsPredicted.setText("&Predicted")
     self.menuShowBitsPredicted.setCheckable(True)
     self.menuShowBitsPredicted.triggered.connect(self.menuShowBits_Click)
 
     # menuShowBitsFalselyPredicted
-    self.menuShowBitsFalselyPredicted = QtGui.QAction(self)
+    self.menuShowBitsFalselyPredicted = QtWidgets.QAction(self)
     self.menuShowBitsFalselyPredicted.setText("&Falsely Predicted")
     self.menuShowBitsFalselyPredicted.setCheckable(True)
     self.menuShowBitsFalselyPredicted.triggered.connect(self.menuShowBits_Click)
 
     # menuShowBits
-    self.menuShowBits = QtGui.QMenu()
+    self.menuShowBits = QtWidgets.QMenu()
     self.menuShowBits.addAction(self.menuShowBitsNone)
     self.menuShowBits.addAction(self.menuShowBitsActive)
     self.menuShowBits.addAction(self.menuShowBitsPredicted)
@@ -191,43 +162,43 @@ class SimulationForm(QtGui.QWidget):
     self.menuShowBits.setTitle("&Sensor bits")
 
     # menuShowCellsNone
-    self.menuShowCellsNone = QtGui.QAction(self)
+    self.menuShowCellsNone = QtWidgets.QAction(self)
     self.menuShowCellsNone.setText("&None")
     self.menuShowCellsNone.setCheckable(True)
     self.menuShowCellsNone.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCellsLearning
-    self.menuShowCellsLearning = QtGui.QAction(self)
+    self.menuShowCellsLearning = QtWidgets.QAction(self)
     self.menuShowCellsLearning.setText("&Learning")
     self.menuShowCellsLearning.setCheckable(True)
     self.menuShowCellsLearning.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCellsActive
-    self.menuShowCellsActive = QtGui.QAction(self)
+    self.menuShowCellsActive = QtWidgets.QAction(self)
     self.menuShowCellsActive.setText("&Active")
     self.menuShowCellsActive.setCheckable(True)
     self.menuShowCellsActive.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCellsInactive
-    self.menuShowCellsInactive = QtGui.QAction(self)
+    self.menuShowCellsInactive = QtWidgets.QAction(self)
     self.menuShowCellsInactive.setText("&Inactive")
     self.menuShowCellsInactive.setCheckable(True)
     self.menuShowCellsInactive.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCellsPredicted
-    self.menuShowCellsPredicted = QtGui.QAction(self)
+    self.menuShowCellsPredicted = QtWidgets.QAction(self)
     self.menuShowCellsPredicted.setText("&Predicted")
     self.menuShowCellsPredicted.setCheckable(True)
     self.menuShowCellsPredicted.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCellsFalselyPredicted
-    self.menuShowCellsFalselyPredicted = QtGui.QAction(self)
+    self.menuShowCellsFalselyPredicted = QtWidgets.QAction(self)
     self.menuShowCellsFalselyPredicted.setText("&Falsely Predicted")
     self.menuShowCellsFalselyPredicted.setCheckable(True)
     self.menuShowCellsFalselyPredicted.triggered.connect(self.menuShowCells_Click)
 
     # menuShowCells
-    self.menuShowCells = QtGui.QMenu()
+    self.menuShowCells = QtWidgets.QMenu()
     self.menuShowCells.addAction(self.menuShowCellsNone)
     self.menuShowCells.addAction(self.menuShowCellsLearning)
     self.menuShowCells.addAction(self.menuShowCellsActive)
@@ -237,31 +208,31 @@ class SimulationForm(QtGui.QWidget):
     self.menuShowCells.setTitle("C&ells")
 
     # menuShowProximalSegmentsNone
-    self.menuShowProximalSegmentsNone = QtGui.QAction(self)
+    self.menuShowProximalSegmentsNone = QtWidgets.QAction(self)
     self.menuShowProximalSegmentsNone.setText("&None")
     self.menuShowProximalSegmentsNone.setCheckable(True)
     self.menuShowProximalSegmentsNone.triggered.connect(self.menuShowProximalSegments_Click)
 
     # menuShowProximalSegmentsActive
-    self.menuShowProximalSegmentsActive = QtGui.QAction(self)
+    self.menuShowProximalSegmentsActive = QtWidgets.QAction(self)
     self.menuShowProximalSegmentsActive.setText("&Active")
     self.menuShowProximalSegmentsActive.setCheckable(True)
     self.menuShowProximalSegmentsActive.triggered.connect(self.menuShowProximalSegments_Click)
 
     # menuShowProximalSegmentsPredicted
-    self.menuShowProximalSegmentsPredicted = QtGui.QAction(self)
+    self.menuShowProximalSegmentsPredicted = QtWidgets.QAction(self)
     self.menuShowProximalSegmentsPredicted.setText("&Predicted")
     self.menuShowProximalSegmentsPredicted.setCheckable(True)
     self.menuShowProximalSegmentsPredicted.triggered.connect(self.menuShowProximalSegments_Click)
 
     # menuShowProximalSegmentsFalselyPredicted
-    self.menuShowProximalSegmentsFalselyPredicted = QtGui.QAction(self)
+    self.menuShowProximalSegmentsFalselyPredicted = QtWidgets.QAction(self)
     self.menuShowProximalSegmentsFalselyPredicted.setText("&Falsely Predicted")
     self.menuShowProximalSegmentsFalselyPredicted.setCheckable(True)
     self.menuShowProximalSegmentsFalselyPredicted.triggered.connect(self.menuShowProximalSegments_Click)
 
     # menuShowProximalSegments
-    self.menuShowProximalSegments = QtGui.QMenu()
+    self.menuShowProximalSegments = QtWidgets.QMenu()
     self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsNone)
     self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsActive)
     self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsPredicted)
@@ -269,37 +240,37 @@ class SimulationForm(QtGui.QWidget):
     self.menuShowProximalSegments.setTitle("&Segments")
 
     # menuShowProximalSynapsesNone
-    self.menuShowProximalSynapsesNone = QtGui.QAction(self)
+    self.menuShowProximalSynapsesNone = QtWidgets.QAction(self)
     self.menuShowProximalSynapsesNone.setText("&None")
     self.menuShowProximalSynapsesNone.setCheckable(True)
     self.menuShowProximalSynapsesNone.triggered.connect(self.menuShowProximalSynapses_Click)
 
     # menuShowProximalSynapsesConnected
-    self.menuShowProximalSynapsesConnected = QtGui.QAction(self)
+    self.menuShowProximalSynapsesConnected = QtWidgets.QAction(self)
     self.menuShowProximalSynapsesConnected.setText("&Connected")
     self.menuShowProximalSynapsesConnected.setCheckable(True)
     self.menuShowProximalSynapsesConnected.triggered.connect(self.menuShowProximalSynapses_Click)
 
     # menuShowProximalSynapsesActive
-    self.menuShowProximalSynapsesActive = QtGui.QAction(self)
+    self.menuShowProximalSynapsesActive = QtWidgets.QAction(self)
     self.menuShowProximalSynapsesActive.setText("&Active")
     self.menuShowProximalSynapsesActive.setCheckable(True)
     self.menuShowProximalSynapsesActive.triggered.connect(self.menuShowProximalSynapses_Click)
 
     # menuShowProximalSynapsesPredicted
-    self.menuShowProximalSynapsesPredicted = QtGui.QAction(self)
+    self.menuShowProximalSynapsesPredicted = QtWidgets.QAction(self)
     self.menuShowProximalSynapsesPredicted.setText("&Predicted")
     self.menuShowProximalSynapsesPredicted.setCheckable(True)
     self.menuShowProximalSynapsesPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
 
     # menuShowProximalSynapsesFalselyPredicted
-    self.menuShowProximalSynapsesFalselyPredicted = QtGui.QAction(self)
+    self.menuShowProximalSynapsesFalselyPredicted = QtWidgets.QAction(self)
     self.menuShowProximalSynapsesFalselyPredicted.setText("&Falsely Predicted")
     self.menuShowProximalSynapsesFalselyPredicted.setCheckable(True)
     self.menuShowProximalSynapsesFalselyPredicted.triggered.connect(self.menuShowProximalSynapses_Click)
 
     # menuShowProximalSynapses
-    self.menuShowProximalSynapses = QtGui.QMenu()
+    self.menuShowProximalSynapses = QtWidgets.QMenu()
     self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesNone)
     self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesConnected)
     self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesActive)
@@ -308,62 +279,62 @@ class SimulationForm(QtGui.QWidget):
     self.menuShowProximalSynapses.setTitle("&Synapses")
 
     # menuShowProximal
-    self.menuShowProximal = QtGui.QMenu()
+    self.menuShowProximal = QtWidgets.QMenu()
     self.menuShowProximal.addMenu(self.menuShowProximalSegments)
     self.menuShowProximal.addMenu(self.menuShowProximalSynapses)
     self.menuShowProximal.setTitle("&Proximal")
 
     # menuShowDistalSegmentsNone
-    self.menuShowDistalSegmentsNone = QtGui.QAction(self)
+    self.menuShowDistalSegmentsNone = QtWidgets.QAction(self)
     self.menuShowDistalSegmentsNone.setText("&None")
     self.menuShowDistalSegmentsNone.setCheckable(True)
     self.menuShowDistalSegmentsNone.triggered.connect(self.menuShowDistalSegments_Click)
 
     # menuShowDistalSegmentsActive
-    self.menuShowDistalSegmentsActive = QtGui.QAction(self)
+    self.menuShowDistalSegmentsActive = QtWidgets.QAction(self)
     self.menuShowDistalSegmentsActive.setText("&Active")
     self.menuShowDistalSegmentsActive.setCheckable(True)
     self.menuShowDistalSegmentsActive.triggered.connect(self.menuShowDistalSegments_Click)
 
     # menuShowDistalSegments
-    self.menuShowDistalSegments = QtGui.QMenu()
+    self.menuShowDistalSegments = QtWidgets.QMenu()
     self.menuShowDistalSegments.addAction(self.menuShowDistalSegmentsNone)
     self.menuShowDistalSegments.addAction(self.menuShowDistalSegmentsActive)
     self.menuShowDistalSegments.setTitle("&Segments")
 
     # menuShowDistalSynapsesNone
-    self.menuShowDistalSynapsesNone = QtGui.QAction(self)
+    self.menuShowDistalSynapsesNone = QtWidgets.QAction(self)
     self.menuShowDistalSynapsesNone.setText("&None")
     self.menuShowDistalSynapsesNone.setCheckable(True)
     self.menuShowDistalSynapsesNone.triggered.connect(self.menuShowDistalSynapses_Click)
 
     # menuShowDistalSynapsesConnected
-    self.menuShowDistalSynapsesConnected = QtGui.QAction(self)
+    self.menuShowDistalSynapsesConnected = QtWidgets.QAction(self)
     self.menuShowDistalSynapsesConnected.setText("&Connected")
     self.menuShowDistalSynapsesConnected.setCheckable(True)
     self.menuShowDistalSynapsesConnected.triggered.connect(self.menuShowDistalSynapses_Click)
 
     # menuShowDistalSynapsesActive
-    self.menuShowDistalSynapsesActive = QtGui.QAction(self)
+    self.menuShowDistalSynapsesActive = QtWidgets.QAction(self)
     self.menuShowDistalSynapsesActive.setText("&Active")
     self.menuShowDistalSynapsesActive.setCheckable(True)
     self.menuShowDistalSynapsesActive.triggered.connect(self.menuShowDistalSynapses_Click)
 
     # menuShowDistalSynapses
-    self.menuShowDistalSynapses = QtGui.QMenu()
+    self.menuShowDistalSynapses = QtWidgets.QMenu()
     self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesNone)
     self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesConnected)
     self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesActive)
     self.menuShowDistalSynapses.setTitle("&Synapses")
 
     # menuShowDistal
-    self.menuShowDistal = QtGui.QMenu()
+    self.menuShowDistal = QtWidgets.QMenu()
     self.menuShowDistal.addMenu(self.menuShowDistalSegments)
     self.menuShowDistal.addMenu(self.menuShowDistalSynapses)
     self.menuShowDistal.setTitle("&Distal")
 
     # menuShow
-    self.menuShow = QtGui.QMenu()
+    self.menuShow = QtWidgets.QMenu()
     self.menuShow.addMenu(self.menuShowBits)
     self.menuShow.addMenu(self.menuShowCells)
     self.menuShow.addMenu(self.menuShowProximal)
@@ -371,85 +342,56 @@ class SimulationForm(QtGui.QWidget):
     self.menuShow.setTitle("&Show")
 
     # menuLegend
-    self.menuLegend = QtGui.QAction(self)
+    self.menuLegend = QtWidgets.QAction(self)
     self.menuLegend.setText("&Legend")
     self.menuLegend.triggered.connect(self.menuLegend_Click)
 
     # menuSimulation
-    self.menuSimulation = QtGui.QMenu()
+    self.menuSimulation = QtWidgets.QMenu()
     self.menuSimulation.addMenu(self.menuViews)
-    self.menuSimulation.addMenu(self.menuCamera)
     self.menuSimulation.addMenu(self.menuShow)
     self.menuSimulation.addAction(self.menuLegend)
     self.menuSimulation.setTitle("&Simulation")
 
-    # layout
-    layout = QtGui.QGridLayout()
-    layout.addWidget(self.simulationViewer, 1, 0)
-    layout.setRowStretch(1, 100)
+    # image
+    self.pivot_image = QtGui.QImage(os.path.join(Global.appPath + '/images', 'cross.png'))
 
-    # SimulationForm
-    self.setLayout(layout)
-    self.setWindowTitle("Simulation")
-    self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
-    self.setMinimumWidth(400)
-    self.setMinimumHeight(200)
-    self.setToolTip("Left button drag: Rotates the scene around a central point.\r\nControl key + Middle button drag: Pan the scene by moving the central 'look-at' point within the plane.\r\nWheel spin: Zoom in/out.\r\nRight button: Shows menu.")
+    # pivot
+    self.pivot = QtWidgets.QLabel(self)
+    self.pivot.setPixmap(QtGui.QPixmap.fromImage(self.pivot_image))
+    self.pivot.setVisible(False)
 
-  def showContextMenu(self, pos):
-    """
-    Event handling right-click contextMenu
-    """
+    # Change background color
+    palette = self.palette()
+    palette.setColor(self.backgroundRole(), QtCore.Qt.black)
 
-    if Global.simulationInitialized:
-      self.menuSimulation.exec_(self.mapToGlobal(pos))
-    else:
-      QtGui.QMessageBox.information(self, "Information", "Context menu available only during the simulation.")
+    # self
+    self.setPalette(palette)
+    self.setMouseTracking(True)
+    self.setAutoFillBackground(True)
 
-  def __updateCamera(self, event):
-    """
-    Update camera position in the scene
-    """
-
-    menuClicked = self.sender()
-    self.simulationViewer.setCameraPosition(distance = (self.treeHeight * 30))
-    if menuClicked == self.menuCameraTop:
-      self.simulationViewer.setCameraPosition(elevation = 90)
-      self.simulationViewer.setCameraPosition(azimuth = 90)
-    elif menuClicked == self.menuCameraBottom:
-      self.simulationViewer.setCameraPosition(elevation = -90)
-      self.simulationViewer.setCameraPosition(azimuth = 90)
-    elif menuClicked == self.menuCameraPerspective:
-      self.simulationViewer.setCameraPosition(elevation = 17)
-      self.simulationViewer.setCameraPosition(azimuth = 45)
-    else:
-      self.simulationViewer.setCameraPosition(elevation = 17)
-      self.simulationViewer.setCameraPosition(azimuth = 90)
-
-  def clearControls(self):
-    """
-    Reset all controls.
-    """
-
-    # Remove all items
-    while len(self.simulationViewer.items) > 0:
-      self.simulationViewer.removeItem(self.simulationViewer.items[0])
-
-    # Draw a sphere only to initialize simulation.
-    # If we don't do this, viewer crashes. Probably a PYQtGraph bug
-    fooMd = gl.MeshData.sphere(rows=10, cols=10)
-    self.fooItem = gl.GLMeshItem(meshdata=fooMd, smooth=False, shader='shaded', glOptions='opaque')
-    self.fooItem.translate(0, 0, 0)
-    self.simulationViewer.addItem(self.fooItem)
-    self.simulationViewer.setCameraPosition(distance = 10000)
-
-  def initializeControls(self):
+  def initializeControls(self, top_region):
     """
     Refresh controls for each time step.
     """
+    self.topRegion = top_region
 
-    # Remove initial sphere
-    self.simulationViewer.removeItem(self.fooItem)
+    # Set the colors of the states.
+    self.ColorInactive = Texture3D.Gray
+    self.ColorSelected = Texture3D.Blue
+    self.ColorBitActive = Texture3D.Green
+    self.ColorBitPredicted = Texture3D.Yellow
+    self.ColorBitFalselyPredicted = Texture3D.Red
+    self.ColorCellLearning = Texture3D.GreenYellow
+    self.ColorCellActive = Texture3D.Green
+    self.ColorCellPredicted = Texture3D.Yellow
+    self.ColorCellFalselyPredicted = Texture3D.Red
+    self.ColorSegmentActive = Texture3D.Green
+    self.ColorSegmentPredicted = Texture3D.Yellow
+    self.ColorSegmentFalselyPredicted = Texture3D.Red
+    self.ColorSynapseConnected = Texture3D.Green
+    self.ColorSynapsePredicted = Texture3D.Yellow
+    self.ColorSynapseFalselyPredicted = Texture3D.Red
 
     # Arrange the tree once to see how big it is.
     self.treeWidth = 0
@@ -458,8 +400,10 @@ class SimulationForm(QtGui.QWidget):
     minZ = 0
     minX, minZ = self.__arrangeNode(self.topRegion, minX, minZ)
 
+    x, y, z = self.topRegion.tree3d_pos
+
     # Rearrange the tree again to center it horizontally.
-    offsetX = self.topRegion.tree3d_x
+    offsetX = x
     self.__centerNode(self.topRegion, offsetX)
 
     # Rearrange the tree again to invert it vertically.
@@ -472,10 +416,162 @@ class SimulationForm(QtGui.QWidget):
     # Draw the tree recursively from top region.
     self.__drawNode(self.topRegion, True)
 
-    # Adjust camera
-    self.__updateCamera(None)
+  def clear(self):
+    """
+    Reset all controls.
+    """
+    self.mouse_working_area = None
 
-  def refreshControls(self):
+  def update(self):
+    """
+    Refresh controls for each time step.
+    """
+    if Global.mainForm.is_running():
+
+      # Get the image to be draw on this viewer.
+      image = None
+      if Global.mainForm.state == State.Simulating:
+        texture = Global.mainForm.simulation.screen_texture
+        size = (texture.getXSize(), texture.getYSize())
+        format = "RGBA"
+        if texture.mightHaveRamImage():
+          image = Image.frombuffer(format, size, texture.getRamImageAs(format), "raw", format, 0, 0)
+        else:
+          image = Image.new(format, size)
+      elif Global.mainForm.state == State.Playbacking:
+        playback_file = os.path.join(Global.mainForm.get_record_path(),
+                                     "main_camera_" + "{:08d}".format(Global.mainForm.get_step()) + ".png")
+        if os.path.isfile(playback_file):
+          image = Image.open(playback_file)
+
+      # Draw the image.
+      _image = image.toqimage()
+      self.pixel_map = QtGui.QPixmap.fromImage(_image)
+      self.adjust_mouse_working_area()
+
+  def showContextMenu(self, pos):
+    """
+    Event handling right-click contextMenu
+    """
+
+    if Global.simulationInitialized:
+      self.menuSimulation.exec_(self.mapToGlobal(pos))
+    else:
+      QtWidgets.QMessageBox.information(self, "Information", "Context menu available only during the simulation.")
+
+  def adjust_mouse_working_area(self):
+    viewer_size = self.size()
+    self.setPixmap(self.pixel_map.scaled(viewer_size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+    image_size = self.pixmap().size()
+    horizontal_margin = (viewer_size.width() - image_size.width()) / 2
+    vertical_margin = (viewer_size.height() - image_size.height()) / 2
+    self.mouse_working_area = (
+    horizontal_margin, vertical_margin, horizontal_margin + image_size.width(), vertical_margin + image_size.height())
+
+  def resizeEvent(self, event):
+    if self.mouse_working_area is not None:
+      self.adjust_mouse_working_area()
+
+  def handle_key_event(self, event, event_state):
+    # Inform Panda to start (or continue) the action associated with the key pressed
+    # or stop it if key is released
+    key_pressed = event.key()
+
+    # Check if key is in the user's key map an then call associated function
+    for k, value in Global.mainForm.simulation.key_map.items():
+      if "-" in k:
+        [key_ascii, key_state] = k.split("-")
+      else:
+        key_ascii = k
+        key_state = ""
+      if key_state == event_state and QtGui.QKeySequence(
+              key_ascii) == key_pressed and not event.isAutoRepeat():
+        (func, args) = value
+        func(*args)
+        break
+
+  def is_simulating(self):
+    return (Global.mainForm.state == State.Simulating and not Global.mainForm.paused) and Global.mainForm.simulation is not None
+
+  def keyPressEvent(self, event):
+    if self.is_simulating():
+      self.handle_key_event(event, "")
+
+  def keyReleaseEvent(self, event):
+    if self.is_simulating():
+      self.handle_key_event(event, "up")
+
+  def create_start_mouse_work_fn(self, x, y):
+    def fn():
+      width = self.pivot_image.width()
+      height = self.pivot_image.height()
+      self.pivot.setGeometry(x - (width / 2), y - (height / 2), width, height)
+      self.pivot.setVisible(True)
+    return fn
+
+  def create_stop_mouse_work_fn(self):
+    def fn():
+      self.pivot.setVisible(False)
+    return fn
+
+  def mouseDoubleClickEvent(self, event):
+    if self.is_simulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.LeftButton:
+      Global.mainForm.simulation.reset_camera()
+
+  def mouseMoveEvent(self, event):
+    if self.is_simulating() and self.mouse_working_area is not None:
+      def pyqt_to_panda(val, max):
+        mid = max / 2
+        return (val - mid) / float(mid)
+
+      # Check if mouse is on the image
+      mouse_pos = event.pos()
+      x, y = mouse_pos.x(), mouse_pos.y()
+      x0, y0, xn, yn = self.mouse_working_area
+      if self.mouse_working_area is not None and x >= x0 and x <= xn and y >= y0 and y <= yn:
+        self.mouse_inside_working_area = True
+      else:
+        self.mouse_inside_working_area = False
+
+      # Fix coordinates by removing margins of PyQT screen
+      x -= x0
+      y -= y0
+      width = xn - x0
+      height = yn - y0
+
+      # Transform coordinates from PyQt (0, n) to Panda (-1, 1)
+      Global.mainForm.simulation.mouse_x = pyqt_to_panda(x, width)
+      Global.mainForm.simulation.mouse_y = pyqt_to_panda(y, height) * (-1)
+
+      # Pass the movement commands to Panda
+      if self.mouse_inside_working_area and Global.mainForm.simulation.mouse_feature == "":
+        feature = ""
+        if event.buttons() == QtCore.Qt.LeftButton:
+          feature = "rotate"
+        elif event.buttons() == QtCore.Qt.MiddleButton:
+          feature = "pan"
+        if feature != "":
+          start_fn = self.create_start_mouse_work_fn(self.width() / 2, self.height() / 2)
+          stop_fn = self.create_stop_mouse_work_fn()
+          Global.mainForm.simulation.start_mouse_work(feature, start_fn, stop_fn)
+
+  def mousePressEvent(self, event):
+    if self.is_simulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.RightButton:
+      self.showContextMenu(event.pos())
+
+  def mouseReleaseEvent(self, event):
+    if self.is_simulating() and Global.mainForm.simulation.mouse_feature != "":
+      Global.mainForm.simulation.stop_mouse_work()
+
+  def wheelEvent(self, event):
+    if self.is_simulating()and self.mouse_inside_working_area:
+      mouse_pos = event.pos()
+      start_fn = self.create_start_mouse_work_fn(mouse_pos.x(), mouse_pos.y())
+      stop_fn = self.create_stop_mouse_work_fn()
+      Global.mainForm.simulation.start_mouse_work("zoom", start_fn, stop_fn)
+      Global.mainForm.simulation.mouse_steps = event.angleDelta().y()
+
+  def update_3d_elements(self):
     """
     Refresh controls for each time step.
     """
@@ -489,7 +585,8 @@ class SimulationForm(QtGui.QWidget):
     Rearrange the node in order to tree is in the center (0, 0, 0) of the scene.
     """
 
-    node.tree3d_x -= offsetX
+    x, y, z = node.tree3d_pos
+    node.tree3d_pos = (x - offsetX, y, z)
     for feeder in Global.project.network.getFeederNodes(node):
       self.__centerNode(feeder, offsetX)
 
@@ -497,8 +594,8 @@ class SimulationForm(QtGui.QWidget):
     """
     Rearrange the node in order to tree is inverted from top to bottom.
     """
-
-    node.tree3d_z = offsetZ - node.tree3d_z
+    x, y, z = node.tree3d_pos
+    node.tree3d_pos = (x, y, offsetZ - z)
     for feeder in Global.project.network.getFeederNodes(node):
       self.__invertNode(feeder, offsetZ)
 
@@ -512,45 +609,37 @@ class SimulationForm(QtGui.QWidget):
     x0 = (node.width / 2) * (-1)
     y0 = (node.height / 2) * (-1)
 
+    xNode, yNode, zNode = node.tree3d_pos
+
     # Calculate the absolute position of each column
     for y in range(node.height):
       for x in range(node.width):
         # The absolute X is calculated by multiply its relative position with offset
-        xCol = node.tree3d_x + ((x0 + x) * self.offsetColumns)
+        xCol = xNode + ((x0 + x) * self.offsetColumns)
 
         # The absolute Y is calculated by multiply its relative position with offset
-        yCol = node.tree3d_y + ((y0 + y) * self.offsetColumns)
+        yCol = yNode + ((y0 + y) * self.offsetColumns)
 
         # Calculate positions of the columns of cells if node is a region
         # or input bits if node is a sensor
-        zCol = node.tree3d_z
+        zCol = zNode
 
         if node.type == NodeType.region:
           column = node.getColumn(x, y)
-          column.tree3d_x = xCol
-          column.tree3d_y = yCol
-          column.tree3d_z = zCol
+          column.tree3d_pos = (xCol, yCol, zCol)
 
           # The proximal segment transverse all cells on this column
-          column.segment.tree3d_x1 = xCol
-          column.segment.tree3d_y1 = yCol
-          column.segment.tree3d_z1 = zCol + ((node.numCellsPerColumn - 1) * self.offsetCells)
-          column.segment.tree3d_x2 = xCol
-          column.segment.tree3d_y2 = yCol
-          column.segment.tree3d_z2 = zCol - self.offsetCells # Segment down towards to feeder nodes
+          column.segment.tree3d_start_pos = (xCol, yCol, zCol + ((node.numCellsPerColumn - 1) * self.offsetCells))
+          column.segment.tree3d_end_pos = (xCol, yCol, zCol - self.offsetCells)  # Segment down towards to feeder nodes
 
           # Calculate the absolute position of each cell
           for z in range(len(column.cells)):
             # The absolute Z is calculated by multiply its relative position with offset
             cell = column.getCell(z)
-            cell.tree3d_x = xCol
-            cell.tree3d_y = yCol
-            cell.tree3d_z = zCol + (z * self.offsetCells)
+            cell.tree3d_pos = (xCol, yCol, zCol + (z * self.offsetCells))
         else:
           bit = node.getBit(x, y)
-          bit.tree3d_x = xCol
-          bit.tree3d_y = yCol
-          bit.tree3d_z = zCol
+          bit.tree3d_pos = (xCol, yCol, zCol)
 
     # Perform the same actions for the lower nodes that feed this node
     for feeder in Global.project.network.getFeederNodes(node):
@@ -613,9 +702,7 @@ class SimulationForm(QtGui.QWidget):
       subtreeWidth = width
 
     # Set this node's center position.
-    node.tree3d_x = minX + (subtreeWidth / 2)
-    node.tree3d_y = 0
-    node.tree3d_z = minZ + (depth / 2)
+    node.tree3d_pos = (minX + (subtreeWidth / 2), 0, minZ + (depth / 2))
 
     # Increase minX to allow room for the subtree before returning.
     minX += subtreeWidth
@@ -661,31 +748,27 @@ class SimulationForm(QtGui.QWidget):
     if self.menuShowBitsNone.isChecked():
       isVisible = False
     elif bit.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsFalselyPredicted.isChecked():
-      color = self.colorBitFalselyPredicted
+      color = self.ColorBitFalselyPredicted
     elif bit.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsPredicted.isChecked():
-      color = self.colorBitPredicted
+      color = self.ColorBitPredicted
     elif bit.isActive.atGivenStepAgo(Global.selStep) and self.menuShowBitsActive.isChecked():
-      color = self.colorBitActive
+      color = self.ColorBitActive
     else:
-      color = self.colorInactive
+      color = self.ColorInactive
 
     if isVisible:
       # Draw the input bit
       if not bit.tree3d_initialized:
-        # TODO: Use cube instead of sphere
-        bitMd = gl.MeshData.sphere(rows=2, cols=4)
-        bit.tree3d_item = gl.GLMeshItem(meshdata=bitMd, shader='shaded', smooth=False, glOptions='opaque')
-        bit.tree3d_item.translate(bit.tree3d_x, bit.tree3d_y, bit.tree3d_z)
+        bit.tree3d_item_np = Global.mainForm.simulation.create_bit(bit.tree3d_pos)
         bit.tree3d_initialized = True
-        self.simulationViewer.addItem(bit.tree3d_item)
 
       # Update the color
       if bit.tree3d_selected:
-        color = self.colorSelected
-      bit.tree3d_item.setColor(color)
+        color = self.ColorSelected
+      bit.tree3d_item_np.setTexture(color)
 
-    if bit.tree3d_item != None:
-      bit.tree3d_item.setVisible(isVisible)
+    if bit.tree3d_item_np != None:
+      bit.tree3d_item_np.show() if isVisible else bit.tree3d_item_np.hide()
 
   def __drawColumn(self, column):
 
@@ -701,54 +784,49 @@ class SimulationForm(QtGui.QWidget):
     if self.menuShowCellsNone.isChecked():
       isVisible = False
     elif cell.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsFalselyPredicted.isChecked():
-      color = self.colorCellFalselyPredicted
+      color = self.ColorCellFalselyPredicted
     elif cell.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsPredicted.isChecked():
-      color = self.colorCellPredicted
+      color = self.ColorCellPredicted
     elif cell.isLearning.atGivenStepAgo(Global.selStep) and self.menuShowCellsLearning.isChecked():
-      color = self.colorCellLearning
+      color = self.ColorCellLearning
     elif cell.isActive.atGivenStepAgo(Global.selStep) and self.menuShowCellsActive.isChecked():
-      color = self.colorCellActive
+      color = self.ColorCellActive
     elif self.menuShowCellsInactive.isChecked():
-      color = self.colorInactive
+      color = self.ColorInactive
     else:
       isVisible = False
 
     if isVisible:
       # Draw the cell
       if not cell.tree3d_initialized:
-        cellMd = gl.MeshData.sphere(rows=10, cols=10)
-        cell.tree3d_item = gl.GLMeshItem(meshdata=cellMd, shader='shaded', smooth=False, glOptions='opaque')
-        cell.tree3d_item.translate(cell.tree3d_x, cell.tree3d_y, cell.tree3d_z)
+        cell.tree3d_item_np = Global.mainForm.simulation.create_cell(cell.tree3d_pos)
         cell.tree3d_initialized = True
-        self.simulationViewer.addItem(cell.tree3d_item)
 
       # Update the color
       if cell.tree3d_selected:
-        color = self.colorSelected
-      cell.tree3d_item.setColor(color)
+        color = self.ColorSelected
+      cell.tree3d_item_np.setTexture(color)
 
-    if cell.tree3d_item != None:
-      cell.tree3d_item.setVisible(isVisible)
+    if cell.tree3d_item_np != None:
+      cell.tree3d_item_np.show() if isVisible else cell.tree3d_item_np.hide()
 
     # Draw/update all distal segments
     for segment in cell.segments:
-      segment.tree3d_x1 = cell.tree3d_x
-      segment.tree3d_y1 = cell.tree3d_y
-      segment.tree3d_z1 = cell.tree3d_z
-      segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2 = self.__calculateSegmentEndPos(segment, segment.tree3d_x1, segment.tree3d_y1, segment.tree3d_z1)
+      segment.tree3d_start_pos = cell.tree3d_pos
+      segment.tree3d_end_pos = self.__calculateSegmentEndPos(segment, segment.tree3d_start_pos)
       self.__drawSegment(segment)
 
-  def __calculateSegmentEndPos(self, segment, xSeg1, ySeg1, zSeg1):
+  def __calculateSegmentEndPos(self, segment, start_pos):
     """
     Calculates an average position of the segment's end through their synapses' end positions.
     """
+    xSeg1, ySeg1, zSeg1 = start_pos
 
     sumK = 0.
     numXBelow = 0
     numXAbove = 0
     for synapse in segment.synapses:
-      xSyn = synapse.inputElem.tree3d_x
-      ySyn = synapse.inputElem.tree3d_y
+      xSyn, ySyn, zSyn = synapse.inputElem.tree3d_pos
 
       # Calculate 'k' (slope) of the straight line representing this synapse
       deltaY = ySyn - ySeg1
@@ -804,41 +882,39 @@ class SimulationForm(QtGui.QWidget):
     else:
       if segment.isFalselyPredicted.atGivenStepAgo(Global.selStep):
         if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsFalselyPredicted.isChecked():
-          color = self.colorSegmentFalselyPredicted
+          color = self.ColorSegmentFalselyPredicted
         else:
           isVisible = False
       elif segment.isPredicted.atGivenStepAgo(Global.selStep):
         if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsPredicted.isChecked():
-          color = self.colorSegmentPredicted
+          color = self.ColorSegmentPredicted
         else:
           isVisible = False
       elif segment.isActive.atGivenStepAgo(Global.selStep):
         if (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsActive.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsActive.isChecked()):
-          color = self.colorSegmentActive
+          color = self.ColorSegmentActive
         else:
           isVisible = False
       else:
         if segment.type == SegmentType.proximal:
-          color = self.colorInactive
+          color = self.ColorInactive
         else:
           isVisible = False
 
     if isVisible:
       # Draw the segment
       if not segment.tree3d_initialized:
-        pts = numpy.array([[segment.tree3d_x1, segment.tree3d_y1, segment.tree3d_z1], [segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2]])
-        segment.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
+        segment.tree3d_item_np = Global.mainForm.simulation.create_segment(segment.tree3d_start_pos, segment.tree3d_end_pos)
         segment.tree3d_initialized = True
-        self.simulationViewer.addItem(segment.tree3d_item)
 
       # Update the color
       if segment.tree3d_selected:
-        color = self.colorSelected
-      segment.tree3d_item.color = pg.glColor(color)
+        color = self.ColorSelected
+      segment.tree3d_item_np.setTexture(color)
     else:
       segment.tree3d_initialized = False
-      if segment.tree3d_item in self.simulationViewer.items:
-        self.simulationViewer.removeItem(segment.tree3d_item)
+      if segment.tree3d_item_np is not None:
+        Global.mainForm.simulation.remove_element(segment.tree3d_item_np)
 
     # Draw/update all synapses of this segment
     for synapse in segment.synapses:
@@ -853,41 +929,39 @@ class SimulationForm(QtGui.QWidget):
     else:
       if synapse.isFalselyPredicted.atGivenStepAgo(Global.selStep):
         if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesFalselyPredicted.isChecked()):
-          color = self.colorSynapseFalselyPredicted
+          color = self.ColorSynapseFalselyPredicted
         else:
           isVisible = False
       elif synapse.isPredicted.atGivenStepAgo(Global.selStep):
         if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesPredicted.isChecked()):
-          color = self.colorSynapsePredicted
+          color = self.ColorSynapsePredicted
         else:
           isVisible = False
       elif synapse.isConnected.atGivenStepAgo(Global.selStep):
         if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesConnected.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesConnected.isChecked()):
-          color = self.colorSynapseConnected
+          color = self.ColorSynapseConnected
         else:
           isVisible = False
       else:
         if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesActive.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesActive.isChecked()):
-          color = self.colorInactive
+          color = self.ColorInactive
         else:
           isVisible = False
 
     if isVisible and segmentIsVisible:
       # Draw the synapse
       if not synapse.tree3d_initialized:
-        pts = numpy.array([[segment.tree3d_x2, segment.tree3d_y2, segment.tree3d_z2], [synapse.inputElem.tree3d_x, synapse.inputElem.tree3d_y, synapse.inputElem.tree3d_z]])
-        synapse.tree3d_item = gl.GLLinePlotItem(pos=pts, width=1, antialias=False)
+        synapse.tree3d_item_np = Global.mainForm.simulation.create_synapse(segment.tree3d_end_pos, synapse.inputElem.tree3d_pos)
         synapse.tree3d_initialized = True
-        self.simulationViewer.addItem(synapse.tree3d_item)
 
       # Update the color
       if synapse.tree3d_selected:
-        color = self.colorSelected
-      synapse.tree3d_item.color = pg.glColor(color)
+        color = self.ColorSelected
+      synapse.tree3d_item_np.setTexture(color)
     else:
       synapse.tree3d_initialized = False
-      if synapse.tree3d_item in self.simulationViewer.items:
-        self.simulationViewer.removeItem(synapse.tree3d_item)
+      if synapse.tree3d_item_np is not None:
+        Global.mainForm.simulation.remove_element(synapse.tree3d_item_np)
 
   def selectView(self, viewMenu):
     """
@@ -930,7 +1004,7 @@ class SimulationForm(QtGui.QWidget):
         self.menuShowDistalSynapsesActive.setChecked(view.showDistalSynapsesActive)
 
         # Update simulation
-        self.refreshControls()
+        self.update_3d_elements()
 
         break
 
@@ -960,7 +1034,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowBitsNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuShowCells_Click(self, event):
     menuClicked = self.sender()
@@ -975,7 +1049,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowCellsNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuShowProximalSegments_Click(self, event):
     menuClicked = self.sender()
@@ -988,7 +1062,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowProximalSegmentsNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuShowProximalSynapses_Click(self, event):
     menuClicked = self.sender()
@@ -1002,7 +1076,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowProximalSynapsesNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuShowDistalSegments_Click(self, event):
     menuClicked = self.sender()
@@ -1013,7 +1087,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowDistalSegmentsNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuShowDistalSynapses_Click(self, event):
     menuClicked = self.sender()
@@ -1025,7 +1099,7 @@ class SimulationForm(QtGui.QWidget):
     else:
       self.menuShowDistalSynapsesNone.setChecked(False)
 
-    self.refreshControls()
+    self.update_3d_elements()
 
   def menuView_Click(self, event):
     menuClicked = self.sender()
@@ -1034,11 +1108,11 @@ class SimulationForm(QtGui.QWidget):
   def menuViewsNew_Click(self, event):
 
     # Ask for views's name
-    enteredText, ok = QtGui.QInputDialog.getText(self, "Input Dialog", "Enter views' name:")
+    enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter views' name:")
     if ok:
       view = View()
       view.name = enteredText
-      view.menu = QtGui.QAction(self)
+      view.menu = QtWidgets.QAction(self)
       view.menu.setText(view.name)
       view.menu.setCheckable(True)
       view.menu.triggered.connect(self.menuView_Click)
@@ -1093,5 +1167,3 @@ class SimulationForm(QtGui.QWidget):
 
     # Set 'Default' view as initial view
     self.selectView(self.defaultViewMenu)
-
-  #endregion

@@ -1,8 +1,8 @@
 ﻿import sys
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
-class StartForm(QtGui.QDialog):
+class StartForm(QtWidgets.QDialog):
 
   #region Constructor
 
@@ -11,7 +11,7 @@ class StartForm(QtGui.QDialog):
     Initializes a new instance of this class.
     """
 
-    QtGui.QDialog.__init__(self)
+    QtWidgets.QDialog.__init__(self)
 
     self.initUI()
 
@@ -22,22 +22,22 @@ class StartForm(QtGui.QDialog):
   def initUI(self):
 
     # buttonNew
-    self.buttonNew = QtGui.QPushButton()
+    self.buttonNew = QtWidgets.QPushButton()
     self.buttonNew.setText("New Project")
     self.buttonNew.clicked.connect(self.__buttonNew_Click)
 
     # buttonOpen
-    self.buttonOpen = QtGui.QPushButton()
+    self.buttonOpen = QtWidgets.QPushButton()
     self.buttonOpen.setText("Open Project")
     self.buttonOpen.clicked.connect(self.__buttonOpen_Click)
 
     # buttonClose
-    self.buttonClose = QtGui.QPushButton()
+    self.buttonClose = QtWidgets.QPushButton()
     self.buttonClose.setText("Close")
     self.buttonClose.clicked.connect(self.__buttonClose_Click)
 
     # formLayout
-    layout = QtGui.QHBoxLayout()
+    layout = QtWidgets.QHBoxLayout()
     layout.addWidget(self.buttonNew)
     layout.addWidget(self.buttonOpen)
     layout.addWidget(self.buttonClose)

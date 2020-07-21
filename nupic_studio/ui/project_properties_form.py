@@ -1,7 +1,7 @@
-﻿from PyQt4 import QtGui, QtCore
+﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
-class ProjectPropertiesForm(QtGui.QDialog):
+class ProjectPropertiesForm(QtWidgets.QDialog):
 
   #region Constructor
 
@@ -10,7 +10,7 @@ class ProjectPropertiesForm(QtGui.QDialog):
     Initializes a new instance of this class.
     """
 
-    QtGui.QDialog.__init__(self)
+    QtWidgets.QDialog.__init__(self)
 
     self.initUI()
 
@@ -21,31 +21,31 @@ class ProjectPropertiesForm(QtGui.QDialog):
   def initUI(self):
 
     # labelName
-    self.labelName = QtGui.QLabel()
+    self.labelName = QtWidgets.QLabel()
     self.labelName.setText("Name")
     self.labelName.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxName
-    self.textBoxName = QtGui.QLineEdit()
+    self.textBoxName = QtWidgets.QLineEdit()
 
     # labelAuthor
-    self.labelAuthor = QtGui.QLabel()
+    self.labelAuthor = QtWidgets.QLabel()
     self.labelAuthor.setText("Author")
     self.labelAuthor.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxAuthor
-    self.textBoxAuthor = QtGui.QLineEdit()
+    self.textBoxAuthor = QtWidgets.QLineEdit()
 
     # labelDescription
-    self.labelDescription = QtGui.QLabel()
+    self.labelDescription = QtWidgets.QLabel()
     self.labelDescription.setText("Description")
     self.labelDescription.setAlignment(QtCore.Qt.AlignRight)
 
     # textBoxDescription
-    self.textBoxDescription = QtGui.QTextEdit()
+    self.textBoxDescription = QtWidgets.QTextEdit()
 
     # groupBoxMainLayout
-    groupBoxMainLayout = QtGui.QGridLayout()
+    groupBoxMainLayout = QtWidgets.QGridLayout()
     groupBoxMainLayout.addWidget(self.labelName, 0, 0)
     groupBoxMainLayout.addWidget(self.textBoxName, 0, 1)
     groupBoxMainLayout.addWidget(self.labelAuthor, 1, 0)
@@ -54,16 +54,16 @@ class ProjectPropertiesForm(QtGui.QDialog):
     groupBoxMainLayout.addWidget(self.textBoxDescription, 2, 1)
 
     # groupBoxMain
-    self.groupBoxMain = QtGui.QGroupBox()
+    self.groupBoxMain = QtWidgets.QGroupBox()
     self.groupBoxMain.setLayout(groupBoxMainLayout)
 
     # buttonBox
-    self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
-    self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
-    self.buttonBox.button(QtGui.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
+    self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+    self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_Click)
+    self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_Click)
 
     # layout
-    layout = QtGui.QVBoxLayout()
+    layout = QtWidgets.QVBoxLayout()
     layout.addWidget(self.groupBoxMain)
     layout.addWidget(self.buttonBox)
 

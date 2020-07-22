@@ -261,10 +261,9 @@ class Sensor(Node):
                 if encoding.enableInference:
                     # Prepare list with predictions to be classified
                     # This list contains the indexes of all bits that are predicted
-                    patternNZ = []
-                    for i in range(offset, encoderWidth):
-                        if self.bits[i].isActive.atCurrStep():
-                            patternNZ.append(i)
+                    patternNZ = [i
+                                 for i in range(offset, encoderWidth)
+                                 if self.bits[i].isActive.atCurrStep()]
 
                     # Get the bucket index of the current value at the encoder
                     actualValue = encoding.currentValue.atCurrStep()

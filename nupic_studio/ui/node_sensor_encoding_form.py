@@ -74,13 +74,7 @@ class EncodingForm(QtWidgets.QDialog):
         self.labelEncoderParams.setAlignment(QtCore.Qt.AlignRight)
 
         # dataGridEncoderParams
-        data = []
-        data.append(['', ''])
-        data.append(['', ''])
-        data.append(['', ''])
-        data.append(['', ''])
-        data.append(['', ''])
-        data.append(['', ''])
+        data = [['', ''] for i in xrange(6)]
         self.dataGridEncoderParams = QtWidgets.QTableView()
         self.dataGridEncoderParams.setModel(ArrayTableModel(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
         self.dataGridEncoderParams.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)

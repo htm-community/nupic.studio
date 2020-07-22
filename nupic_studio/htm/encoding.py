@@ -66,9 +66,7 @@ class Encoding:
 
         # Create Classifier instance with appropriate parameters
         self.minProbabilityThreshold = 0.0001
-        self.steps = []
-        for step in range(maxFutureSteps):
-            self.steps.append(step+1)
+        self.steps = [step+1 for step in range(maxFutureSteps)]
         self.classifier = CLAClassifier(steps=self.steps)
 
         # Increase history according to inference flag

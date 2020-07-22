@@ -61,10 +61,7 @@ class Network:
         self.phases = []
 
         # First put all sensors as non allocated nodes
-        nonAllocatedNodes = []
-        for node in self.nodes:
-            if node.type == NodeType.sensor:
-                nonAllocatedNodes.append(node)
+        nonAllocatedNodes = [node for node in self.nodes if node.type == NodeType.sensor]
 
         # Now find the regions that these sensors feed and process them recursively
         self.__processPhase(nonAllocatedNodes)
@@ -91,10 +88,10 @@ class Network:
                 nonAllocatedNodes.remove(node)
 
         # Add higher regions of the phase nodes into non allocated nodes list
-        for node in phaseNodes:
-            for link in self.links:
-                if link.outNode == node and not link.inNode in nonAllocatedNodes:
-                    nonAllocatedNodes.append(link.inNode)
+        nonAllocatedNodes = [link.inNode
+                             for link in self.links
+                             for node in phaseNodes
+                             if link.outNode == node and not link.inNode in nonAllocatedNodes]
 
         # Process recursively the remaining nodes
         if len(nonAllocatedNodes) > 0:
@@ -156,10 +153,9 @@ class Network:
         """
 
         # Get all nodes that feed the specified node
-        feeders = []
-        for link in self.links:
-            if link.inNode == node:
-                feeders.append(link.outNode)
+        feeders = [link.outNode
+                   for link in self.links
+                   if link.inNode == node]
 
         return feeders
 
@@ -169,10 +165,9 @@ class Network:
         """
 
         # Get all nodes that feed the specified node
-        feds = []
-        for link in self.links:
-            if link.outNode == node:
-                feds.append(link.inNode)
+        feds = [link.inNode
+                for link in self.links
+                if link.outNode == node]
 
         return feds
 

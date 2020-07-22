@@ -148,28 +148,28 @@ class MainForm(QtWidgets.QMainWindow):
         # buttonInitHTM
         self.buttonInitHTM = QtWidgets.QAction(self)
         self.buttonInitHTM.setEnabled(False)
-        self.buttonInitHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonInitializeHTM.png'))
+        self.buttonInitHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_initialize.png'))
         self.buttonInitHTM.setToolTip("Initialize simulation")
         self.buttonInitHTM.triggered.connect(self.__buttonInitHTM_click)
 
         # buttonStepHTM
         self.buttonStepHTM = QtWidgets.QAction(self)
         self.buttonStepHTM.setEnabled(False)
-        self.buttonStepHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStepHTM.png'))
+        self.buttonStepHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_step.png'))
         self.buttonStepHTM.setToolTip("Forward one time step")
         self.buttonStepHTM.triggered.connect(self.__buttonStepHTM_click)
 
         # buttonMultipleStepsHTM
         self.buttonMultipleStepsHTM = QtWidgets.QAction(self)
         self.buttonMultipleStepsHTM.setEnabled(False)
-        self.buttonMultipleStepsHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStepFastHTM.png'))
+        self.buttonMultipleStepsHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_multiple_steps.png'))
         self.buttonMultipleStepsHTM.setToolTip("Forward a specific number of time steps")
         self.buttonMultipleStepsHTM.triggered.connect(self.__buttonMultipleStepsHTM_click)
 
         # buttonStopHTM
         self.buttonStopHTM = QtWidgets.QAction(self)
         self.buttonStopHTM.setEnabled(False)
-        self.buttonStopHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/buttonStopHTM.png'))
+        self.buttonStopHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_stop.png'))
         self.buttonStopHTM.setToolTip("Stop simulation")
         self.buttonStopHTM.triggered.connect(self.__buttonStopHTM_click)
 

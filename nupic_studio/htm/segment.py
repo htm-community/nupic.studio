@@ -16,14 +16,14 @@ class Segment:
         Initializes a new instance of this class.
         """
 
+        # Determine if this segment is proximal or distal.
         self.type = type
-        """Determine if this segment is proximal or distal."""
 
+        # Index of this segment in the temporal pooler.
         self.indexTP = -1
-        """Index of this segment in the temporal pooler."""
 
+        # List of distal synapses of this segment.
         self.synapses = []
-        """List of distal synapses of this segment."""
 
         # States of this element
         self.isActive = MachineState(False, maxPreviousSteps)

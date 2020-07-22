@@ -42,10 +42,10 @@ class SimulationForm(QtWidgets.QWidget):
         self.viewer_3d.clear()
 
     def update(self):
-            """
-            Refresh controls for each time step.
-            """
-            self.viewer_3d.update()
+        """
+        Refresh controls for each time step.
+        """
+        self.viewer_3d.update()
 
     def refreshControls(self):
         """

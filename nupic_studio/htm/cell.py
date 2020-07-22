@@ -12,14 +12,14 @@ class Cell:
         Initializes a new instance of this class.
         """
 
+        # Index of this cell in the temporal pooler.
         self.index = -1
-        """Index of this cell in the temporal pooler."""
 
+        # Position on Z axis
         self.z = -1
-        """Position on Z axis"""
 
+        # List of distal segments of this cell.
         self.segments = []
-        """List of distal segments of this cell."""
 
         # States of this element
         self.isLearning = MachineState(False, maxPreviousSteps)

@@ -9,8 +9,8 @@ class Link:
         Initializes a new instance of this class.
         """
 
+        # Node which its output will be used as input to the second node.
         self.outNode = None
-        """Node which its output will be used as input to the second node."""
 
+        # Target region to receive the input.
         self.inNode = None
-        """Target region to receive the input."""

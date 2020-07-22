@@ -19,11 +19,11 @@ class Bit:
         Initialize this bit.
         """
 
+        # Position on X axis
         self.x = -1
-        """Position on X axis"""
 
+        # Position on Y axis
         self.y = -1
-        """Position on Y axis"""
 
         # States of this element
         self.isActive = MachineState(False, maxPreviousSteps)

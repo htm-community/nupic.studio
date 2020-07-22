@@ -18,20 +18,20 @@ class Node:
         Initializes a new instance of this class.
         """
 
+        # The name of the Node.
         self.name = name
-        """The name of the Node."""
 
+        # Type of the node (Region or Sensor).
         self.type = type
-        """Type of the node (Region or Sensor)"""
 
+        # Width determines the number of columns in the X axis.
         self.width = 64
-        """Width determines the number of columns in the X axis"""
 
+        # Height determines the number of columns in the Y axis.
         self.height = 64
-        """Height determines the number of columns in the Y axis"""
 
+        # An array representing the current output from this node.
         self._output = []
-        """An array representing the current output from this node."""
 
         self.tree2d_x = 0.
         self.tree2d_y = 0.

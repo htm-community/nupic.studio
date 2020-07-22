@@ -23,41 +23,41 @@ class Encoding:
         Initializes a new instance of this class.
         """
 
+        # Target field of the database table or file.
         self.dataSourceFieldName = ''
-        """Target field of the database table or file."""
 
+        # Data type of the field returned by database table or file.
         self.dataSourceFieldDataType = FieldDataType.string
-        """Data type of the field returned by database table or file."""
 
+        # Optional encoder to convert raw data to htm input and vice-versa.
         self.encoder = None
-        """Optional encoder to convert raw data to htm input and vice-versa."""
 
+        # Module name which encoder class is imported.
         self.encoderModule = ""
-        """Module name which encoder class is imported."""
 
+        # Class name which encode or decode values.
         self.encoderClass = ""
-        """Class name which encode or decode values."""
 
+        # Parameters passed to the encoder class constructor.
         self.encoderParams = ""
-        """Parameters passed to the encoder class constructor."""
 
+        # Field name returned by encoder when decode() function.
         self.encoderFieldName = ""
-        """Field name returned by encoder when decode() function."""
 
+        # Data type of the field returned by encoder.
         self.encoderFieldDataType = FieldDataType.string
-        """Data type of the field returned by encoder."""
 
+        # Enable inference for this field.
         self.enableInference = False
-        """Enable inference for this field."""
 
+        # Value read currently from database.
         self.currentValue = MachineState(None, maxPreviousSteps)
-        """Value read currently from database."""
 
+        # Best value predicted by network. This is need to build predictions chart.
         self.bestPredictedValue = MachineState(None, maxPreviousSteps)
-        """Best value predicted by network. This is need to build predictions chart."""
 
+        # Values predicted by network.
         self.predictedValues = MachineState(None, maxPreviousSteps)
-        """Values predicted by network."""
 
     def initialize(self):
         """

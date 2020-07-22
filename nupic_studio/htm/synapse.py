@@ -12,17 +12,17 @@ class Synapse:
         Initializes a new instance of this class.
         """
 
+        # Index of this cell in the spatial pooler.
         self.indexSP = -1
-        """Index of this cell in the spatial pooler."""
 
+        # Index of this synapse in the temporal pooler.
         self.indexTP = -1
-        """Index of this synapse in the temporal pooler."""
 
+        # An input element is a cell in case of the source be a column or then a bit in case of the source be a sensor.
         self.inputElem = None
-        """An input element is a cell in case of the source be a column or then a bit in case of the source be a sensor"""
 
+        # Permanence of this synapse.
         self.permanence = MachineState(0., maxPreviousSteps)
-        """Permanence of this synapse."""
 
         # States of this element
         self.isConnected = MachineState(False, maxPreviousSteps)

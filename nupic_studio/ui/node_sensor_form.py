@@ -15,11 +15,11 @@ class SensorForm(QtWidgets.QDialog):
 
         self.initUI()
 
+        # Temporary list of encodings that is being edited.
         self.encodings = []
-        """Temporary list of encodings that is being edited"""
 
+        # Flag to indicate if encodings list was edited.
         self.encodingsChanged = False
-        """Flag to indicate if encodings list was edited"""
 
     def initUI(self):
 

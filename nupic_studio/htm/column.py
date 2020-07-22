@@ -10,17 +10,17 @@ class Column:
         Initializes a new instance of this class.
         """
 
+        # Position on X axis
         self.x = -1
-        """Position on X axis"""
 
+        # Position on Y axis
         self.y = -1
-        """Position on Y axis"""
 
+        # Proximal segment of this column
         self.segment = Segment(SegmentType.proximal)
-        """Proximal segment of this column"""
 
+        # List of cells that compose this column.
         self.cells = []
-        """List of cells that compose this column."""
 
         self.tree3d_pos = (0, 0, 0)
 

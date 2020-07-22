@@ -78,14 +78,14 @@ class DesignPanel(QtWidgets.QWidget):
 
         QtWidgets.QWidget.__init__(self)
 
+        # Node that is on top of the hierarchy.
         self.topRegion = Region("TopRegion")
-        """Node that is on top of the hierarchy."""
 
+        # Node that is selected for visualization of its details.
         self.selectedNode = None
-        """Node that is selected for visualization of its details."""
 
+        # Node that is highlighted due to mouse is on it.
         self.underMouseNode = None
-        """Node that is highlighted due to mouse is on it."""
 
         # Space to skip horizontally between siblings
         # and vertically between generations

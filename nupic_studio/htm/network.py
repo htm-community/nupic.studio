@@ -15,17 +15,17 @@ class Network:
         Initializes a new instance of this class.
         """
 
+        # All regions/sensors in hierarchy which compose this network.
         self.nodes = []
-        """All regions/sensors in hierarchy which compose this network."""
 
+        # All links among all regions/sensors in hierarchy.
         self.links = []
-        """All links among all regions/sensors in hierarchy."""
 
+        # Phases stores the processing order of one or more nodes.
+        # For example, in the Phase #0 all sensors should be processed.
+        # In turn, in the phase #1 all regions that are fed by the processed nodes in the previous phase also are processed.
+        # The last phase is the phase where top nodes (that do not feed nothing but only receive inputs) are processed.
         self.phases = []
-        """Phases stores the processing order of one or more nodes.
-        For example, in the Phase #0 all sensors should be processed.
-        In turn, in the phase #1 all regions that are fed by the processed nodes in the previous phase also are processed.
-        The last phase is the phase where top nodes (that do not feed nothing but only receive inputs) are processed."""
 
         self.statsPrecisionRate = 0.
 

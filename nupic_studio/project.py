@@ -22,20 +22,20 @@ class Project:
         Initializes a new instance of this class.
         """
 
+        # Project file
         self.fileName = ''
-        """Project file"""
 
+        # Name of the project.
         self.name = "Untitled"
-        """Name of the project."""
 
+        # Author of the project.
         self.author = ""
-        """Author of the project."""
 
+        # Description of the project.
         self.description = ""
-        """Description of the project."""
 
+        # The network created for the project.
         self.network = Network()
-        """The network created for the project."""
 
     def new(self):
         """

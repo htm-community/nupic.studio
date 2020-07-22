@@ -42,38 +42,38 @@ class Sensor(Node):
 
         Node.__init__(self, name, NodeType.sensor)
 
+        # An array of the bit objects that compose the current output of this node.
         self.bits = []
-        """An array of the bit objects that compose the current output of this node."""
 
+        # Data source which provides records to fed into a region.
         self.dataSource = None
-        """Data source which provides records to fed into a region."""
 
+        # Type of the data source (File or Database).
         self.dataSourceType = DataSourceType.file
-        """Type of the data source (File or Database)"""
 
+        # The input file name to be handled. Returns the input file name only if it is in the project directory, full path otherwise.
         self.fileName = ''
-        """The input file name to be handled. Returns the input file name only if it is in the project directory, full path otherwise."""
 
+        # Connection string of the database.
         self.databaseConnectionString = ""
-        """Connection string of the database."""
 
+        # Target table of the database.
         self.databaseTable = ''
-        """Target table of the database."""
 
+        # Multi-encoder which concatenate sub-encodings to convert raw data to htm input and vice-versa.
         self.encoder = None
-        """Multi-encoder which concatenate sub-encodings to convert raw data to htm input and vice-versa."""
 
+        # List of sub-encodings that handles the input from database.
         self.encodings = []
-        """List of sub-encodings that handles the input from database"""
 
+        # Method used to get predicted values and their probabilities.
         self.predictionsMethod = PredictionsMethod.reconstruction
-        """Method used to get predicted values and their probabilities."""
 
+        # Switch for classification learning.
         self.enableClassificationLearning = True
-        """Switch for classification learning"""
 
+        # Switch for classification inference.
         self.enableClassificationInference = True
-        """Switch for classification inference"""
 
         self.statsPrecisionRate = 0.
 

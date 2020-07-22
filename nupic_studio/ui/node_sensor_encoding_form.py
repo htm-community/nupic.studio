@@ -16,11 +16,11 @@ class EncodingForm(QtWidgets.QDialog):
 
         self.initUI()
 
+        # Index of the encoding that is being edited. If index is -1 the user is creating a new encoding.
         self.encodingIdx = -1
-        """Index of the encoding that is being edited. If index is -1 the user is creating a new encoding."""
 
+        # Temporary list of encodings that is being edited.
         self.encodings = []
-        """Temporary list of encodings that is being edited"""
 
     def initUI(self):
 

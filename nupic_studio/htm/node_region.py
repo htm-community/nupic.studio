@@ -23,96 +23,137 @@ class Region(Node):
 
         Node.__init__(self, name, NodeType.region)
 
+        # List of columns that compose this region.
         self.columns = []
-        """List of columns that compose this region"""
 
+        # An array representing the input map for this region.
         self._inputMap = []
-        """An array representing the input map for this region."""
 
+        # Switch for spatial learning.
         self.enableSpatialLearning = True
-        """Switch for spatial learning"""
 
+        # This parameter determines the extent of the input that each column can potentially be connected to. This
+        # can be thought of as the input bits that are visible to each column, or a 'receptiveField' of the field of
+        # vision. A large enough value will result in 'global coverage', meaning that each column can potentially be
+        # connected to every input bit. This parameter defines a square (or hyper square) area: a column will have a
+        # max square potential pool with sides of length 2 * potentialRadius + 1.
         self.potentialRadius = 0
-        """This parameter determines the extent of the input that each column can potentially be connected to. This can be thought of as the input bits that are visible to each column, or a 'receptiveField' of the field of vision. A large enough value will result in 'global coverage', meaning that each column can potentially be connected to every input bit. This parameter defines a square (or hyper square) area: a column will have a max square potential pool with sides of length 2 * potentialRadius + 1."""
 
+        # The percent of the inputs, within a column's potential radius, that a column can be connected to. If set
+        # to 1, the column will be connected to every input within its potential radius. This parameter is used to
+        # give each column a unique potential pool when a large potentialRadius causes overlap between the columns.
+        # At initialization time we choose ((2*potentialRadius + 1)^(# inputDimensions) * potentialPct) input bits to
+        # comprise the column's potential pool.
         self.potentialPct = 0.5
-        """The percent of the inputs, within a column's potential radius, that a column can be connected to. If set to 1, the column will be connected to every input within its potential radius. This parameter is used to give each column a unique potential pool when a large potentialRadius causes overlap between the columns. At initialization time we choose ((2*potentialRadius + 1)^(# inputDimensions) * potentialPct) input bits to comprise the column's potential pool."""
 
+        # If true, then during inhibition phase the winning columns are selected as the most active columns from the
+        # region as a whole. Otherwise, the winning columns are selected with respect to their local neighborhoods.
+        # Using global inhibition boosts performance x60.
         self.globalInhibition = False
-        """If true, then during inhibition phase the winning columns are selected as the most active columns from the region as a whole. Otherwise, the winning columns are selected with respect to their local neighborhoods. Using global inhibition boosts performance x60."""
 
+        # The desired density of active columns within a local inhibition area (the size of which is set by the
+        # internally calculated inhibitionRadius, which is in turn determined from the average size of the connected
+        # potential pools of all columns). The inhibition logic will insure that at most N columns remain ON within a
+        # local inhibition area, where N = localAreaDensity * (total number of columns in inhibition area).
         self.localAreaDensity = -1.0
-        """The desired density of active columns within a local inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn determined from the average size of the connected potential pools of all columns). The inhibition logic will insure that at most N columns remain ON within a local inhibition area, where N = localAreaDensity * (total number of columns in inhibition area)."""
 
+        # An alternate way to control the density of the active columns. If numActiveColumnsPerInhArea is specified
+        # then localAreaDensity must be less than 0, and vice versa. When using numActiveColumnsPerInhArea, the
+        # inhibition logic will insure that at most 'numActiveColumnsPerInhArea' columns remain ON within a local
+        # inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn
+        # determined from the average size of the connected receptive fields of all columns). When using this method,
+        # as columns learn and grow their effective receptive fields, the inhibitionRadius will grow, and hence the net
+        # density of the active columns will *decrease*. This is in contrast to the localAreaDensity method, which
+        # keeps the density of active columns the same regardless of the size of their receptive fields.
         self.numActiveColumnsPerInhArea = int(0.02 * (self.width * self.height))
-        """An alternate way to control the density of the active columns. If numActiveColumnsPerInhArea is specified then localAreaDensity must be less than 0, and vice versa. When using numActiveColumnsPerInhArea, the inhibition logic will insure that at most 'numActiveColumnsPerInhArea' columns remain ON within a local inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn determined from the average size of the connected receptive fields of all columns). When using this method, as columns learn and grow their effective receptive fields, the inhibitionRadius will grow, and hence the net density of the active columns will *decrease*. This is in contrast to the localAreaDensity method, which keeps the density of active columns the same regardless of the size of their receptive fields."""
 
+        # This is a number specifying the minimum number of synapses that must be on in order for a columns to turn ON.
+        # The purpose of this is to prevent noise input from activating columns. Specified as a percent of a fully grown
+        # synapse.
         self.stimulusThreshold = 0
-        """This is a number specifying the minimum number of synapses that must be on in order for a columns to turn ON. The purpose of this is to prevent noise input from activating columns. Specified as a percent of a fully grown synapse."""
 
         self.proximalSynConnectedPerm = 0.10
-        """The default connected threshold. Any synapse whose permanence value is above the connected threshold is a "connected synapse", meaning it can contribute to the cell's firing."""
+        # The default connected threshold. Any synapse whose permanence value is above the connected threshold is a
+        # "connected synapse", meaning it can contribute to the cell's firing.
 
         self.proximalSynPermIncrement = 0.1
-        """The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse."""
+        # The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown
+        # synapse.
 
         self.proximalSynPermDecrement = 0.01
-        """The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse."""
+        # The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown
+        # synapse.
 
+        # A number between 0 and 1.0, used to set a floor on how often a column should have at least stimulusThreshold
+        # active inputs. Periodically, each column looks at the overlap duty cycle of all other columns within its
+        # inhibition radius and sets its own internal minimal acceptable duty cycle to:
+        #     minPctDutyCycleBeforeInh * max(other columns' duty cycles).
+        # On each iteration, any column whose overlap duty cycle falls below this computed value will get all of its
+        # permanence values boosted up by synPermActiveInc. Raising all permanences in response to a sub-par duty cycle
+        # before inhibition allows a cell to search for new inputs when either its previously learned inputs are no
+        # longer ever active, or when the vast majority of them have been "hijacked" by other columns.
         self.minPctOverlapDutyCycle = 0.001
-        """A number between 0 and 1.0, used to set a floor on how often a column should have at least stimulusThreshold active inputs. Periodically, each column looks at the overlap duty cycle of all other columns within its inhibition radius and sets its own internal minimal acceptable duty cycle to:
-            minPctDutyCycleBeforeInh * max(other columns' duty cycles).
-        On each iteration, any column whose overlap duty cycle falls below this computed value will get all of its permanence values boosted up by synPermActiveInc. Raising all permanences in response to a sub-par duty cycle before inhibition allows a cell to search for new inputs when either its previously learned inputs are no longer ever active, or when the vast majority of them have been "hijacked" by other columns."""
 
+        # A number between 0 and 1.0, used to set a floor on how often a column should be activate. Periodically, each
+        # column looks at the activity duty cycle of all other columns within its inhibition radius and sets its own
+        # internal minimal acceptable duty cycle to:
+        #     minPctDutyCycleAfterInh * max(other columns' duty cycles).
+        # On each iteration, any column whose duty cycle after inhibition falls below this computed value will get its
+        # internal boost factor increased.
         self.minPctActiveDutyCycle = 0.001
-        """A number between 0 and 1.0, used to set a floor on how often a column should be activate. Periodically, each column looks at the activity duty cycle of all other columns within its inhibition radius and sets its own internal minimal acceptable duty cycle to:
-            minPctDutyCycleAfterInh * max(other columns' duty cycles).
-        On each iteration, any column whose duty cycle after inhibition falls below this computed value will get its internal boost factor increased."""
 
+        # The period used to calculate duty cycles. Higher values make it take longer to respond to changes in boost or
+        # synPerConnectedCell. Shorter values make it more unstable and likely to oscillate.
         self.dutyCyclePeriod = 1000
-        """The period used to calculate duty cycles. Higher values make it take longer to respond to changes in boost or synPerConnectedCell. Shorter values make it more unstable and likely to oscillate."""
 
+        # The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets
+        # considered for inhibition. The actual boost factor for a column is number between 1.0 and maxBoost. A boost
+        # factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, maxBoost is used if the duty cycle is 0,
+        # and any duty cycle in between is linearly extrapolated from these 2 endpoints.
         self.maxBoost = 10.0
-        """The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets considered for inhibition. The actual boost factor for a column is number between 1.0 and maxBoost. A boost factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, maxBoost is used if the duty cycle is 0, and any duty cycle in between is linearly extrapolated from these 2 endpoints."""
 
+        # Seed for generate random values.
         self.spSeed = -1
-        """Seed for generate random values"""
 
+        # Switch for temporal learning.
         self.enableTemporalLearning = True
-        """Switch for temporal learning"""
 
+        # Number of cells per column. More cells, more contextual information.
         self.numCellsPerColumn = 10
-        """Number of cells per column. More cells, more contextual information"""
 
+        # The initial permanence of an distal synapse.
         self.distalSynInitialPerm = 0.11
-        """The initial permanence of an distal synapse."""
 
+        # The default connected threshold. Any synapse whose permanence value is above the connected threshold is a
+        # "connected synapse", meaning it can contribute to the cell's firing.
         self.distalSynConnectedPerm = 0.50
-        """The default connected threshold. Any synapse whose permanence value is above the connected threshold is a "connected synapse", meaning it can contribute to the cell's firing."""
 
+        # The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown
+        # synapse.
         self.distalSynPermIncrement = 0.10
-        """The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse."""
 
+        # The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown
+        # synapse.
         self.distalSynPermDecrement = 0.10
-        """The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse."""
 
+        # If the number of synapses active on a segment is at least this threshold, it is selected as the best matching
+        # cell in a bursing column.
         self.minThreshold = 8
-        """If the number of synapses active on a segment is at least this threshold, it is selected as the best matching cell in a bursing column."""
 
+        # If the number of active connected synapses on a segment is at least this threshold, the segment is said to be active.
         self.activationThreshold = 12
-        """If the number of active connected synapses on a segment is at least this threshold, the segment is said to be active."""
 
+        # The maximum number of synapses added to a segment during learning.
         self.maxNumNewSynapses = 15
-        """The maximum number of synapses added to a segment during learning."""
 
+        # Seed for generate random values.
         self.tpSeed = 42
-        """Seed for generate random values"""
 
+        # Spatial Pooler instance.
         self.spatialPooler = None
-        """Spatial Pooler instance"""
 
+        # Temporal Pooler instance.
         self.temporalPooler = None
-        """Temporal Pooler instance"""
 
         self.statsPrecisionRate = 0.
 

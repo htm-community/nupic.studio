@@ -137,21 +137,21 @@ class Simulation(ShowBase):
 
         # Load the color textures
         print("Loading textures...")
-        Texture3D.Red = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_red.png")))
-        Texture3D.Yellow = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_yellow.png")))
-        Texture3D.GreenYellow = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_green_yellow.png")))
+        Texture3D.RED = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_red.png")))
+        Texture3D.YELLOW = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_yellow.png")))
+        Texture3D.GREEN_YELLOW = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_green_yellow.png")))
         Texture3D.Green = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_green.png")))
-        Texture3D.Blue = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_blue.png")))
-        Texture3D.Gray = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_gray.png")))
+        Texture3D.BLUE = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_blue.png")))
+        Texture3D.GRAY = self.loader.loadTexture(Filename.from_os_specific(os.path.join(REPO_DIR, "models", "tex_gray.png")))
 
         print("Adjusting lights...")
         directional_light_1 = DirectionalLight('directional_light_1')
-        directional_light_1.setColor(Color3D.White)
+        directional_light_1.setColor(Color3D.WHITE)
         self.directional_light_1_np = self.render.attachNewNode(directional_light_1)
         self.directional_light_1_np.setHpr(200, -20, 0)
         self.render.setLight(self.directional_light_1_np)
         directional_light_2 = DirectionalLight('directional_light_2')
-        directional_light_2.setColor(Color3D.White)
+        directional_light_2.setColor(Color3D.WHITE)
         self.directional_light_2_np = self.render.attachNewNode(directional_light_2)
         self.directional_light_2_np.setHpr(20, -20, 0)
         self.render.setLight(self.directional_light_2_np)
@@ -181,7 +181,7 @@ class Simulation(ShowBase):
         self.coords_np, self.axis_x_np, self.axis_y_np, self.axis_z_np, self.cam_label_np, self.cam_pos_np, self.cam_hpr_np, \
         self.touched_label_np, self.touched_object_np, self.touched_pos_np = self.createScreenWidgets()
 
-        self.isSimulating = True
+        self.is_simulating = True
         print("Simulation running!")
         print("(See 'output.log' to more details)")
 
@@ -201,13 +201,13 @@ class Simulation(ShowBase):
 
     def destroy(self):
         print("Cleaning memory...")
-        self.isSimulating = False
+        self.is_simulating = False
         ShowBase.destroy(self)
         print("Simulation stopped!")
 
     def update(self, task):
         # Don't update if simulating is stopping! Risk of null objects raise exceptions.
-        if self.isSimulating:
+        if self.is_simulating:
             self.updateCamera()
             time_per_frame = self.getTimePerFrame()
             self.physics_manager.doPhysics(time_per_frame)
@@ -355,7 +355,7 @@ class Simulation(ShowBase):
         origin = [-1.7, 5, -1.1]
         text = TextNode("cam_label")
         text.setText("Observer")
-        text.setTextColor(Color3D.Yellow)
+        text.setTextColor(Color3D.YELLOW)
         cam_label_np = self.cam.attachNewNode(text)
         cam_label_np.setPos(self.cam, tuple(origin))
         cam_label_np.setScale(0.07)
@@ -364,7 +364,7 @@ class Simulation(ShowBase):
         origin = [-1.7, 5, -1.2]
         text = TextNode("cam_pos")
         text.setText("XYZ:")
-        text.setTextColor(Color3D.Yellow)
+        text.setTextColor(Color3D.YELLOW)
         cam_pos_np = self.cam.attachNewNode(text)
         cam_pos_np.setPos(self.cam, tuple(origin))
         cam_pos_np.setScale(0.07)
@@ -373,7 +373,7 @@ class Simulation(ShowBase):
         origin = [-1.7, 5, -1.3]
         text = TextNode("cam_hpr")
         text.setText("HPR:")
-        text.setTextColor(Color3D.Yellow)
+        text.setTextColor(Color3D.YELLOW)
         cam_hpr_np = self.cam.attachNewNode(text)
         cam_hpr_np.setPos(self.cam, tuple(origin))
         cam_hpr_np.setScale(0.07)
@@ -382,7 +382,7 @@ class Simulation(ShowBase):
         origin = [0.8, 5, -1.1]
         text = TextNode("touched_label")
         text.setText("Touched Object")
-        text.setTextColor(Color3D.Yellow)
+        text.setTextColor(Color3D.YELLOW)
         touched_label_np = self.cam.attachNewNode(text)
         touched_label_np.setPos(self.cam, tuple(origin))
         touched_label_np.setScale(0.07)
@@ -391,14 +391,14 @@ class Simulation(ShowBase):
         origin = [0.8, 5, -1.2]
         text = TextNode("touched_object")
         text.setText("Name:")
-        text.setTextColor(Color3D.Yellow)
+        text.setTextColor(Color3D.YELLOW)
         touched_object_np = self.cam.attachNewNode(text)
         touched_object_np.setPos(self.cam, tuple(origin))
         touched_object_np.setScale(0.07)
 
         return coords_np, axis_x_np, axis_y_np, axis_z_np, cam_label_np, cam_pos_np, cam_hpr_np, touched_label_np, touched_object_np, touched_object_np
 
-    def _create_element(self, name, type, start, end=None):
+    def createElement(self, name, type, start, end=None):
         if type == "cell":
             model_file = "sphere.dae"
         elif type == "bit":
@@ -446,22 +446,22 @@ class Simulation(ShowBase):
     def createBit(self, position):
         name = "bit_" + str(self.last_bit_idx)
         self.last_bit_idx += 1
-        return self._create_element(name, "bit", position)
+        return self.createElement(name, "bit", position)
 
     def createCell(self, position):
         name = "cell_" + str(self.last_cell_idx)
         self.last_cell_idx += 1
-        return self._create_element(name, "cell", position)
+        return self.createElement(name, "cell", position)
 
     def createSegment(self, start, end):
         name = "segment_" + str(self.last_segment_idx)
         self.last_segment_idx += 1
-        return self._create_element(name, "segment", start, end)
+        return self.createElement(name, "segment", start, end)
 
     def createSynapse(self, start, end):
         name = "synapse_" + str(self.last_synapse_idx)
         self.last_synapse_idx += 1
-        return self._create_element(name, "synapse", start, end)
+        return self.createElement(name, "synapse", start, end)
 
     def removeElement(self, element_np):
         if len(element_np.children) > 0:

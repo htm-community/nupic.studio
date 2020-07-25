@@ -1,191 +1,95 @@
 import os
-import collections
+import copy
 from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.htm import maxPreviousStepsWithInference
 
 
 class State:
-    No_Started = 0
-    Simulating = 1
-    Playbacking = 2
-    Stopped = 3
+    NO_STARTED = 0
+    SIMULATING = 1
+    PLAYBACKING = 2
+    STOPPED = 3
 
 
-class View:
-    """
-    A class only to group properties related to pre-defined views.
-    """
+DEFAULT_CONFIGURATION = {'views': [
+    {'name': "Default", 'show_bits_none': False, 'show_bits_active': True, 'show_bits_predicted': True, 'show_bits_falsely_predicted': True, 'show_cells_none': False, 'show_cells_learning': True, 'show_cells_active': True, 'show_cells_predicted': True, 'show_cells_falsely_predicted': True, 'show_cells_inactive': False, 'show_proximal_segments_none': False, 'show_proximal_segments_active': True, 'show_proximal_segments_predicted': True, 'show_proximal_segments_falsely_predicted': True, 'show_proximal_synapses_none': False, 'show_proximal_synapses_connected': True, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': True, 'show_proximal_synapses_falsely_predicted': True, 'show_distal_segments_none': False, 'show_distal_segments_active': True, 'show_distal_synapses_none': False, 'show_distal_synapses_connected': True, 'show_distal_synapses_active': False},
+    {'name': "Sensors Bits", 'show_bits_none': False, 'show_bits_active': True, 'show_bits_predicted': True, 'show_bits_falsely_predicted': True, 'show_cells_none': True, 'show_cells_learning': False, 'show_cells_active': False, 'show_cells_predicted': False, 'show_cells_falsely_predicted': False, 'show_cells_inactive': False, 'show_proximal_segments_none': True, 'show_proximal_segments_active': False, 'show_proximal_segments_predicted': False, 'show_proximal_segments_falsely_predicted': False, 'show_proximal_synapses_none': True, 'show_proximal_synapses_connected': False, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': False, 'show_proximal_synapses_falsely_predicted': False, 'show_distal_segments_none': True, 'show_distal_segments_active': False, 'show_distal_synapses_none': True, 'show_distal_synapses_connected': False, 'show_distal_synapses_active': False},
+    {'name': "Spatial Activation", 'show_bits_none': False, 'show_bits_active': True, 'show_bits_predicted': False, 'show_bits_falsely_predicted': False, 'show_cells_none': False, 'show_cells_learning': False, 'show_cells_active': True, 'show_cells_predicted': False, 'show_cells_falsely_predicted': False, 'show_cells_inactive': False, 'show_proximal_segments_none': False, 'show_proximal_segments_active': True, 'show_proximal_segments_predicted': False, 'show_proximal_segments_falsely_predicted': False, 'show_proximal_synapses_none': False, 'show_proximal_synapses_connected': True, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': False, 'show_proximal_synapses_falsely_predicted': False, 'show_distal_segments_none': True, 'show_distal_segments_active': False, 'show_distal_synapses_none': True, 'show_distal_synapses_connected': False, 'show_distal_synapses_active': False},
+    {'name': "Temporal Activation", 'show_bits_none': False, 'show_bits_active': False, 'show_bits_predicted': True, 'show_bits_falsely_predicted': True, 'show_cells_none': False, 'show_cells_learning': True, 'show_cells_active': False, 'show_cells_predicted': True, 'show_cells_falsely_predicted': True, 'show_cells_inactive': False, 'show_proximal_segments_none': False, 'show_proximal_segments_active': False, 'show_proximal_segments_predicted': True, 'show_proximal_segments_falsely_predicted': True, 'show_proximal_synapses_none': False, 'show_proximal_synapses_connected': False, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': True, 'show_proximal_synapses_falsely_predicted': True, 'show_distal_segments_none': False, 'show_distal_segments_active': True, 'show_distal_synapses_none': False, 'show_distal_synapses_connected': True, 'show_distal_synapses_active': False},
+    {'name': "Active Elements", 'show_bits_none': False, 'show_bits_active': True, 'show_bits_predicted': False, 'show_bits_falsely_predicted': False, 'show_cells_none': False, 'show_cells_learning': True, 'show_cells_active': True, 'show_cells_predicted': False, 'show_cells_falsely_predicted': False, 'show_cells_inactive': False, 'show_proximal_segments_none': False, 'show_proximal_segments_active': True, 'show_proximal_segments_predicted': False, 'show_proximal_segments_falsely_predicted': False, 'show_proximal_synapses_none': False, 'show_proximal_synapses_connected': True, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': False, 'show_proximal_synapses_falsely_predicted': False, 'show_distal_segments_none': False, 'show_distal_segments_active': True, 'show_distal_synapses_none': False, 'show_distal_synapses_connected': True, 'show_distal_synapses_active': False},
+    {'name': "Predicted Elements", 'show_bits_none': False, 'show_bits_active': False, 'show_bits_predicted': True, 'show_bits_falsely_predicted': True, 'show_cells_none': False, 'show_cells_learning': False, 'show_cells_active': False, 'show_cells_predicted': True, 'show_cells_falsely_predicted': True, 'show_cells_inactive': False, 'show_proximal_segments_none': False, 'show_proximal_segments_active': False, 'show_proximal_segments_predicted': True, 'show_proximal_segments_falsely_predicted': True, 'show_proximal_synapses_none': False, 'show_proximal_synapses_connected': False, 'show_proximal_synapses_active': False, 'show_proximal_synapses_predicted': True, 'show_proximal_synapses_falsely_predicted': True, 'show_distal_segments_none': True, 'show_distal_segments_active': False, 'show_distal_synapses_none': True, 'show_distal_synapses_connected': False, 'show_distal_synapses_active': False},
+]}
 
-    def __init__(self):
-        """
-        Initializes a new instance of this class.
-        """
 
-        self.menu = None
-        self.name = ""
-        self.showBitsNone = False
-        self.showBitsActive = True
-        self.showBitsPredicted = True
-        self.showBitsFalselyPredicted = True
-        self.showCellsNone = False
-        self.showCellsLearning = True
-        self.showCellsActive = True
-        self.showCellsPredicted = True
-        self.showCellsFalselyPredicted = True
-        self.showCellsInactive = True
-        self.showProximalSegmentsNone = False
-        self.showProximalSegmentsActive = True
-        self.showProximalSegmentsPredicted = True
-        self.showProximalSegmentsFalselyPredicted = True
-        self.showProximalSynapsesNone = False
-        self.showProximalSynapsesConnected = True
-        self.showProximalSynapsesActive = True
-        self.showProximalSynapsesPredicted = True
-        self.showProximalSynapsesFalselyPredicted = True
-        self.showDistalSegmentsNone = False
-        self.showDistalSegmentsActive = True
-        self.showDistalSynapsesNone = False
-        self.showDistalSynapsesConnected = True
-        self.showDistalSynapsesActive = True
+NEW_VIEW = {
+    'menu': None,
+    'name': "",
+    'show_bits_none': False,
+    'show_bits_active': True,
+    'show_bits_predicted': True,
+    'show_bits_falsely_predicted': True,
+    'show_cells_none': False,
+    'show_cells_learning': True,
+    'show_cells_active': True,
+    'show_cells_predicted': True,
+    'show_cells_falsely_predicted': True,
+    'show_cells_inactive': True,
+    'show_proximal_segments_none': False,
+    'show_proximal_segments_active': True,
+    'show_proximal_segments_predicted': True,
+    'show_proximal_segments_falsely_predicted': True,
+    'show_proximal_synapses_none': False,
+    'show_proximal_synapses_connected': True,
+    'show_proximal_synapses_active': True,
+    'show_proximal_synapses_predicted': True,
+    'show_proximal_synapses_falsely_predicted': True,
+    'show_distal_segments_none': False,
+    'show_distal_segments_active': True,
+    'show_distal_synapses_none': False,
+    'show_distal_synapses_connected': True,
+    'show_distal_synapses_active': True,
+}
+
 
 class Global:
-    appPath = ''
+    app_path = ''
     version = '0.1.0'
 
-    simulationInitialized = False
-    currStep = 0
-    selStep = 0
-    timeStepsPredictionsChart = None
+    simulation_initialized = False
+    curr_step = 0
+    sel_step = 0
+    time_steps_predictions_chart = None
     output = []
 
     views = []
 
     project = None
-    architectureForm = None
-    nodeInformationForm = None
-    simulationForm = None
-    outputForm = None
-    mainForm = None
+    architecture_form = None
+    node_information_form = None
+    simulation_form = None
+    output_form = None
+    main_form = None
 
     @staticmethod
     def loadConfig():
         """
         Loads the content from XML file to config the program.
         """
-
-        fileName = os.path.join(Global.appPath, "nupic_studio.config")
-        file = QtCore.QFile(fileName)
-        if (file.open(QtCore.QIODevice.ReadOnly)):
-            xmlReader = QtCore.QXmlStreamReader()
-            xmlReader.setDevice(file)
-            while (not xmlReader.isEndDocument()):
-                if xmlReader.isStartElement():
-                    if xmlReader.name() == 'View':
-                        view = View()
-                        view.name = Global.__getStringAttribute(xmlReader.attributes(), 'name')
-                        view.showBitsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsNone')
-                        view.showBitsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsActive')
-                        view.showBitsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsPredicted')
-                        view.showBitsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showBitsFalselyPredicted')
-                        view.showCellsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsNone')
-                        view.showCellsLearning = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsLearning')
-                        view.showCellsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsActive')
-                        view.showCellsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsPredicted')
-                        view.showCellsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsFalselyPredicted')
-                        view.showCellsInactive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showCellsInactive')
-                        view.showProximalSegmentsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsNone')
-                        view.showProximalSegmentsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsActive')
-                        view.showProximalSegmentsPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsPredicted')
-                        view.showProximalSegmentsFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSegmentsFalselyPredicted')
-                        view.showProximalSynapsesNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesNone')
-                        view.showProximalSynapsesConnected = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesConnected')
-                        view.showProximalSynapsesActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesActive')
-                        view.showProximalSynapsesPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesPredicted')
-                        view.showProximalSynapsesFalselyPredicted = Global.__getBooleanAttribute(xmlReader.attributes(), 'showProximalSynapsesFalselyPredicted')
-                        view.showDistalSegmentsNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSegmentsNone')
-                        view.showDistalSegmentsActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSegmentsActive')
-                        view.showDistalSynapsesNone = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSynapsesNone')
-                        view.showDistalSynapsesConnected = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSynapsesConnected')
-                        view.showDistalSynapsesActive = Global.__getBooleanAttribute(xmlReader.attributes(), 'showDistalSynapsesActive')
-                        Global.views.append(view)
-                xmlReader.readNext()
-            if (xmlReader.hasError()):
-                QtWidgets.QMessageBox.critical(None, "Critical", "Ocurred a XML error: " + xmlReader.errorString().data(), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
-        else:
-            QtWidgets.QMessageBox.critical(None, "Critical", "Cannot read the config file!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
-
-    @staticmethod
-    def __getStringAttribute(attributes, attributeName):
-        if attributes.value(attributeName) != "":
-            attributeValue = str(attributes.value(attributeName))
-        else:
-            attributeValue = ""
-        return attributeValue
-
-    @staticmethod
-    def __getIntegerAttribute(attributes, attributeName):
-        attributeValue = 0
-        if attributes.value(attributeName) != "":
-            attributeValue = int(attributes.value(attributeName))
-        return attributeValue
-
-    @staticmethod
-    def __getFloatAttribute(attributes, attributeName):
-        attributeValue = 0.0
-        if attributes.value(attributeName) != "":
-            attributeValue = float(attributes.value(attributeName))
-        return attributeValue
-
-    @staticmethod
-    def __getBooleanAttribute(attributes, attributeName):
-        attributeValue = False
-        if attributes.value(attributeName) == "True":
-            attributeValue = True
-        return attributeValue
+        file_name = os.path.join(Global.app_path, "nupic_studio.config")
+        try:
+            config = eval(open(file_name, 'r').read())
+        except:
+            QtWidgets.QMessageBox.warning(None, "Warning", "Cannot read the config file (" + file_name + ")! Configuration was reseted!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
+            config = DEFAULT_CONFIGURATION
+        Global.views = config['views']
 
     @staticmethod
     def saveConfig():
         """
         Saves the content from current program's configuration.
         """
-
-        fileName = os.path.join(Global.appPath, "nupic_studio.config")
-        file = QtCore.QFile(fileName)
-        file.open(QtCore.QIODevice.WriteOnly)
-        xmlWriter = QtCore.QXmlStreamWriter(file)
-        xmlWriter.setAutoFormatting(True)
-        xmlWriter.writeStartDocument()
-        xmlWriter.writeStartElement('Program')
-
-        for view in Global.views:
-            xmlWriter.writeStartElement('View')
-            xmlWriter.writeAttribute('name', view.name)
-            xmlWriter.writeAttribute('showBitsNone', str(view.showBitsNone))
-            xmlWriter.writeAttribute('showBitsActive', str(view.showBitsActive))
-            xmlWriter.writeAttribute('showBitsPredicted', str(view.showBitsPredicted))
-            xmlWriter.writeAttribute('showBitsFalselyPredicted', str(view.showBitsFalselyPredicted))
-            xmlWriter.writeAttribute('showCellsNone', str(view.showCellsNone))
-            xmlWriter.writeAttribute('showCellsLearning', str(view.showCellsLearning))
-            xmlWriter.writeAttribute('showCellsActive', str(view.showCellsActive))
-            xmlWriter.writeAttribute('showCellsPredicted', str(view.showCellsPredicted))
-            xmlWriter.writeAttribute('showCellsFalselyPredicted', str(view.showCellsFalselyPredicted))
-            xmlWriter.writeAttribute('showCellsInactive', str(view.showCellsInactive))
-            xmlWriter.writeAttribute('showProximalSegmentsNone', str(view.showProximalSegmentsNone))
-            xmlWriter.writeAttribute('showProximalSegmentsActive', str(view.showProximalSegmentsActive))
-            xmlWriter.writeAttribute('showProximalSegmentsPredicted', str(view.showProximalSegmentsPredicted))
-            xmlWriter.writeAttribute('showProximalSegmentsFalselyPredicted', str(view.showProximalSegmentsFalselyPredicted))
-            xmlWriter.writeAttribute('showProximalSynapsesNone', str(view.showProximalSynapsesNone))
-            xmlWriter.writeAttribute('showProximalSynapsesConnected', str(view.showProximalSynapsesConnected))
-            xmlWriter.writeAttribute('showProximalSynapsesActive', str(view.showProximalSynapsesActive))
-            xmlWriter.writeAttribute('showProximalSynapsesPredicted', str(view.showProximalSynapsesPredicted))
-            xmlWriter.writeAttribute('showProximalSynapsesFalselyPredicted', str(view.showProximalSynapsesFalselyPredicted))
-            xmlWriter.writeAttribute('showDistalSegmentsNone', str(view.showDistalSegmentsNone))
-            xmlWriter.writeAttribute('showDistalSegmentsActive', str(view.showDistalSegmentsActive))
-            xmlWriter.writeAttribute('showDistalSynapsesNone', str(view.showDistalSynapsesNone))
-            xmlWriter.writeAttribute('showDistalSynapsesConnected', str(view.showDistalSynapsesConnected))
-            xmlWriter.writeAttribute('showDistalSynapsesActive', str(view.showDistalSynapsesActive))
-            xmlWriter.writeEndElement()
-
-        xmlWriter.writeEndElement()
-        xmlWriter.writeEndDocument()
-        file.close()
+        file_name = os.path.join(Global.app_path, "nupic_studio.config")
+        views = copy.deepcopy(Global.views)
+        for view in views:
+            view['menu'] = None
+        config = {'views': views}
+        open(file_name, 'w').write(str(config))

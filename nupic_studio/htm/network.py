@@ -5,6 +5,7 @@ from nupic_studio.htm.node import NodeType
 from nupic_studio.htm.link import Link
 from nupic_studio.ui import Global
 
+
 class Network:
     """
     The mains class for represent a HTM network composed by nodes and the links among them.
@@ -27,7 +28,8 @@ class Network:
         # The last phase is the phase where top nodes (that do not feed nothing but only receive inputs) are processed.
         self.phases = []
 
-        self.statsPrecisionRate = 0.
+        # Statistics
+        self.stats_precision_rate = 0.0
 
     def initialize(self):
         """
@@ -35,11 +37,11 @@ class Network:
         """
 
         # Initialize nodes using phases order
-        for phaseNodes in self.phases:
-            for node in phaseNodes:
+        for nodes in self.phases:
+            for node in nodes:
                 initialized = node.initialize()
                 if not initialized:
-                    return
+                    return False
 
         return True
 
@@ -49,53 +51,52 @@ class Network:
         """
 
         # Process nodes using phases order
-        for phaseNodes in self.phases:
-            for node in phaseNodes:
+        for nodes in self.phases:
+            for node in nodes:
                 node.nextStep()
 
     def preparePhases(self):
         """
         Prepare phases analysing links between nodes.
         """
-
         self.phases = []
 
         # First put all sensors as non allocated nodes
-        nonAllocatedNodes = [node for node in self.nodes if node.type == NodeType.sensor]
+        non_allocated_nodes = [node for node in self.nodes if node.type == NodeType.SENSOR]
 
         # Now find the regions that these sensors feed and process them recursively
-        self.__processPhase(nonAllocatedNodes)
+        self.processPhase(non_allocated_nodes)
 
-    def __processPhase(self, nonAllocatedNodes):
+    def processPhase(self, non_allocated_nodes):
 
         # Check what nodes in the temporary list could be allocated into next phase
         # Only allocate a node to the next phase if this node not receives inputs of other non allocated node
         # if the node depends of other nodes, the latter ones has priority to be allocated into next phase
-        phaseNodes = []
-        for node in nonAllocatedNodes:
-            canAllocate = True
+        phase_nodes = []
+        for node in non_allocated_nodes:
+            can_allocate = True
             for link in self.links:
-                if link.inNode == node and link.outNode in nonAllocatedNodes:
-                    canAllocate = False
+                if link.in_node == node and link.out_node in non_allocated_nodes:
+                    can_allocate = False
                     break
-            if canAllocate:
-                phaseNodes.append(node)
-        self.phases.append(phaseNodes)
+            if can_allocate:
+                phase_nodes.append(node)
+        self.phases.append(phase_nodes)
 
         # Remove allocated nodes from non allocated list
-        for node in phaseNodes:
-            if node in nonAllocatedNodes:
-                nonAllocatedNodes.remove(node)
+        for node in phase_nodes:
+            if node in non_allocated_nodes:
+                non_allocated_nodes.remove(node)
 
         # Add higher regions of the phase nodes into non allocated nodes list
-        nonAllocatedNodes = [link.inNode
-                             for link in self.links
-                             for node in phaseNodes
-                             if link.outNode == node and not link.inNode in nonAllocatedNodes]
+        non_allocated_nodes = [link.in_node
+                               for link in self.links
+                               for node in phase_nodes
+                               if link.out_node == node and not link.in_node in non_allocated_nodes]
 
         # Process recursively the remaining nodes
-        if len(nonAllocatedNodes) > 0:
-            self.__processPhase(nonAllocatedNodes)
+        if len(non_allocated_nodes) > 0:
+            self.processPhase(non_allocated_nodes)
 
     def calculateStatistics(self):
         """
@@ -103,27 +104,27 @@ class Network:
         """
 
         # The network prediction precision is the average between all nodes precision
-        precisionRate = 0.
-        numNodes = 0
-        for phaseNodes in self.phases:
-            for node in phaseNodes:
+        precision_rate = 0.0
+        nodes_count = 0
+        for nodes in self.phases:
+            for node in nodes:
                 node.calculateStatistics()
-                precisionRate += node.statsPrecisionRate
-                numNodes += 1
-        self.statsPrecisionRate = precisionRate / numNodes
+                precision_rate += node.stats_precision_rate
+                nodes_count += 1
+        self.stats_precision_rate = precision_rate / nodes_count
 
-    def addFeederNode(self, feederNode, fedNode):
+    def addFeederNode(self, feeder_node, fed_node):
         """
         Delete a node from hierarchy.
         """
 
         # Link the first node to the target node which it receive its output
         link = Link()
-        link.outNode = feederNode
-        link.inNode = fedNode
+        link.out_node = feeder_node
+        link.in_node = fed_node
 
         # Add the node and the link to the network
-        self.nodes.append(feederNode)
+        self.nodes.append(feeder_node)
         self.links.append(link)
 
         self.preparePhases()
@@ -139,10 +140,11 @@ class Network:
 
         # Remove all links involving this node
         for link in self.links:
-            if link.outNode == node or link.inNode == node:
+            if link.out_node == node or link.in_node == node:
                 self.links.remove(link)
 
         # Delete the node
+        self.nodes.remove(node)
         del node
 
         self.preparePhases()
@@ -153,9 +155,9 @@ class Network:
         """
 
         # Get all nodes that feed the specified node
-        feeders = [link.outNode
+        feeders = [link.out_node
                    for link in self.links
-                   if link.inNode == node]
+                   if link.in_node == node]
 
         return feeders
 
@@ -165,9 +167,9 @@ class Network:
         """
 
         # Get all nodes that feed the specified node
-        feds = [link.inNode
+        feds = [link.in_node
                 for link in self.links
-                if link.outNode == node]
+                if link.out_node == node]
 
         return feds
 
@@ -206,99 +208,99 @@ class Network:
                 "\n"
 
         # Generate 'nodes'
-        for phaseNodes in reversed(self.phases):
-            for node in phaseNodes:
-                if node.type == NodeType.region:
+        for nodes in reversed(self.phases):
+            for node in nodes:
+                if node.type == NodeType.REGION:
 
                     # Generate the spatial process params
-                    spParams = "{ " \
-                               "'spatialImp': 'py', " \
-                               "'columnCount': " + str(node.width * node.height) + ", " \
-                               "'inputWidth': " + str(node.getInputSize()) + ", " \
-                               "'potentialRadius': " + str(node.potentialRadius) + ", " \
-                               "'potentialPct': " + str(node.potentialPct) + ", " \
-                               "'globalInhibition': " + str(int(node.globalInhibition)) + ", " \
-                               "'localAreaDensity': " + str(node.localAreaDensity) + ", " \
-                               "'numActiveColumnsPerInhArea': " + str(node.numActiveColumnsPerInhArea) + ", " \
-                               "'stimulusThreshold': " + str(node.stimulusThreshold) + ", " \
-                               "'synPermInactiveDec': " + str(node.proximalSynPermDecrement) + ", " \
-                               "'synPermActiveInc': " + str(node.proximalSynPermIncrement) + ", " \
-                               "'synPermConnected': " + str(node.proximalSynConnectedPerm) + ", " \
-                               "'minPctOverlapDutyCycle': " + str(node.minPctOverlapDutyCycle) + ", " \
-                               "'minPctActiveDutyCycle': " + str(node.minPctActiveDutyCycle) + ", " \
-                               "'dutyCyclePeriod': " + str(node.dutyCyclePeriod) + ", " \
-                               "'maxBoost': " + str(node.maxBoost) + ", " \
-                               "'seed': " + str(node.spSeed) + ", " \
-                               "'spVerbosity': 0" \
-                               " }"
+                    sp_params = "{ " \
+                                "'spatialImp': 'py', " \
+                                "'columnCount': " + str(node.width * node.height) + ", " \
+                                "'inputWidth': " + str(node.getInputSize()) + ", " \
+                                "'potentialRadius': " + str(node.potential_radius) + ", " \
+                                "'potentialPct': " + str(node.potential_pct) + ", " \
+                                "'globalInhibition': " + str(int(node.global_inhibition)) + ", " \
+                                "'localAreaDensity': " + str(node.local_area_density) + ", " \
+                                "'numActiveColumnsPerInhArea': " + str(node.num_active_columns_per_inh_area) + ", " \
+                                "'stimulusThreshold': " + str(node.stimulus_threshold) + ", " \
+                                "'synPermInactiveDec': " + str(node.proximal_syn_perm_decrement) + ", " \
+                                "'synPermActiveInc': " + str(node.proximal_syn_perm_increment) + ", " \
+                                "'synPermConnected': " + str(node.proximal_syn_connected_perm) + ", " \
+                                "'minPctOverlapDutyCycle': " + str(node.min_pct_overlap_duty_cycle) + ", " \
+                                "'minPctActiveDutyCycle': " + str(node.min_pct_active_duty_cycle) + ", " \
+                                "'dutyCyclePeriod': " + str(node.duty_cycle_period) + ", " \
+                                "'maxBoost': " + str(node.max_boost) + ", " \
+                                "'seed': " + str(node.sp_seed) + ", " \
+                                "'spVerbosity': 0" \
+                                " }"
 
                     # Generate the temporal process params
-                    tpParams = "{ " \
-                               "'temporalImp': 'py', " \
-                               "'columnCount': " + str(node.width * node.height) + ", " \
-                               "'inputWidth': " + str(node.getInputSize()) + ", " \
-                               "'cellsPerColumn': " + str(node.numCellsPerColumn) + ", " \
-                               "'initialPerm': " + str(node.distalSynInitialPerm) + ", " \
-                               "'connectedPerm': " + str(node.distalSynConnectedPerm) + ", " \
-                               "'minThreshold': " + str(node.minThreshold) + ", " \
-                               "'newSynapseCount': " + str(node.maxNumNewSynapses) + ", " \
-                               "'permanenceInc': " + str(node.distalSynPermIncrement) + ", " \
-                               "'permanenceDec': " + str(node.distalSynPermDecrement) + ", " \
-                               "'activationThreshold': " + str(node.activationThreshold) + ", " \
-                               "'seed': " + str(node.tpSeed)+ "" \
-                               " }"
+                    tp_params = "{ " \
+                                "'temporalImp': 'py', " \
+                                "'columnCount': " + str(node.width * node.height) + ", " \
+                                "'inputWidth': " + str(node.getInputSize()) + ", " \
+                                "'cellsPerColumn': " + str(node.cells_per_column) + ", " \
+                                "'initialPerm': " + str(node.distal_syn_initial_perm) + ", " \
+                                "'connectedPerm': " + str(node.distal_syn_connected_perm) + ", " \
+                                "'minThreshold': " + str(node.min_threshold) + ", " \
+                                "'newSynapseCount': " + str(node.max_new_synapses) + ", " \
+                                "'permanenceInc': " + str(node.distal_syn_perm_increment) + ", " \
+                                "'permanenceDec': " + str(node.distal_syn_perm_decrement) + ", " \
+                                "'activationThreshold': " + str(node.activation_threshold) + ", " \
+                                "'seed': " + str(node.tp_seed)+ "" \
+                                " }"
 
                     code += "\t# Create '" + node.name + "' region\n" \
-                            "\tcreateRegion(network=network, name='" + node.name + "', spParams=" + spParams + ", tpParams=" + tpParams + ")\n"
+                            "\tcreateRegion(network=network, name='" + node.name + "', spParams=" + sp_params + ", tpParams=" + tp_params + ")\n"
 
-                elif node.type == NodeType.sensor:
+                elif node.type == NodeType.SENSOR:
 
                     # Generate the sensor params
-                    sensorParams = "{ " \
-                                   "'verbosity': 0" \
-                                   " }"
+                    sensor_params = "{ " \
+                                    "'verbosity': 0" \
+                                    " }"
 
                     # If file name provided is a relative path, use project file path
-                    dataSource = ""
-                    if node.fileName != "":
-                        if os.path.dirname(node.fileName) == '':
-                            dataSource = os.path.dirname(Global.project.fileName) + '/' + node.fileName
+                    data_source = ""
+                    if node.file_name != "":
+                        if os.path.dirname(node.file_name) == '':
+                            data_source = os.path.dirname(Global.project.file_name) + '/' + node.file_name
                         else:
-                            dataSource = node.fileName
+                            data_source = node.file_name
 
                     # Generate the encodings params
-                    encodingsParams = ""
+                    encodings_params = ""
                     for encoding in node.encodings:
-                        name = encoding.encoderFieldName.split('.')[0]
-                        params = json.loads(encoding.encoderParams.replace("'", "\""), object_pairs_hook=collections.OrderedDict)
+                        name = encoding.encoder_field_name.split('.')[0]
+                        params = encoding.encoder_params
 
-                        encodingsParams = "'" + name + "': { " \
-                                          "'name': '" + name + "', " \
-                                          "'fieldname': '" + encoding.dataSourceFieldName + "', "
+                        encodings_params = "'" + name + "': { " \
+                                           "'name': '" + name + "', " \
+                                           "'fieldname': '" + encoding.data_source_field_name + "', "
 
-                        for paramName in params:
-                            paramValue = params[paramName]
-                            if paramValue == "true":
-                                paramValue = 'True'
-                            elif paramValue == "false":
-                                paramValue = 'False'
+                        for param_name in params:
+                            param_value = params[param_name]
+                            if param_value == "true":
+                                param_value = 'True'
+                            elif param_value == "false":
+                                param_value = 'False'
 
-                            encodingsParams += "'" + paramName + "': " + str(paramValue) + ", "
+                            encodings_params += "'" + param_name + "': " + str(param_value) + ", "
 
-                        encodingsParams += "'type': '" + encoding.encoderClass + "'" \
+                        encodings_params += "'type': '" + encoding.encoder_class + "'" \
                                            " }, "
 
                     # Generate 'sensor'
                     code += "\t# Create '" + node.name + "' sensor\n" \
-                            "\tcreateSensor(network=network, name='" + node.name + "', params=" + sensorParams + ", dataFile='" + dataSource + "', encodings={ " + encodingsParams + " })\n"
+                            "\tcreateSensor(network=network, name='" + node.name + "', params=" + sensor_params + ", dataFile='" + data_source + "', encodings={ " + encodings_params + " })\n"
 
                 for fed in self.getFedNodes(node):
-                    if node.type == NodeType.region:
+                    if node.type == NodeType.REGION:
 
                         # Generate link between this region and the fed region
                         code += "\tlinkRegionToRegion(network=network, outName='" + node.name + "', inName='" + fed.name + "')\n"
 
-                    elif node.type == NodeType.sensor:
+                    elif node.type == NodeType.SENSOR:
 
                         # Generate link between this sensor and the fed region
                         code += "\tlinkSensorToRegion(network=network, outName='" + node.name + "', inName='" + fed.name + "')\n"
@@ -389,19 +391,19 @@ class Network:
         code += "\t# Only encodings with 'EnableInference' turned 'ON' will be printed\n" \
                 "\tlinks = []\n"
         for node in self.nodes:
-            if node.type == NodeType.sensor:
-                sensorName = node.name
-                regionName = self.getFedNodes(node)[0].name
+            if node.type == NodeType.SENSOR:
+                sensor_name = node.name
+                region_name = self.getFedNodes(node)[0].name
 
                 # Add to list only those encodings with inference enabled
                 encodings = "["
-                for encodingIdx in range(len(node.encodings)):
-                    encoding = node.encodings[encodingIdx]
-                    if encoding.enableInference:
-                        encodings += "['" + encoding.encoderFieldName + "', " + str(encodingIdx) + "], "
+                for idx in range(len(node.encodings)):
+                    encoding = node.encodings[idx]
+                    if encoding.enable_inference:
+                        encodings += "['" + encoding.encoder_field_name + "', " + str(idx) + "], "
                 encodings += "]"
 
-                code += "\tlinks.append({ 'sensorName': '" + sensorName + "', 'regionName': '" + regionName + "', 'encodings': " + encodings + ", 'prevPredictedColumns': [] })\n"
+                code += "\tlinks.append({ 'sensorName': '" + sensor_name + "', 'regionName': '" + region_name + "', 'encodings': " + encodings + ", 'prevPredictedColumns': [] })\n"
         code += "\n"
 
         # Generate 'network' iteration

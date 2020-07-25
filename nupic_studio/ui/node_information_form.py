@@ -2,10 +2,11 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import ArrayTableModel
 from nupic_studio.ui import Global
-from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
+from nupic_studio.htm import MAX_PREVIOUS_STEPS, MAX_FUTURE_STEPS, MAX_PREVIOUS_STEPS_WITH_INFERENCE
 from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_sensor import PredictionsMethod
 from nupic_studio.htm.encoding import FieldDataType
+
 
 class NodeInformationForm(QtWidgets.QWidget):
 
@@ -13,304 +14,303 @@ class NodeInformationForm(QtWidgets.QWidget):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QWidget.__init__(self)
 
-        self.previousSelectedNode = None
-        self.selectedSensor = None
-        self.selectedEncoding = None
-        self.selectedRegion = None
-        self.selectedColumn = None
-        self.selectedProximalSynapse = None
-        self.selectedCell = None
-        self.selectedDistalSegment = None
-        self.selectedDistalSynapse = None
+        self.previous_selected_node = None
+        self.selected_sensor = None
+        self.selected_encoding = None
+        self.selected_region = None
+        self.selected_column = None
+        self.selected_proximal_synapse = None
+        self.selected_cell = None
+        self.selected_distal_segment = None
+        self.selected_distal_synapse = None
 
         # Predictions variables used for the predictions chart
-        self.currentValuesPlotItem = None
-        self.predictedValuesPlotItem = None
+        self.current_values_plot_item = None
+        self.predicted_values_plot_item = None
 
         self.initUI()
 
     def initUI(self):
 
-        # labelSensorName
-        self.labelSensorName = QtWidgets.QLabel()
-        self.labelSensorName.setText("Name")
-        self.labelSensorName.setAlignment(QtCore.Qt.AlignRight)
+        # label_sensor_name
+        self.label_sensor_name = QtWidgets.QLabel()
+        self.label_sensor_name.setText("Name")
+        self.label_sensor_name.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxSensorName
-        self.textBoxSensorName = QtWidgets.QLineEdit()
-        self.textBoxSensorName.setEnabled(False)
-        self.textBoxSensorName.setAlignment(QtCore.Qt.AlignLeft)
+        # text_box_sensor_name
+        self.text_box_sensor_name = QtWidgets.QLineEdit()
+        self.text_box_sensor_name.setEnabled(False)
+        self.text_box_sensor_name.setAlignment(QtCore.Qt.AlignLeft)
 
-        # labelSensorPrecisionRate
-        self.labelSensorPrecisionRate = QtWidgets.QLabel()
-        self.labelSensorPrecisionRate.setText("Precision Rate (%)")
-        self.labelSensorPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
+        # label_sensor_precision_rate
+        self.label_sensor_precision_rate = QtWidgets.QLabel()
+        self.label_sensor_precision_rate.setText("Precision Rate (%)")
+        self.label_sensor_precision_rate.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxSensorPrecisionRate
-        self.textBoxSensorPrecisionRate = QtWidgets.QLineEdit()
-        self.textBoxSensorPrecisionRate.setEnabled(False)
-        self.textBoxSensorPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
+        # text_box_sensor_precision_rate
+        self.text_box_sensor_precision_rate = QtWidgets.QLineEdit()
+        self.text_box_sensor_precision_rate.setEnabled(False)
+        self.text_box_sensor_precision_rate.setAlignment(QtCore.Qt.AlignRight)
 
-        # checkBoxEnableClassificationLearning
-        self.checkBoxEnableClassificationLearning = QtWidgets.QCheckBox()
-        self.checkBoxEnableClassificationLearning.setText("Enable Classification Learning")
-        self.checkBoxEnableClassificationLearning.toggled.connect(self.__checkBoxEnableClassificationLearning_Toggled)
+        # check_box_enable_classification_learning
+        self.check_box_enable_classification_learning = QtWidgets.QCheckBox()
+        self.check_box_enable_classification_learning.setText("Enable Classification Learning")
+        self.check_box_enable_classification_learning.toggled.connect(self.checkBoxEnableClassificationLearning_toggled)
 
-        # checkBoxEnableClassificationInference
-        self.checkBoxEnableClassificationInference = QtWidgets.QCheckBox()
-        self.checkBoxEnableClassificationInference.setText("Enable Classification Inference")
-        self.checkBoxEnableClassificationInference.toggled.connect(self.__checkBoxEnableClassificationInference_Toggled)
+        # check_box_enable_classification_inference
+        self.check_box_enable_classification_inference = QtWidgets.QCheckBox()
+        self.check_box_enable_classification_inference.setText("Enable Classification Inference")
+        self.check_box_enable_classification_inference.toggled.connect(self.checkBoxEnableClassificationInference_toggled)
 
-        # tabPageSensor1Layout
-        tabPageSensor1Layout = QtWidgets.QGridLayout()
-        tabPageSensor1Layout.addWidget(self.labelSensorName, 0, 0)
-        tabPageSensor1Layout.addWidget(self.textBoxSensorName, 0, 1)
-        tabPageSensor1Layout.addWidget(self.labelSensorPrecisionRate, 1, 0)
-        tabPageSensor1Layout.addWidget(self.textBoxSensorPrecisionRate, 1, 1)
-        tabPageSensor1Layout.addWidget(self.checkBoxEnableClassificationLearning, 2, 1)
-        tabPageSensor1Layout.addWidget(self.checkBoxEnableClassificationInference, 3, 1)
-        tabPageSensor1Layout.setRowStretch(4, 100)
+        # sensor_layout
+        sensor_layout = QtWidgets.QGridLayout()
+        sensor_layout.addWidget(self.label_sensor_name, 0, 0)
+        sensor_layout.addWidget(self.text_box_sensor_name, 0, 1)
+        sensor_layout.addWidget(self.label_sensor_precision_rate, 1, 0)
+        sensor_layout.addWidget(self.text_box_sensor_precision_rate, 1, 1)
+        sensor_layout.addWidget(self.check_box_enable_classification_learning, 2, 1)
+        sensor_layout.addWidget(self.check_box_enable_classification_inference, 3, 1)
+        sensor_layout.setRowStretch(4, 100)
 
-        # tabPageSensorLayout
-        tabPageSensorLayout = QtWidgets.QGridLayout()
-        tabPageSensorLayout.addLayout(tabPageSensor1Layout, 0, 0)
-        tabPageSensorLayout.setColumnStretch(1, 100)
+        # tab_page_sensor_layout
+        tab_page_sensor_layout = QtWidgets.QGridLayout()
+        tab_page_sensor_layout.addLayout(sensor_layout, 0, 0)
+        tab_page_sensor_layout.setColumnStretch(1, 100)
 
-        # tabPageSensor
-        self.tabPageSensor = QtWidgets.QWidget()
-        self.tabPageSensor.setLayout(tabPageSensorLayout)
+        # tab_page_sensor
+        self.tab_page_sensor = QtWidgets.QWidget()
+        self.tab_page_sensor.setLayout(tab_page_sensor_layout)
 
-        # dataGridBits
-        self.dataGridBits = QtWidgets.QTableView()
-        self.dataGridBits.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridBits.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridBits.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridBits.setToolTip("Click on a row to see more details")
-        self.dataGridBits.verticalHeader().setDefaultSectionSize(20)
+        # data_grid_bits
+        self.data_grid_bits = QtWidgets.QTableView()
+        self.data_grid_bits.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_bits.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_bits.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_bits.setToolTip("Click on a row to see more details")
+        self.data_grid_bits.verticalHeader().setDefaultSectionSize(20)
 
-        # tabPageBitsLayout
-        tabPageBitsLayout = QtWidgets.QHBoxLayout()
-        tabPageBitsLayout.addWidget(self.dataGridBits)
+        # tab_page_bits_layout
+        tab_page_bits_layout = QtWidgets.QHBoxLayout()
+        tab_page_bits_layout.addWidget(self.data_grid_bits)
 
-        # tabPageBits
-        self.tabPageBits = QtWidgets.QWidget()
-        self.tabPageBits.setLayout(tabPageBitsLayout)
+        # tab_page_bits
+        self.tab_page_bits = QtWidgets.QWidget()
+        self.tab_page_bits.setLayout(tab_page_bits_layout)
 
-        # labelEncoding
-        self.labelEncoding = QtWidgets.QLabel()
-        self.labelEncoding.setText("Encoding:")
-        self.labelEncoding.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoding
+        self.label_encoding = QtWidgets.QLabel()
+        self.label_encoding.setText("Encoding:")
+        self.label_encoding.setAlignment(QtCore.Qt.AlignRight)
 
-        # comboBoxEncoding
-        self.comboBoxEncoding = QtWidgets.QComboBox()
-        self.comboBoxEncoding.currentIndexChanged.connect(self.__comboBoxEncoding_CurrentIndexChanged)
+        # combo_box_encoding
+        self.combo_box_encoding = QtWidgets.QComboBox()
+        self.combo_box_encoding.currentIndexChanged.connect(self.comboBoxEncoding_currentIndexChanged)
 
-        # labelCurrentValue
-        self.labelCurrentValue = QtWidgets.QLabel()
-        self.labelCurrentValue.setText("Current Value")
-        self.labelCurrentValue.setAlignment(QtCore.Qt.AlignRight)
+        # label_current_value
+        self.label_current_value = QtWidgets.QLabel()
+        self.label_current_value.setText("Current Value")
+        self.label_current_value.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxCurrentValue
-        self.textBoxCurrentValue = QtWidgets.QLineEdit()
-        self.textBoxCurrentValue.setEnabled(False)
-        self.textBoxCurrentValue.setAlignment(QtCore.Qt.AlignRight)
+        # text_box_current_value
+        self.text_box_current_value = QtWidgets.QLineEdit()
+        self.text_box_current_value.setEnabled(False)
+        self.text_box_current_value.setAlignment(QtCore.Qt.AlignRight)
 
-        # labelPredictedValues
-        self.labelPredictedValues = QtWidgets.QLabel()
-        self.labelPredictedValues.setText("Predicted Values")
-        self.labelPredictedValues.setAlignment(QtCore.Qt.AlignRight)
+        # label_predicted_values
+        self.label_predicted_values = QtWidgets.QLabel()
+        self.label_predicted_values.setText("Predicted Values")
+        self.label_predicted_values.setAlignment(QtCore.Qt.AlignRight)
 
-        # dataGridPredictedValues
-        self.dataGridPredictedValues = QtWidgets.QTableView()
-        self.dataGridPredictedValues.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridPredictedValues.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridPredictedValues.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridPredictedValues.verticalHeader().setDefaultSectionSize(20)
+        # data_grid_predicted_values
+        self.data_grid_predicted_values = QtWidgets.QTableView()
+        self.data_grid_predicted_values.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_predicted_values.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_predicted_values.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_predicted_values.verticalHeader().setDefaultSectionSize(20)
 
-        # encoding1Layout
-        encoding1Layout = QtWidgets.QGridLayout()
-        encoding1Layout.addWidget(self.labelEncoding, 0, 0)
-        encoding1Layout.addWidget(self.comboBoxEncoding, 0, 1)
-        encoding1Layout.addWidget(self.labelCurrentValue, 1, 0)
-        encoding1Layout.addWidget(self.textBoxCurrentValue, 1, 1)
-        encoding1Layout.setRowStretch(2, 100)
+        # encoding_1_layout
+        encoding_1_layout = QtWidgets.QGridLayout()
+        encoding_1_layout.addWidget(self.label_encoding, 0, 0)
+        encoding_1_layout.addWidget(self.combo_box_encoding, 0, 1)
+        encoding_1_layout.addWidget(self.label_current_value, 1, 0)
+        encoding_1_layout.addWidget(self.text_box_current_value, 1, 1)
+        encoding_1_layout.setRowStretch(2, 100)
 
-        # sliderStep
-        self.sliderStep = QtWidgets.QSlider()
-        self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
-        self.sliderStep.setSingleStep(1)
-        self.sliderStep.setRange(1, maxFutureSteps)
-        self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
+        # slider_step
+        self.slider_step = QtWidgets.QSlider()
+        self.slider_step.setOrientation(QtCore.Qt.Horizontal)
+        self.slider_step.setSingleStep(1)
+        self.slider_step.setRange(1, MAX_FUTURE_STEPS)
+        self.slider_step.valueChanged.connect(self.sliderStep_valueChanged)
 
-        # encoding2Layout
-        encoding2Layout = QtWidgets.QGridLayout()
-        encoding2Layout.addWidget(self.sliderStep, 0, 1)
-        encoding2Layout.addWidget(self.labelPredictedValues, 1, 0)
-        encoding2Layout.addWidget(self.dataGridPredictedValues, 1, 1)
+        # encoding_2_layout
+        encoding_2_layout = QtWidgets.QGridLayout()
+        encoding_2_layout.addWidget(self.slider_step, 0, 1)
+        encoding_2_layout.addWidget(self.label_predicted_values, 1, 0)
+        encoding_2_layout.addWidget(self.data_grid_predicted_values, 1, 1)
 
-        # predictionsChart
-        self.predictionsChart = pg.PlotWidget()
-        self.predictionsChart.showGrid(x=True, y=True)
-        self.predictionsChart.getAxis('left').setGrid(1)
+        # predictions_chart
+        self.predictions_chart = pg.PlotWidget()
+        self.predictions_chart.showGrid(x=True, y=True)
+        self.predictions_chart.getAxis('left').setGrid(1)
 
-        # encoding3Layout
-        encoding3Layout = QtWidgets.QGridLayout()
-        encoding3Layout.addWidget(self.predictionsChart, 0, 1)
+        # encoding_3_layout
+        encoding_3_layout = QtWidgets.QGridLayout()
+        encoding_3_layout.addWidget(self.predictions_chart, 0, 1)
 
-        # tabPageEncodingsLayout
-        tabPageEncodingsLayout = QtWidgets.QHBoxLayout()
-        tabPageEncodingsLayout.addLayout(encoding1Layout)
-        tabPageEncodingsLayout.addLayout(encoding2Layout)
-        tabPageEncodingsLayout.addLayout(encoding3Layout)
+        # tab_page_encodings_layout
+        tab_page_encodings_layout = QtWidgets.QHBoxLayout()
+        tab_page_encodings_layout.addLayout(encoding_1_layout)
+        tab_page_encodings_layout.addLayout(encoding_2_layout)
+        tab_page_encodings_layout.addLayout(encoding_3_layout)
 
-        # tabPageEncodings
-        self.tabPageEncodings = QtWidgets.QWidget()
-        self.tabPageEncodings.setLayout(tabPageEncodingsLayout)
+        # tab_page_encodings
+        self.tab_page_encodings = QtWidgets.QWidget()
+        self.tab_page_encodings.setLayout(tab_page_encodings_layout)
 
-        # labelRegionName
-        self.labelRegionName = QtWidgets.QLabel()
-        self.labelRegionName.setText("Name")
-        self.labelRegionName.setAlignment(QtCore.Qt.AlignRight)
+        # label_region_name
+        self.label_region_name = QtWidgets.QLabel()
+        self.label_region_name.setText("Name")
+        self.label_region_name.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxRegionName
-        self.textBoxRegionName = QtWidgets.QLineEdit()
-        self.textBoxRegionName.setEnabled(False)
-        self.textBoxRegionName.setAlignment(QtCore.Qt.AlignLeft)
+        # text_box_region_name
+        self.text_box_region_name = QtWidgets.QLineEdit()
+        self.text_box_region_name.setEnabled(False)
+        self.text_box_region_name.setAlignment(QtCore.Qt.AlignLeft)
 
-        # labelRegionPrecisionRate
-        self.labelRegionPrecisionRate = QtWidgets.QLabel()
-        self.labelRegionPrecisionRate.setText("Precision Rate (%)")
-        self.labelRegionPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
+        # label_region_precision_rate
+        self.label_region_precision_rate = QtWidgets.QLabel()
+        self.label_region_precision_rate.setText("Precision Rate (%)")
+        self.label_region_precision_rate.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxRegionPrecisionRate
-        self.textBoxRegionPrecisionRate = QtWidgets.QLineEdit()
-        self.textBoxRegionPrecisionRate.setEnabled(False)
-        self.textBoxRegionPrecisionRate.setAlignment(QtCore.Qt.AlignRight)
+        # text_box_region_precision_rate
+        self.text_box_region_precision_rate = QtWidgets.QLineEdit()
+        self.text_box_region_precision_rate.setEnabled(False)
+        self.text_box_region_precision_rate.setAlignment(QtCore.Qt.AlignRight)
 
-        # checkBoxEnableSpatialLearning
-        self.checkBoxEnableSpatialLearning = QtWidgets.QCheckBox()
-        self.checkBoxEnableSpatialLearning.setText("Enable Spatial Learning")
-        self.checkBoxEnableSpatialLearning.toggled.connect(self.__checkBoxEnableSpatialLearning_Toggled)
+        # check_box_enable_spatial_learning
+        self.check_box_enable_spatial_learning = QtWidgets.QCheckBox()
+        self.check_box_enable_spatial_learning.setText("Enable Spatial Learning")
+        self.check_box_enable_spatial_learning.toggled.connect(self.checkBoxEnableSpatialLearning_toggled)
 
-        # checkBoxEnableTemporalLearning
-        self.checkBoxEnableTemporalLearning = QtWidgets.QCheckBox()
-        self.checkBoxEnableTemporalLearning.setText("Enable Temporal Learning")
-        self.checkBoxEnableTemporalLearning.toggled.connect(self.__checkBoxEnableTemporalLearning_Toggled)
+        # check_box_enable_temporal_learning
+        self.check_box_enable_temporal_learning = QtWidgets.QCheckBox()
+        self.check_box_enable_temporal_learning.setText("Enable Temporal Learning")
+        self.check_box_enable_temporal_learning.toggled.connect(self.checkBoxEnableTemporalLearning_toggled)
 
-        # tabPageRegionsLayout
-        tabPageRegionsLayout = QtWidgets.QGridLayout()
-        tabPageRegionsLayout.addWidget(self.labelRegionName, 0, 0)
-        tabPageRegionsLayout.addWidget(self.textBoxRegionName, 0, 1)
-        tabPageRegionsLayout.addWidget(self.labelRegionPrecisionRate, 1, 0)
-        tabPageRegionsLayout.addWidget(self.textBoxRegionPrecisionRate, 1, 1)
-        tabPageRegionsLayout.addWidget(self.checkBoxEnableSpatialLearning, 2, 1)
-        tabPageRegionsLayout.addWidget(self.checkBoxEnableTemporalLearning, 3, 1)
-        tabPageRegionsLayout.setRowStretch(4, 100)
-        tabPageRegionsLayout.setColumnStretch(2, 100)
+        # tab_page_regions_layout
+        tab_page_regions_layout = QtWidgets.QGridLayout()
+        tab_page_regions_layout.addWidget(self.label_region_name, 0, 0)
+        tab_page_regions_layout.addWidget(self.text_box_region_name, 0, 1)
+        tab_page_regions_layout.addWidget(self.label_region_precision_rate, 1, 0)
+        tab_page_regions_layout.addWidget(self.text_box_region_precision_rate, 1, 1)
+        tab_page_regions_layout.addWidget(self.check_box_enable_spatial_learning, 2, 1)
+        tab_page_regions_layout.addWidget(self.check_box_enable_temporal_learning, 3, 1)
+        tab_page_regions_layout.setRowStretch(4, 100)
+        tab_page_regions_layout.setColumnStretch(2, 100)
 
-        # tabPageRegions
-        self.tabPageRegions = QtWidgets.QWidget()
-        self.tabPageRegions.setLayout(tabPageRegionsLayout)
+        # tab_page_regions
+        self.tab_page_regions = QtWidgets.QWidget()
+        self.tab_page_regions.setLayout(tab_page_regions_layout)
 
-        # dataGridColumns
-        self.dataGridColumns = QtWidgets.QTableView()
-        self.dataGridColumns.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridColumns.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridColumns.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridColumns.setToolTip("Click on a row to see more details")
-        self.dataGridColumns.verticalHeader().setDefaultSectionSize(20)
-        self.dataGridColumns.selectionModel().selectionChanged.connect(self.__dataGridColumns_SelectionChanged)
+        # data_grid_columns
+        self.data_grid_columns = QtWidgets.QTableView()
+        self.data_grid_columns.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_columns.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_columns.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_columns.setToolTip("Click on a row to see more details")
+        self.data_grid_columns.verticalHeader().setDefaultSectionSize(20)
+        self.data_grid_columns.selectionModel().selectionChanged.connect(self.dataGridColumns_selectionChanged)
 
-        # tabPageColumnsLayout
-        tabPageColumnsLayout = QtWidgets.QHBoxLayout()
-        tabPageColumnsLayout.addWidget(self.dataGridColumns)
+        # tab_page_columns_layout
+        tab_page_columns_layout = QtWidgets.QHBoxLayout()
+        tab_page_columns_layout.addWidget(self.data_grid_columns)
 
-        # tabPageColumns
-        self.tabPageColumns = QtWidgets.QWidget()
-        self.tabPageColumns.setLayout(tabPageColumnsLayout)
+        # tab_page_columns
+        self.tab_page_columns = QtWidgets.QWidget()
+        self.tab_page_columns.setLayout(tab_page_columns_layout)
 
-        # dataGridProximalSynapses
-        self.dataGridProximalSynapses = QtWidgets.QTableView()
-        self.dataGridProximalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridProximalSynapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridProximalSynapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridProximalSynapses.setToolTip("Click on a row to see more details")
-        self.dataGridProximalSynapses.verticalHeader().setDefaultSectionSize(20)
-        self.dataGridProximalSynapses.selectionModel().selectionChanged.connect(self.__dataGridProximalSynapses_SelectionChanged)
+        # data_grid_proximal_synapses
+        self.data_grid_proximal_synapses = QtWidgets.QTableView()
+        self.data_grid_proximal_synapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_proximal_synapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_proximal_synapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_proximal_synapses.setToolTip("Click on a row to see more details")
+        self.data_grid_proximal_synapses.verticalHeader().setDefaultSectionSize(20)
+        self.data_grid_proximal_synapses.selectionModel().selectionChanged.connect(self.dataGridProximalSynapses_selectionChanged)
 
-        # tabPageProximalSynapsesLayout
-        tabPageProximalSynapsesLayout = QtWidgets.QHBoxLayout()
-        tabPageProximalSynapsesLayout.addWidget(self.dataGridProximalSynapses)
+        # tab_page_proximal_synapses_layout
+        tab_page_proximal_synapses_layout = QtWidgets.QHBoxLayout()
+        tab_page_proximal_synapses_layout.addWidget(self.data_grid_proximal_synapses)
 
-        # tabPageProximalSynapses
-        self.tabPageProximalSynapses = QtWidgets.QWidget()
-        self.tabPageProximalSynapses.setLayout(tabPageProximalSynapsesLayout)
+        # tab_page_proximal_synapses
+        self.tab_page_proximal_synapses = QtWidgets.QWidget()
+        self.tab_page_proximal_synapses.setLayout(tab_page_proximal_synapses_layout)
 
-        # dataGridCells
-        self.dataGridCells = QtWidgets.QTableView()
-        self.dataGridCells.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridCells.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridCells.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridCells.setToolTip("Click on a row to see more details")
-        self.dataGridCells.verticalHeader().setDefaultSectionSize(20)
-        self.dataGridCells.selectionModel().selectionChanged.connect(self.__dataGridCells_SelectionChanged)
+        # data_grid_cells
+        self.data_grid_cells = QtWidgets.QTableView()
+        self.data_grid_cells.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_cells.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_cells.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_cells.setToolTip("Click on a row to see more details")
+        self.data_grid_cells.verticalHeader().setDefaultSectionSize(20)
+        self.data_grid_cells.selectionModel().selectionChanged.connect(self.dataGridCells_selectionChanged)
 
-        # tabPageCellsLayout
-        tabPageCellsLayout = QtWidgets.QHBoxLayout()
-        tabPageCellsLayout.addWidget(self.dataGridCells)
+        # tab_page_cells_layout
+        tab_page_cells_layout = QtWidgets.QHBoxLayout()
+        tab_page_cells_layout.addWidget(self.data_grid_cells)
 
-        # tabPageCells
-        self.tabPageCells = QtWidgets.QWidget()
-        self.tabPageCells.setLayout(tabPageCellsLayout)
+        # tab_page_cells
+        self.tab_page_cells = QtWidgets.QWidget()
+        self.tab_page_cells.setLayout(tab_page_cells_layout)
 
-        # dataGridDistalSegments
-        self.dataGridDistalSegments = QtWidgets.QTableView()
-        self.dataGridDistalSegments.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridDistalSegments.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridDistalSegments.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridDistalSegments.setToolTip("Click on a row to see more details")
-        self.dataGridDistalSegments.verticalHeader().setDefaultSectionSize(20)
-        self.dataGridDistalSegments.selectionModel().selectionChanged.connect(self.__dataGridDistalSegments_SelectionChanged)
+        # data_grid_distal_segments
+        self.data_grid_distal_segments = QtWidgets.QTableView()
+        self.data_grid_distal_segments.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_distal_segments.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_distal_segments.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_distal_segments.setToolTip("Click on a row to see more details")
+        self.data_grid_distal_segments.verticalHeader().setDefaultSectionSize(20)
+        self.data_grid_distal_segments.selectionModel().selectionChanged.connect(self.dataGridDistalSegments_selectionChanged)
 
-        # tabPageDistalSegmentsLayout
-        tabPageDistalSegmentsLayout = QtWidgets.QHBoxLayout()
-        tabPageDistalSegmentsLayout.addWidget(self.dataGridDistalSegments)
+        # tab_page_distal_segments_layout
+        tab_page_distal_segments_layout = QtWidgets.QHBoxLayout()
+        tab_page_distal_segments_layout.addWidget(self.data_grid_distal_segments)
 
-        # tabPageDistalSegments
-        self.tabPageDistalSegments = QtWidgets.QWidget()
-        self.tabPageDistalSegments.setLayout(tabPageDistalSegmentsLayout)
+        # tab_page_distal_segments
+        self.tab_page_distal_segments = QtWidgets.QWidget()
+        self.tab_page_distal_segments.setLayout(tab_page_distal_segments_layout)
 
-        # dataGridDistalSynapses
-        self.dataGridDistalSynapses = QtWidgets.QTableView()
-        self.dataGridDistalSynapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridDistalSynapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.dataGridDistalSynapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.dataGridDistalSynapses.setToolTip("Click on a row to see more details")
-        self.dataGridDistalSynapses.verticalHeader().setDefaultSectionSize(20)
-        self.dataGridDistalSynapses.selectionModel().selectionChanged.connect(self.__dataGridDistalSynapses_SelectionChanged)
+        # data_grid_distal_synapses
+        self.data_grid_distal_synapses = QtWidgets.QTableView()
+        self.data_grid_distal_synapses.setModel(ArrayTableModel(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_distal_synapses.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.data_grid_distal_synapses.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.data_grid_distal_synapses.setToolTip("Click on a row to see more details")
+        self.data_grid_distal_synapses.verticalHeader().setDefaultSectionSize(20)
+        self.data_grid_distal_synapses.selectionModel().selectionChanged.connect(self.dataGridDistalSynapses_selectionChanged)
 
-        # tabPageDistalSynapsesLayout
-        tabPageDistalSynapsesLayout = QtWidgets.QHBoxLayout()
-        tabPageDistalSynapsesLayout.addWidget(self.dataGridDistalSynapses)
+        # tab_page_distal_synapses_layout
+        tab_page_distal_synapses_layout = QtWidgets.QHBoxLayout()
+        tab_page_distal_synapses_layout.addWidget(self.data_grid_distal_synapses)
 
-        # tabPageDistalSynapses
-        self.tabPageDistalSynapses = QtWidgets.QWidget()
-        self.tabPageDistalSynapses.setLayout(tabPageDistalSynapsesLayout)
+        # tab_page_distal_synapses
+        self.tab_page_distal_synapses = QtWidgets.QWidget()
+        self.tab_page_distal_synapses.setLayout(tab_page_distal_synapses_layout)
 
-        # tabControlMain
-        self.tabControlMain = QtWidgets.QTabWidget()
+        # tab_control_main
+        self.tab_control_main = QtWidgets.QTabWidget()
 
         # layout
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.tabControlMain)
+        layout.addWidget(self.tab_control_main)
 
         # NodeInformationForm
         self.setLayout(layout)
         self.setWindowTitle("Node Information")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.setMinimumHeight(200)
         self.setMaximumHeight(300)
 
@@ -318,369 +318,361 @@ class NodeInformationForm(QtWidgets.QWidget):
         """
         Reset all controls.
         """
-
-        self.textBoxCurrentValue.setText("")
-        self.sliderStep.setEnabled(False)
-        self.dataGridPredictedValues.model().update([], [])
-        self.predictionsChart.setVisible(False)
+        self.text_box_current_value.setText("")
+        self.slider_step.setEnabled(False)
+        self.data_grid_predicted_values.model().update([], [])
+        self.predictions_chart.setVisible(False)
 
     def refreshControls(self):
         """
         Refresh controls for each time step.
         """
-
-        selectedNode = Global.architectureForm.designPanel.selectedNode
+        selected_node = Global.architecture_form.design_panel.selected_node
 
         # Show information according to note type
-        if selectedNode != self.previousSelectedNode:
+        if selected_node != self.previous_selected_node:
             while True:
-                self.tabControlMain.removeTab(0)
-                if self.tabControlMain.count() == 0:
+                self.tab_control_main.removeTab(0)
+                if self.tab_control_main.count() == 0:
                     break
-            if selectedNode.type == NodeType.region:
-                self.selectedRegion = selectedNode
+            if selected_node.type == NodeType.REGION:
+                self.selected_region = selected_node
 
-                self.textBoxRegionName.setText(self.selectedRegion.name)
-                self.checkBoxEnableSpatialLearning.setChecked(self.selectedRegion.enableSpatialLearning)
-                self.checkBoxEnableTemporalLearning.setChecked(self.selectedRegion.enableTemporalLearning)
-                self.showTab(self.tabPageRegions, "Region")
-                self.showTab(self.tabPageColumns, "Columns")
-                self.dataGridColumns.clearSelection()
-            elif selectedNode.type == NodeType.sensor:
-                self.selectedSensor = selectedNode
+                self.text_box_region_name.setText(self.selected_region.name)
+                self.check_box_enable_spatial_learning.setChecked(self.selected_region.enable_spatial_learning)
+                self.check_box_enable_temporal_learning.setChecked(self.selected_region.enable_temporal_learning)
+                self.showTab(self.tab_page_regions, "Region")
+                self.showTab(self.tab_page_columns, "Columns")
+                self.data_grid_columns.clearSelection()
+            elif selected_node.type == NodeType.SENSOR:
+                self.selected_sensor = selected_node
 
-                self.textBoxSensorName.setText(self.selectedSensor.name)
-                self.showTab(self.tabPageSensor, "Sensor")
-                self.showTab(self.tabPageBits, "Bits")
-                self.showTab(self.tabPageEncodings, "Encodings")
-                self.dataGridBits.clearSelection()
-                if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-                    self.checkBoxEnableClassificationLearning.setVisible(True)
-                    self.checkBoxEnableClassificationLearning.setChecked(self.selectedSensor.enableClassificationLearning)
-                    self.checkBoxEnableClassificationInference.setVisible(True)
-                    self.checkBoxEnableClassificationInference.setChecked(self.selectedSensor.enableClassificationInference)
+                self.text_box_sensor_name.setText(self.selected_sensor.name)
+                self.showTab(self.tab_page_sensor, "Sensor")
+                self.showTab(self.tab_page_bits, "Bits")
+                self.showTab(self.tab_page_encodings, "Encodings")
+                self.data_grid_bits.clearSelection()
+                if self.selected_sensor.predictions_method == PredictionsMethod.CLASSIFICATION:
+                    self.check_box_enable_classification_learning.setVisible(True)
+                    self.check_box_enable_classification_learning.setChecked(self.selected_sensor.enable_classification_learning)
+                    self.check_box_enable_classification_inference.setVisible(True)
+                    self.check_box_enable_classification_inference.setChecked(self.selected_sensor.enable_classification_inference)
                 else:
-                    self.checkBoxEnableClassificationLearning.setVisible(False)
-                    self.checkBoxEnableClassificationInference.setVisible(False)
+                    self.check_box_enable_classification_learning.setVisible(False)
+                    self.check_box_enable_classification_inference.setVisible(False)
 
                 # Populate encodings combobox
-                self.comboBoxEncoding.clear()
-                for encoding in self.selectedSensor.encodings:
-                    if encoding.enableInference:
-                        name = encoding.encoderFieldName.split('.')[0]
-                        self.comboBoxEncoding.addItem(name)
-                self.selectedEncoding = None
-            self.tabControlMain.selectedIndex = 0
+                self.combo_box_encoding.clear()
+                for encoding in self.selected_sensor.encodings:
+                    if encoding.enable_inference:
+                        name = encoding.encoder_field_name.split('.')[0]
+                        self.combo_box_encoding.addItem(name)
+                self.selected_encoding = None
+            self.tab_control_main.selectedIndex = 0
 
-            self.previousSelectedNode = selectedNode
+            self.previous_selected_node = selected_node
 
-        if Global.simulationInitialized:
-            if selectedNode.type == NodeType.region:
-                self.textBoxRegionPrecisionRate.setText("{0:.3f}".format(self.selectedRegion.statsPrecisionRate))
+        if Global.simulation_initialized:
+            if selected_node.type == NodeType.REGION:
+                self.text_box_region_precision_rate.setText("{0:.3f}".format(self.selected_region.stats_precision_rate))
 
                 # Bind the columns from this region
-                header, data = self.getColumnsData(self.selectedRegion)
-                self.dataGridColumns.model().update(header, data)
-                self.dataGridColumns.resizeColumnsToContents()
+                header, data = self.getColumnsData(self.selected_region)
+                self.data_grid_columns.model().update(header, data)
+                self.data_grid_columns.resizeColumnsToContents()
 
-            elif selectedNode.type == NodeType.sensor:
-                self.textBoxSensorPrecisionRate.setText("{0:.3f}".format(self.selectedSensor.statsPrecisionRate))
+            elif selected_node.type == NodeType.SENSOR:
+                self.text_box_sensor_precision_rate.setText("{0:.3f}".format(self.selected_sensor.stats_precision_rate))
 
                 # Bind the bits from this sensor
-                header, data = self.getBitsData(self.selectedSensor)
-                self.dataGridBits.model().update(header, data)
-                self.dataGridBits.resizeColumnsToContents()
+                header, data = self.getBitsData(self.selected_sensor)
+                self.data_grid_bits.model().update(header, data)
+                self.data_grid_bits.resizeColumnsToContents()
 
                 # Reset step slider state
-                self.sliderStep.setEnabled(True)
-                self.sliderStep.setValue(self.sliderStep.minimum())
-                if self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-                    self.sliderStep.setEnabled(True)
+                self.slider_step.setEnabled(True)
+                self.slider_step.setValue(self.slider_step.minimum())
+                if self.selected_sensor.predictions_method == PredictionsMethod.CLASSIFICATION:
+                    self.slider_step.setEnabled(True)
                 else:
-                    self.sliderStep.setEnabled(False)
+                    self.slider_step.setEnabled(False)
 
                 # Set default encoding
-                if self.selectedEncoding == None:
-                    self.selectedEncoding = self.selectedSensor.encodings[0]
+                if self.selected_encoding == None:
+                    self.selected_encoding = self.selected_sensor.encodings[0]
                 self.updateEncodingControls()
 
-    def formatValue(self, dataType, value):
-        formattedValue = None
+    def formatValue(self, data_type, value):
+        formatted_value = None
 
         if value == None:
-            formattedValue = "None"
-        elif dataType == FieldDataType.boolean:
+            formatted_value = "None"
+        elif data_type == FieldDataType.BOOLEAN:
             if value == 0:
-                formattedValue = "False"
+                formatted_value = "False"
             else:
-                formattedValue = "True"
-        elif dataType == FieldDataType.integer:
-            formattedValue = "{0}".format(value)
-        elif dataType == FieldDataType.decimal:
-            formattedValue = "{0:.3f}".format(value)
-        elif dataType == FieldDataType.dateTime:
-            formattedValue = value.strftime("%Y-%m-%d %H:%M:%S")
+                formatted_value = "True"
+        elif data_type == FieldDataType.INTEGER:
+            formatted_value = "{0}".format(value)
+        elif data_type == FieldDataType.DECIMAL:
+            formatted_value = "{0:.3f}".format(value)
+        elif data_type == FieldDataType.DATE_TIME:
+            formatted_value = value.strftime("%Y-%m-%d %H:%M:%S")
         else:
-            formattedValue = str(value)
+            formatted_value = str(value)
 
-        return formattedValue
+        return formatted_value
 
-    def getBitsData(self, selectedSensor):
+    def getBitsData(self, selected_sensor):
         header = ['Pos (x,y)', 'Was Predicted', 'Is Active', 'Activation Rate', 'Precision Rate']
         data = []
-        for bit in selectedSensor.bits:
+        for bit in selected_sensor.bits:
             pos = str(bit.x) + ", " + str(bit.y)
-            wasPredicted = bit.isPredicted.atGivenStepAgo(Global.selStep + 1)
-            isActive = bit.isActive.atGivenStepAgo(Global.selStep)
-            activationRate = "{0:.3f}".format(bit.statsActivationRate)
-            precisionRate = "{0:.3f}".format(bit.statsPrecisionRate)
-            data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
-
+            was_predicted = bit.is_predicted.atGivenStepAgo(Global.sel_step + 1)
+            is_active = bit.is_active.atGivenStepAgo(Global.sel_step)
+            activation_rate = "{0:.3f}".format(bit.stats_activation_rate)
+            precision_rate = "{0:.3f}".format(bit.stats_precision_rate)
+            data.append([pos, was_predicted, is_active, activation_rate, precision_rate])
         return header, data
 
     def updateEncodingControls(self):
-        self.textBoxCurrentValue.setText(self.formatValue(self.selectedEncoding.encoderFieldDataType, self.selectedEncoding.currentValue.atGivenStepAgo(Global.selStep)))
-        self.sliderStep.setVisible(self.selectedEncoding.enableInference)
-        self.labelPredictedValues.setVisible(self.selectedEncoding.enableInference)
-        self.dataGridPredictedValues.setVisible(self.selectedEncoding.enableInference)
-        self.predictionsChart.setVisible(False)
-        if Global.simulationInitialized and self.selectedEncoding.enableInference:
+        self.text_box_current_value.setText(self.formatValue(self.selected_encoding.encoder_field_data_type, self.selected_encoding.current_value.atGivenStepAgo(Global.sel_step)))
+        self.slider_step.setVisible(self.selected_encoding.enable_inference)
+        self.label_predicted_values.setVisible(self.selected_encoding.enable_inference)
+        self.data_grid_predicted_values.setVisible(self.selected_encoding.enable_inference)
+        self.predictions_chart.setVisible(False)
+        if Global.simulation_initialized and self.selected_encoding.enable_inference:
             self.updatePredictedValuesGrid()
-            if self.selectedEncoding.encoderFieldDataType == FieldDataType.integer or self.selectedEncoding.encoderFieldDataType == FieldDataType.decimal:
+            if self.selected_encoding.encoder_field_data_type == FieldDataType.INTEGER or self.selected_encoding.encoder_field_data_type == FieldDataType.DECIMAL:
                 self.updatePredictionsChart()
-                self.predictionsChart.setVisible(True)
+                self.predictions_chart.setVisible(True)
 
     def updatePredictedValuesGrid(self):
-        step = self.sliderStep.value()
+        step = self.slider_step.value()
         header, data = self.getPredictedValuesData(step)
-        self.dataGridPredictedValues.model().update(header, data)
-        self.dataGridPredictedValues.resizeColumnsToContents()
+        self.data_grid_predicted_values.model().update(header, data)
+        self.data_grid_predicted_values.resizeColumnsToContents()
 
     def updatePredictionsChart(self):
 
         # Update the chart with the updated predictions history
-        if self.currentValuesPlotItem == None:
+        if self.current_values_plot_item == None:
             # Set plot lines
-            self.currentValuesPlotItem = self.predictionsChart.plot(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.currentValue.getList())
-            self.currentValuesPlotItem.setPen(QtGui.QColor.fromRgb(0, 100, 0)) # green color
-            self.predictedValuesPlotItem = self.predictionsChart.plot(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.bestPredictedValue.getList())
-            self.predictedValuesPlotItem.setPen(QtGui.QColor.fromRgb(255, 215, 80)) # yellow color
+            self.current_values_plot_item = self.predictions_chart.plot(Global.time_steps_predictions_chart.getList(), self.selected_encoding.current_value.getList())
+            self.current_values_plot_item.setPen(QtGui.QColor.fromRgb(0, 100, 0)) # green color
+            self.predicted_values_plot_item = self.predictions_chart.plot(Global.time_steps_predictions_chart.getList(), self.selected_encoding.best_predicted_value.getList())
+            self.predicted_values_plot_item.setPen(QtGui.QColor.fromRgb(255, 215, 80)) # yellow color
 
             # Set legend
-            legend = self.predictionsChart.addLegend(size=None, offset=(0, 0))
-            legend.addItem(self.currentValuesPlotItem, "Current")
-            legend.addItem(self.predictedValuesPlotItem, "Predicted")
+            legend = self.predictions_chart.addLegend(size=None, offset=(0, 0))
+            legend.addItem(self.current_values_plot_item, "Current")
+            legend.addItem(self.predicted_values_plot_item, "Predicted")
         else:
-            self.currentValuesPlotItem.setData(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.currentValue.getList())
-            self.predictedValuesPlotItem.setData(Global.timeStepsPredictionsChart.getList(), self.selectedEncoding.bestPredictedValue.getList())
+            self.current_values_plot_item.setData(Global.time_steps_predictions_chart.getList(), self.selected_encoding.current_value.getList())
+            self.predicted_values_plot_item.setData(Global.time_steps_predictions_chart.getList(), self.selected_encoding.best_predicted_value.getList())
 
         # Set X axis visible range
-        minX = Global.timeStepsPredictionsChart.atFirstStep()
-        maxX = minX + maxPreviousStepsWithInference
-        maxX += 30 # Increase space to avoid plot lines overlap the legend
-        self.predictionsChart.setXRange(minX, maxX)
+        min_x = Global.time_steps_predictions_chart.atFirstStep()
+        max_x = min_x + MAX_PREVIOUS_STEPS_WITH_INFERENCE
+        max_x += 30 # Increase space to avoid plot lines overlap the legend
+        self.predictions_chart.setXRange(min_x, max_x)
 
-    def getPredictedValuesData(self, futureStep):
+    def getPredictedValuesData(self, future_step):
         header = []
-        if self.selectedSensor.predictionsMethod == PredictionsMethod.reconstruction:
+        if self.selected_sensor.predictions_method == PredictionsMethod.RECONSTRUCTION:
             header = ['Value']
-        elif self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
+        elif self.selected_sensor.predictions_method == PredictionsMethod.CLASSIFICATION:
             header = ['Value', 'Probability']
 
         data = []
-        predictions = self.selectedEncoding.predictedValues.atGivenStepAgo(Global.selStep)[futureStep]
-        for predictedValue in predictions:
-            if self.selectedSensor.predictionsMethod == PredictionsMethod.reconstruction:
-                value = predictedValue[1]
+        predictions = self.selected_encoding.predicted_values.atGivenStepAgo(Global.sel_step)[future_step]
+        for predicted_value in predictions:
+            if self.selected_sensor.predictions_method == PredictionsMethod.RECONSTRUCTION:
+                value = predicted_value[1]
                 data.append([value])
-            elif self.selectedSensor.predictionsMethod == PredictionsMethod.classification:
-                value = self.formatValue(self.selectedEncoding.encoderFieldDataType, predictedValue[0])
-                probability = "{0:.3f}".format(predictedValue[1] * 100)
+            elif self.selected_sensor.predictions_method == PredictionsMethod.CLASSIFICATION:
+                value = self.formatValue(self.selected_encoding.encoder_field_data_type, predicted_value[0])
+                probability = "{0:.3f}".format(predicted_value[1] * 100)
                 data.append([value, probability])
 
         return header, data
 
-    def getColumnsData(self, selectedRegion):
+    def getColumnsData(self, selected_region):
         header = ['Pos (x,y)', 'Was Predicted', 'Is Active', 'Activation Rate', 'Precision Rate']
         data = []
-        for column in selectedRegion.columns:
+        for column in selected_region.columns:
             pos = str(column.x) + ", " + str(column.y)
-            wasPredicted = column.segment.isPredicted.atGivenStepAgo(Global.selStep + 1)
-            isActive = column.segment.isActive.atGivenStepAgo(Global.selStep)
-            activationRate = "{0:.3f}".format(column.segment.statsActivationRate)
-            precisionRate = "{0:.3f}".format(column.segment.statsPrecisionRate)
-            data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
-
+            was_predicted = column.segment.is_predicted.atGivenStepAgo(Global.sel_step + 1)
+            is_active = column.segment.is_active.atGivenStepAgo(Global.sel_step)
+            activation_rate = "{0:.3f}".format(column.segment.stats_activation_rate)
+            precision_rate = "{0:.3f}".format(column.segment.stats_precision_rate)
+            data.append([pos, was_predicted, is_active, activation_rate, precision_rate])
         return header, data
 
-    def getProximalSynapsesData(self, selectedSegment):
+    def getProximalSynapsesData(self, selected_segment):
         #TODO: Put sensor bit position (x,y,z)
         header = ['Permanence', 'Is Connected', 'Connection Rate', 'Precision Rate']
         data = []
-        for synapse in selectedSegment.synapses:
-            permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.selStep))
-            isConnected = synapse.isConnected.atGivenStepAgo(Global.selStep)
-            connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
-            precisionRate = "{0:.3f}".format(synapse.statsPrecisionRate)
-            data.append([permanence, isConnected, connectionRate, precisionRate])
-
+        for synapse in selected_segment.synapses:
+            permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.sel_step))
+            is_connected = synapse.is_connected.atGivenStepAgo(Global.sel_step)
+            connection_rate = "{0:.3f}".format(synapse.stats_connection_rate)
+            precision_rate = "{0:.3f}".format(synapse.stats_precision_rate)
+            data.append([permanence, is_connected, connection_rate, precision_rate])
         return header, data
 
-    def getCellsData(self, selectedColumn):
+    def getCellsData(self, selected_column):
         header = ['Pos (z)', 'Was Predicted', 'Is Active', 'Activation Rate', 'Precision Rate']
         data = []
-        for cell in selectedColumn.cells:
+        for cell in selected_column.cells:
             pos = str(cell.z)
-            wasPredicted = cell.isPredicted.atGivenStepAgo(Global.selStep + 1)
-            isActive = cell.isActive.atGivenStepAgo(Global.selStep)
-            activationRate = "{0:.3f}".format(cell.statsActivationRate)
-            precisionRate = "{0:.3f}".format(cell.statsPrecisionRate)
-            data.append([pos, wasPredicted, isActive, activationRate, precisionRate])
-
+            was_predicted = cell.is_predicted.atGivenStepAgo(Global.sel_step + 1)
+            is_active = cell.is_active.atGivenStepAgo(Global.sel_step)
+            activation_rate = "{0:.3f}".format(cell.stats_activation_rate)
+            precision_rate = "{0:.3f}".format(cell.stats_precision_rate)
+            data.append([pos, was_predicted, is_active, activation_rate, precision_rate])
         return header, data
 
-    def getDistalSegmetsData(self, selectedCell):
+    def getDistalSegmetsData(self, selected_cell):
         header = ['Is Active', 'Activation Rate', 'Activation Rate']
         data = []
-        for segment in selectedCell.segments:
-            isActive = segment.isActive.atGivenStepAgo(Global.selStep)
-            activationRate = "{0:.3f}".format(segment.statsActivationRate)
-            data.append([isActive, activationRate, activationRate])
-
+        for segment in selected_cell.segments:
+            is_active = segment.is_active.atGivenStepAgo(Global.sel_step)
+            activation_rate = "{0:.3f}".format(segment.stats_activation_rate)
+            data.append([is_active, activation_rate, activation_rate])
         return header, data
 
-    def getDistalSynapsesData(self, selectedSegment):
+    def getDistalSynapsesData(self, selected_segment):
         #TODO: Put lateral cell position (x,y,z)
         header = ['Permanence', 'Is Connected', 'Connection Rate']
         data = []
-        for synapse in selectedSegment.synapses:
-            permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.selStep))
-            isConnected = synapse.isConnected.atGivenStepAgo(Global.selStep)
-            connectionRate = "{0:.3f}".format(synapse.statsConnectionRate)
-            data.append([permanence, isConnected, connectionRate])
-
+        for synapse in selected_segment.synapses:
+            permanence = "{0:.3f}".format(synapse.permanence.atGivenStepAgo(Global.sel_step))
+            is_connected = synapse.is_connected.atGivenStepAgo(Global.sel_step)
+            connection_rate = "{0:.3f}".format(synapse.stats_connection_rate)
+            data.append([permanence, is_connected, connection_rate])
         return header, data
 
     def showTab(self, tab, title):
-        tabFound = False
-        for tabIdx in range(self.tabControlMain.count()):
-            if self.tabControlMain.tabText(tabIdx) == title:
-                tabFound = True
-        if not tabFound:
-            self.tabControlMain.addTab(tab, title)
+        tab_found = False
+        for idx in range(self.tab_control_main.count()):
+            if self.tab_control_main.tabText(idx) == title:
+                tab_found = True
+        if not tab_found:
+            self.tab_control_main.addTab(tab, title)
 
     def closeEvent(self, event):
         self.Hide()
         self.Parent = None
         event.Cancel = True
 
-    def __sliderStep_ValueChanged(self, value):
+    def sliderStep_valueChanged(self, value):
         self.updatePredictedValuesGrid()
 
-    def __comboBoxEncoding_CurrentIndexChanged(self, event):
-        if Global.simulationInitialized:
-            encodingIdx = self.comboBoxEncoding.currentIndex()
-            self.selectedEncoding = self.selectedSensor.encodings[encodingIdx]
+    def comboBoxEncoding_currentIndexChanged(self, event):
+        if Global.simulation_initialized:
+            idx = self.combo_box_encoding.currentIndex()
+            self.selected_encoding = self.selected_sensor.encodings[idx]
             self.updateEncodingControls()
 
-    def __checkBoxEnableSpatialLearning_Toggled(self, event):
-        self.selectedRegion.enableSpatialLearning = self.checkBoxEnableSpatialLearning.isChecked()
+    def checkBoxEnableSpatialLearning_toggled(self, event):
+        self.selected_region.enable_spatial_learning = self.check_box_enable_spatial_learning.isChecked()
 
-    def __checkBoxEnableTemporalLearning_Toggled(self, event):
-        self.selectedRegion.enableTemporalLearning = self.checkBoxEnableTemporalLearning.isChecked()
+    def checkBoxEnableTemporalLearning_toggled(self, event):
+        self.selected_region.enable_temporal_learning = self.check_box_enable_temporal_learning.isChecked()
 
-    def __checkBoxEnableClassificationLearning_Toggled(self, event):
-        self.selectedSensor.enableClassificationLearning = self.checkBoxEnableClassificationLearning.isChecked()
+    def checkBoxEnableClassificationLearning_toggled(self, event):
+        self.selected_sensor.enable_classification_learning = self.check_box_enable_classification_learning.isChecked()
 
-    def __checkBoxEnableClassificationInference_Toggled(self, event):
-        self.selectedSensor.enableClassificationInference = self.checkBoxEnableClassificationInference.isChecked()
+    def checkBoxEnableClassificationInference_toggled(self, event):
+        self.selected_sensor.enable_classification_inference = self.check_box_enable_classification_inference.isChecked()
 
-    def __dataGridColumns_SelectionChanged(self, event):
-        if self.selectedColumn != None:
-            self.selectedColumn.segment.tree3d_selected = False
+    def dataGridColumns_selectionChanged(self, event):
+        if self.selected_column != None:
+            self.selected_column.segment.tree3d_selected = False
 
-        self.dataGridProximalSynapses.clearSelection()
-        self.dataGridCells.clearSelection()
+        self.data_grid_proximal_synapses.clearSelection()
+        self.data_grid_cells.clearSelection()
 
-        selectedRows = self.dataGridColumns.selectionModel().selectedRows()
-        if len(selectedRows) > 0:
-            index = selectedRows[0].row()
-            self.selectedColumn = self.selectedRegion.columns[index]
-            self.selectedColumn.segment.tree3d_selected = True
+        selected_rows = self.data_grid_columns.selectionModel().selectedRows()
+        if len(selected_rows) > 0:
+            index = selected_rows[0].row()
+            self.selected_column = self.selected_region.columns[index]
+            self.selected_column.segment.tree3d_selected = True
 
             # Bind the synapses of the selected segment
-            self.showTab(self.tabPageProximalSynapses, "Proximal Synapses")
-            header, data = self.getProximalSynapsesData(self.selectedColumn.segment)
-            self.dataGridProximalSynapses.model().update(header, data)
-            self.dataGridProximalSynapses.resizeColumnsToContents()
+            self.showTab(self.tab_page_proximal_synapses, "Proximal Synapses")
+            header, data = self.getProximalSynapsesData(self.selected_column.segment)
+            self.data_grid_proximal_synapses.model().update(header, data)
+            self.data_grid_proximal_synapses.resizeColumnsToContents()
 
             # Bind the cells of the selected column
-            self.showTab(self.tabPageCells, "Cells")
-            header, data = self.getCellsData(self.selectedColumn)
-            self.dataGridCells.model().update(header, data)
-            self.dataGridCells.resizeColumnsToContents()
+            self.showTab(self.tab_page_cells, "Cells")
+            header, data = self.getCellsData(self.selected_column)
+            self.data_grid_cells.model().update(header, data)
+            self.data_grid_cells.resizeColumnsToContents()
 
-        Global.simulationForm.refreshControls()
+        Global.simulation_form.refreshControls()
 
-    def __dataGridProximalSynapses_SelectionChanged(self, event):
-        if self.selectedProximalSynapse != None:
-            self.selectedProximalSynapse.tree3d_selected = False
+    def dataGridProximalSynapses_selectionChanged(self, event):
+        if self.selected_proximal_synapse != None:
+            self.selected_proximal_synapse.tree3d_selected = False
 
-        selectedRows = self.dataGridProximalSynapses.selectionModel().selectedRows()
-        if len(selectedRows) > 0:
-            index = selectedRows[0].row()
-            self.selectedProximalSynapse = self.selectedColumn.segment.synapses[index]
-            self.selectedProximalSynapse.tree3d_selected = True
+        selected_rows = self.data_grid_proximal_synapses.selectionModel().selectedRows()
+        if len(selected_rows) > 0:
+            index = selected_rows[0].row()
+            self.selected_proximal_synapse = self.selected_column.segment.synapses[index]
+            self.selected_proximal_synapse.tree3d_selected = True
 
-        Global.simulationForm.refreshControls()
+        Global.simulation_form.refreshControls()
 
-    def __dataGridCells_SelectionChanged(self, event):
-        if self.selectedCell != None:
-            self.selectedCell.tree3d_selected = False
+    def dataGridCells_selectionChanged(self, event):
+        if self.selected_cell != None:
+            self.selected_cell.tree3d_selected = False
 
-        self.dataGridDistalSegments.clearSelection()
+        self.data_grid_distal_segments.clearSelection()
 
-        selectedRows = self.dataGridCells.selectionModel().selectedRows()
-        if len(selectedRows) > 0:
-            index = selectedRows[0].row()
-            self.selectedCell = self.selectedColumn.cells[index]
-            self.selectedCell.tree3d_selected = True
+        selected_rows = self.data_grid_cells.selectionModel().selectedRows()
+        if len(selected_rows) > 0:
+            index = selected_rows[0].row()
+            self.selected_cell = self.selected_column.cells[index]
+            self.selected_cell.tree3d_selected = True
 
             # Bind the segments of the selected cell
-            self.showTab(self.tabPageDistalSegments, "Distal Segments")
-            header, data = self.getDistalSegmetsData(self.selectedCell)
-            self.dataGridDistalSegments.model().update(header, data)
-            self.dataGridDistalSegments.resizeColumnsToContents()
+            self.showTab(self.tab_page_distal_segments, "Distal Segments")
+            header, data = self.getDistalSegmetsData(self.selected_cell)
+            self.data_grid_distal_segments.model().update(header, data)
+            self.data_grid_distal_segments.resizeColumnsToContents()
 
-        Global.simulationForm.refreshControls()
+        Global.simulation_form.refreshControls()
 
-    def __dataGridDistalSegments_SelectionChanged(self, event):
-        if self.selectedDistalSegment != None:
-            self.selectedDistalSegment.tree3d_selected = False
+    def dataGridDistalSegments_selectionChanged(self, event):
+        if self.selected_distal_segment != None:
+            self.selected_distal_segment.tree3d_selected = False
 
-        self.dataGridDistalSynapses.clearSelection()
+        self.data_grid_distal_synapses.clearSelection()
 
-        selectedRows = self.dataGridDistalSegments.selectionModel().selectedRows()
-        if len(selectedRows) > 0:
-            index = selectedRows[0].row()
-            self.selectedDistalSegment = self.selectedCell.segments[index]
+        selected_rows = self.data_grid_distal_segments.selectionModel().selectedRows()
+        if len(selected_rows) > 0:
+            index = selected_rows[0].row()
+            self.selected_distal_segment = self.selected_cell.segments[index]
 
             # Bind the synapses of the selected segment
-            self.showTab(self.tabPageDistalSynapses, "Distal Synapses")
-            header, data = self.getDistalSynapsesData(self.selectedDistalSegment)
-            self.dataGridDistalSynapses.model().update(header, data)
-            self.dataGridDistalSynapses.resizeColumnsToContents()
+            self.showTab(self.tab_page_distal_synapses, "Distal Synapses")
+            header, data = self.getDistalSynapsesData(self.selected_distal_segment)
+            self.data_grid_distal_synapses.model().update(header, data)
+            self.data_grid_distal_synapses.resizeColumnsToContents()
 
-        Global.simulationForm.refreshControls()
+        Global.simulation_form.refreshControls()
 
-    def __dataGridDistalSynapses_SelectionChanged(self, event):
-        if self.selectedDistalSynapse != None:
-            self.selectedDistalSynapse.tree3d_selected = False
+    def dataGridDistalSynapses_selectionChanged(self, event):
+        if self.selected_distal_synapse != None:
+            self.selected_distal_synapse.tree3d_selected = False
 
-        selectedRows = self.dataGridDistalSynapses.selectionModel().selectedRows()
-        if len(selectedRows) > 0:
-            index = selectedRows[0].row()
-            self.selectedDistalSynapse = self.selectedDistalSegment.synapses[index]
-            self.selectedDistalSynapse.tree3d_selected = True
+        selected_rows = self.data_grid_distal_synapses.selectionModel().selectedRows()
+        if len(selected_rows) > 0:
+            index = selected_rows[0].row()
+            self.selected_distal_synapse = self.selected_distal_segment.synapses[index]
+            self.selected_distal_synapse.tree3d_selected = True
 
-        Global.simulationForm.refreshControls()
+        Global.simulation_form.refreshControls()

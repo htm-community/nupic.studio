@@ -11,23 +11,24 @@ from nupic_studio.ui.node_information_form import NodeInformationForm
 from nupic_studio.ui.simulation_form import SimulationForm
 from nupic_studio.ui.output_form import OutputForm
 
+
 def main():
     Global.app = QtWidgets.QApplication(sys.argv)
     Global.app.setStyleSheet("QGroupBox { border: 1px solid gray; } QGroupBox::title { padding: 0 5px; }")
 
-    Global.appPath = os.path.abspath(os.path.join(__file__, '..'))
+    Global.app_path = os.path.abspath(os.path.join(__file__, '..'))
     Global.loadConfig()
 
     Global.project = Project()
-    Global.simulationForm = SimulationForm()
-    Global.architectureForm = ArchitectureForm()
-    Global.nodeInformationForm = NodeInformationForm()
-    Global.outputForm = OutputForm()
-    Global.mainForm = MainForm()
+    Global.simulation_form = SimulationForm()
+    Global.architecture_form = ArchitectureForm()
+    Global.node_information_form = NodeInformationForm()
+    Global.output_form = OutputForm()
+    Global.main_form = MainForm()
 
     # Create and display the splash screen
     start = time.time()
-    splash_pix = QtGui.QPixmap(Global.appPath + '/images/splash.png')
+    splash_pix = QtGui.QPixmap(Global.app_path + '/images/splash.png')
     splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
@@ -37,11 +38,11 @@ def main():
     splash.close()
 
     # Show start form
-    startForm = StartForm()
-    startForm.show()
+    start_form = StartForm()
+    start_form.show()
 
-    deploymentBuild = os.getenv("NUPIC_STUDIO_DEPLOYMENT_BUILD", False)
-    if deploymentBuild:
+    deployment_build = os.getenv("NUPIC_STUDIO_DEPLOYMENT_BUILD", False)
+    if deployment_build:
         sys.exit(0)
     else:
         sys.exit(Global.app.exec_())

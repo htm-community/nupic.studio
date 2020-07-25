@@ -10,7 +10,7 @@ class Link:
         """
 
         # Node which its output will be used as input to the second node.
-        self.outNode = None
+        self.out_node = None
 
         # Target region to receive the input.
-        self.inNode = None
+        self.in_node = None

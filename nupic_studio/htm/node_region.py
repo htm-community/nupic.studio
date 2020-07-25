@@ -1,7 +1,7 @@
 import numpy
 import time
 from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.htm import MAX_PREVIOUS_STEPS
 from nupic_studio.htm.node import Node, NodeType
 from nupic_studio.htm.column import Column
 from nupic_studio.htm.cell import Cell
@@ -10,6 +10,7 @@ from nupic_studio.htm.synapse import Synapse
 from nupic_studio.ui import Global
 from nupic.research.spatial_pooler import SpatialPooler
 from nupic.research.temporal_memory import TemporalMemory as TemporalPooler
+
 
 class Region(Node):
     """
@@ -21,161 +22,158 @@ class Region(Node):
         Initializes a new instance of this class.
         """
 
-        Node.__init__(self, name, NodeType.region)
+        Node.__init__(self, name, NodeType.REGION)
 
         # List of columns that compose this region.
         self.columns = []
 
         # An array representing the input map for this region.
-        self._inputMap = []
+        self.input_map = []
 
         # Switch for spatial learning.
-        self.enableSpatialLearning = True
+        self.enable_spatial_learning = True
 
         # This parameter determines the extent of the input that each column can potentially be connected to. This
         # can be thought of as the input bits that are visible to each column, or a 'receptiveField' of the field of
         # vision. A large enough value will result in 'global coverage', meaning that each column can potentially be
         # connected to every input bit. This parameter defines a square (or hyper square) area: a column will have a
-        # max square potential pool with sides of length 2 * potentialRadius + 1.
-        self.potentialRadius = 0
+        # max square potential pool with sides of length 2 * potential_radius + 1.
+        self.potential_radius = 0
 
         # The percent of the inputs, within a column's potential radius, that a column can be connected to. If set
         # to 1, the column will be connected to every input within its potential radius. This parameter is used to
-        # give each column a unique potential pool when a large potentialRadius causes overlap between the columns.
-        # At initialization time we choose ((2*potentialRadius + 1)^(# inputDimensions) * potentialPct) input bits to
+        # give each column a unique potential pool when a large potential_radius causes overlap between the columns.
+        # At initialization time we choose ((2*potential_radius + 1)^(# inputDimensions) * potential_pct) input bits to
         # comprise the column's potential pool.
-        self.potentialPct = 0.5
+        self.potential_pct = 0.5
 
         # If true, then during inhibition phase the winning columns are selected as the most active columns from the
         # region as a whole. Otherwise, the winning columns are selected with respect to their local neighborhoods.
         # Using global inhibition boosts performance x60.
-        self.globalInhibition = False
+        self.global_inhibition = False
 
         # The desired density of active columns within a local inhibition area (the size of which is set by the
         # internally calculated inhibitionRadius, which is in turn determined from the average size of the connected
         # potential pools of all columns). The inhibition logic will insure that at most N columns remain ON within a
-        # local inhibition area, where N = localAreaDensity * (total number of columns in inhibition area).
-        self.localAreaDensity = -1.0
+        # local inhibition area, where N = local_area_density * (total number of columns in inhibition area).
+        self.local_area_density = -1.0
 
-        # An alternate way to control the density of the active columns. If numActiveColumnsPerInhArea is specified
-        # then localAreaDensity must be less than 0, and vice versa. When using numActiveColumnsPerInhArea, the
-        # inhibition logic will insure that at most 'numActiveColumnsPerInhArea' columns remain ON within a local
+        # An alternate way to control the density of the active columns. If num_active_columns_per_inh_area is specified
+        # then local_area_density must be less than 0, and vice versa. When using num_active_columns_per_inh_area, the
+        # inhibition logic will insure that at most 'num_active_columns_per_inh_area' columns remain ON within a local
         # inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn
         # determined from the average size of the connected receptive fields of all columns). When using this method,
         # as columns learn and grow their effective receptive fields, the inhibitionRadius will grow, and hence the net
-        # density of the active columns will *decrease*. This is in contrast to the localAreaDensity method, which
+        # density of the active columns will *decrease*. This is in contrast to the local_area_density method, which
         # keeps the density of active columns the same regardless of the size of their receptive fields.
-        self.numActiveColumnsPerInhArea = int(0.02 * (self.width * self.height))
+        self.num_active_columns_per_inh_area = int(0.02 * (self.width * self.height))
 
         # This is a number specifying the minimum number of synapses that must be on in order for a columns to turn ON.
         # The purpose of this is to prevent noise input from activating columns. Specified as a percent of a fully grown
         # synapse.
-        self.stimulusThreshold = 0
+        self.stimulus_threshold = 0
 
-        self.proximalSynConnectedPerm = 0.10
+        self.proximal_syn_connected_perm = 0.10
         # The default connected threshold. Any synapse whose permanence value is above the connected threshold is a
         # "connected synapse", meaning it can contribute to the cell's firing.
 
-        self.proximalSynPermIncrement = 0.1
+        self.proximal_syn_perm_increment = 0.1
         # The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown
         # synapse.
 
-        self.proximalSynPermDecrement = 0.01
+        self.proximal_syn_perm_decrement = 0.01
         # The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown
         # synapse.
 
-        # A number between 0 and 1.0, used to set a floor on how often a column should have at least stimulusThreshold
+        # A number between 0 and 1.0, used to set a floor on how often a column should have at least stimulus_threshold
         # active inputs. Periodically, each column looks at the overlap duty cycle of all other columns within its
         # inhibition radius and sets its own internal minimal acceptable duty cycle to:
-        #     minPctDutyCycleBeforeInh * max(other columns' duty cycles).
+        #     min_pct_duty_cycle_before_inh * max(other columns' duty cycles).
         # On each iteration, any column whose overlap duty cycle falls below this computed value will get all of its
         # permanence values boosted up by synPermActiveInc. Raising all permanences in response to a sub-par duty cycle
         # before inhibition allows a cell to search for new inputs when either its previously learned inputs are no
         # longer ever active, or when the vast majority of them have been "hijacked" by other columns.
-        self.minPctOverlapDutyCycle = 0.001
+        self.min_pct_overlap_duty_cycle = 0.001
 
         # A number between 0 and 1.0, used to set a floor on how often a column should be activate. Periodically, each
         # column looks at the activity duty cycle of all other columns within its inhibition radius and sets its own
         # internal minimal acceptable duty cycle to:
-        #     minPctDutyCycleAfterInh * max(other columns' duty cycles).
+        #     min_pct_duty_cycle_after_inh * max(other columns' duty cycles).
         # On each iteration, any column whose duty cycle after inhibition falls below this computed value will get its
         # internal boost factor increased.
-        self.minPctActiveDutyCycle = 0.001
+        self.min_pct_active_duty_cycle = 0.001
 
         # The period used to calculate duty cycles. Higher values make it take longer to respond to changes in boost or
         # synPerConnectedCell. Shorter values make it more unstable and likely to oscillate.
-        self.dutyCyclePeriod = 1000
+        self.duty_cycle_period = 1000
 
         # The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets
-        # considered for inhibition. The actual boost factor for a column is number between 1.0 and maxBoost. A boost
-        # factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, maxBoost is used if the duty cycle is 0,
+        # considered for inhibition. The actual boost factor for a column is number between 1.0 and max_boost. A boost
+        # factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, max_boost is used if the duty cycle is 0,
         # and any duty cycle in between is linearly extrapolated from these 2 endpoints.
-        self.maxBoost = 10.0
+        self.max_boost = 10.0
 
         # Seed for generate random values.
-        self.spSeed = -1
+        self.sp_seed = -1
 
         # Switch for temporal learning.
-        self.enableTemporalLearning = True
+        self.enable_temporal_learning = True
 
         # Number of cells per column. More cells, more contextual information.
-        self.numCellsPerColumn = 10
+        self.cells_per_column = 10
 
         # The initial permanence of an distal synapse.
-        self.distalSynInitialPerm = 0.11
+        self.distal_syn_initial_perm = 0.11
 
         # The default connected threshold. Any synapse whose permanence value is above the connected threshold is a
         # "connected synapse", meaning it can contribute to the cell's firing.
-        self.distalSynConnectedPerm = 0.50
+        self.distal_syn_connected_perm = 0.50
 
         # The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown
         # synapse.
-        self.distalSynPermIncrement = 0.10
+        self.distal_syn_perm_increment = 0.10
 
         # The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown
         # synapse.
-        self.distalSynPermDecrement = 0.10
+        self.distal_syn_perm_decrement = 0.10
 
         # If the number of synapses active on a segment is at least this threshold, it is selected as the best matching
         # cell in a bursing column.
-        self.minThreshold = 8
+        self.min_threshold = 8
 
         # If the number of active connected synapses on a segment is at least this threshold, the segment is said to be active.
-        self.activationThreshold = 12
+        self.activation_threshold = 12
 
         # The maximum number of synapses added to a segment during learning.
-        self.maxNumNewSynapses = 15
+        self.max_new_synapses = 15
 
         # Seed for generate random values.
-        self.tpSeed = 42
+        self.tp_seed = 42
 
         # Spatial Pooler instance.
-        self.spatialPooler = None
+        self.spatial_pooler = None
 
         # Temporal Pooler instance.
-        self.temporalPooler = None
+        self.temporal_pooler = None
 
-        self.statsPrecisionRate = 0.
+        # Statistics
+        self.stats_precision_rate = 0.0
 
     def getColumn(self, x, y):
         """
         Return the column located at given position
         """
-
         column = self.columns[(y * self.width) + x]
-
         return column
 
     def getInputSize(self):
         """
         Return the sum of sizes of all feeder nodes.
         """
-
-        sumSizes = 0
+        sum_sizes = 0
         for feeder in Global.project.network.getFeederNodes(self):
-            sumSizes += feeder.width * feeder.height
-
-        return sumSizes
+            sum_sizes += feeder.width * feeder.height
+        return sum_sizes
 
     def initialize(self):
         """
@@ -183,8 +181,8 @@ class Region(Node):
         """
 
         # Check if this region has nodes that feed it
-        numFeeders = len(Global.project.network.getFeederNodes(self))
-        if numFeeders == 0:
+        feeders_count = len(Global.project.network.getFeederNodes(self))
+        if feeders_count == 0:
             QtWidgets.QMessageBox.warning(None, "Warning", "Region '" + self.name + "' does not have any child!")
             return
 
@@ -196,69 +194,66 @@ class Region(Node):
         # For example, if we have 2 nodes that feed this region (#1 and #2) with dimensions 6 and 12 respectively,
         # a input map would be something like:
         #   111111222222222222
-        self._inputMap = []
-        elemIdx = 0
+        self.input_map = []
         for feeder in Global.project.network.getFeederNodes(self):
-
             # Arrange input from feeder into input map of this region
-            if feeder.type == NodeType.region:
+            if feeder.type == NodeType.REGION:
                 for column in feeder.columns:
-                    inputElem = column.cells[0]
-                    self._inputMap.append(inputElem)
+                    input_elem = column.cells[0]
+                    self.input_map.append(input_elem)
             else:
                 for bit in feeder.bits:
-                    inputElem = bit
-                    self._inputMap.append(inputElem)
-            elemIdx += 1
+                    input_elem = bit
+                    self.input_map.append(input_elem)
 
         # Initialize elements
         self.columns = []
-        colIdx = 0
+        idx = 0
         for x in range(self.width):
             for y in range(self.height):
                 column = Column()
                 column.x = x
                 column.y = y
-                for z in range(self.numCellsPerColumn):
+                for z in range(self.cells_per_column):
                     cell = Cell()
-                    cell.index = (colIdx * self.numCellsPerColumn) + z
+                    cell.index = (idx * self.cells_per_column) + z
                     cell.z = z
                     column.cells.append(cell)
                 self.columns.append(column)
-                colIdx += 1
+                idx += 1
 
         # Create Spatial Pooler instance with appropriate parameters
-        self.spatialPooler = SpatialPooler(
-            inputDimensions = (self.getInputSize(), 1),
-            columnDimensions = (self.width, self.height),
-            potentialRadius = self.potentialRadius,
-            potentialPct = self.potentialPct,
-            globalInhibition = self.globalInhibition,
-            localAreaDensity = self.localAreaDensity,
-            numActiveColumnsPerInhArea = self.numActiveColumnsPerInhArea,
-            stimulusThreshold = self.stimulusThreshold,
-            synPermInactiveDec = self.proximalSynPermDecrement,
-            synPermActiveInc = self.proximalSynPermIncrement,
-            synPermConnected = self.proximalSynConnectedPerm,
-            minPctOverlapDutyCycle = self.minPctOverlapDutyCycle,
-            minPctActiveDutyCycle = self.minPctActiveDutyCycle,
-            dutyCyclePeriod = self.dutyCyclePeriod,
-            maxBoost = self.maxBoost,
-            seed = self.spSeed,
-            spVerbosity = False)
+        self.spatial_pooler = SpatialPooler(
+            inputDimensions=(self.getInputSize(), 1),
+            columnDimensions=(self.width, self.height),
+            potentialRadius=self.potential_radius,
+            potentialPct=self.potential_pct,
+            globalInhibition=self.global_inhibition,
+            localAreaDensity=self.local_area_density,
+            numActiveColumnsPerInhArea=self.num_active_columns_per_inh_area,
+            stimulusThreshold=self.stimulus_threshold,
+            synPermInactiveDec=self.proximal_syn_perm_decrement,
+            synPermActiveInc=self.proximal_syn_perm_increment,
+            synPermConnected=self.proximal_syn_connected_perm,
+            minPctOverlapDutyCycle=self.min_pct_overlap_duty_cycle,
+            minPctActiveDutyCycle=self.min_pct_active_duty_cycle,
+            dutyCyclePeriod=self.duty_cycle_period,
+            maxBoost=self.max_boost,
+            seed=self.sp_seed,
+            spVerbosity=False)
 
         # Create Temporal Pooler instance with appropriate parameters
-        self.temporalPooler = TemporalPooler(
-            columnDimensions = (self.width, self.height),
-            cellsPerColumn = self.numCellsPerColumn,
-            initialPermanence = self.distalSynInitialPerm,
-            connectedPermanence = self.distalSynConnectedPerm,
-            minThreshold = self.minThreshold,
-            maxNewSynapseCount = self.maxNumNewSynapses,
-            permanenceIncrement = self.distalSynPermIncrement,
-            permanenceDecrement = self.distalSynPermDecrement,
-            activationThreshold = self.activationThreshold,
-            seed = self.tpSeed)
+        self.temporal_pooler = TemporalPooler(
+            columnDimensions=(self.width, self.height),
+            cellsPerColumn=self.cells_per_column,
+            initialPermanence=self.distal_syn_initial_perm,
+            connectedPermanence=self.distal_syn_connected_perm,
+            minThreshold=self.min_threshold,
+            maxNewSynapseCount=self.max_new_synapses,
+            permanenceIncrement=self.distal_syn_perm_increment,
+            permanenceDecrement=self.distal_syn_perm_decrement,
+            activation_threshold=self.activation_threshold,
+            seed=self.tp_seed)
 
         return True
 
@@ -266,7 +261,6 @@ class Region(Node):
         """
         Perfoms actions related to time step progression.
         """
-
         Node.nextStep(self)
         for column in self.columns:
             column.nextStep()
@@ -276,21 +270,21 @@ class Region(Node):
 
         # Send input to Spatial Pooler and get processed output (i.e. the active columns)
         # First initialize the vector for representing the current record
-        columnDimensions = (self.width, self.height)
-        columnNumber = numpy.array(columnDimensions).prod()
-        activeColumns = numpy.zeros(columnNumber)
-        self.spatialPooler.compute(input, self.enableSpatialLearning, activeColumns)
+        column_dimensions = (self.width, self.height)
+        column_number = numpy.array(column_dimensions).prod()
+        active_columns = numpy.zeros(column_number)
+        self.spatial_pooler.compute(input, self.enable_spatial_learning, active_columns)
 
         # Send active columns to Temporal Pooler and get processed output (i.e. the predicting cells)
         # First convert active columns from float array to integer set
-        activeColumnsSet = set()
-        for colIdx in range(len(activeColumns)):
-            if activeColumns[colIdx] == 1:
-                activeColumnsSet.add(colIdx)
-        self.temporalPooler.compute(activeColumnsSet, self.enableTemporalLearning)
+        active_columns_set = set()
+        for idx in range(len(active_columns)):
+            if active_columns[idx] == 1:
+                active_columns_set.add(idx)
+        self.temporal_pooler.compute(active_columns_set, self.enable_temporal_learning)
 
         # Update elements regarding spatial pooler
-        self.updateSpatialElements(activeColumns)
+        self.updateSpatialElements(active_columns)
 
         # Update elements regarding temporal pooler
         self.updateTemporalElements()
@@ -298,13 +292,12 @@ class Region(Node):
         # Get the predicted values
         self.getPredictions()
 
-        #TODO: self._output = self.temporalPooler.getPredictedState()
+        #TODO: self.output = self.temporal_pooler.getPredictedState()
 
     def getPredictions(self):
         """
         Get the predicted values after an iteration.
         """
-
         for feeder in Global.project.network.getFeederNodes(self):
             feeder.getPredictions()
 
@@ -314,12 +307,12 @@ class Region(Node):
         """
 
         # The region's prediction precision is the average between the nodes that feed it
-        precisionRate = 0.
-        numFeeders = 0
+        precision_rate = 0.0
+        feeders_count = 0
         for feeder in Global.project.network.getFeederNodes(self):
-            precisionRate += feeder.statsPrecisionRate
-            numFeeders += 1
-        self.statsPrecisionRate = precisionRate / numFeeders
+            precision_rate += feeder.stats_precision_rate
+            feeders_count += 1
+        self.stats_precision_rate = precision_rate / feeders_count
 
         for column in self.columns:
             column.calculateStatistics()
@@ -330,69 +323,69 @@ class Region(Node):
         """
 
         # Initialize the vector for representing the current input map
-        inputList = []
-        for inputElem in self._inputMap:
-            if inputElem.isActive.atCurrStep():
-                inputList.append(1)
+        input_list = []
+        for input_elem in self.input_map:
+            if input_elem.is_active.atCurrStep():
+                input_list.append(1)
             else:
-                inputList.append(0)
-        input = numpy.array(inputList)
+                input_list.append(0)
+        input = numpy.array(input_list)
 
         return input
 
-    def updateSpatialElements(self, activeColumns):
+    def updateSpatialElements(self, active_columns):
         """
         Update elements regarding spatial pooler
         """
 
         # Update proximal segments and synapses according to active columns
-        for colIdx in range(len(self.columns)):
-            column = self.columns[colIdx]
+        for col_idx in range(len(self.columns)):
+            column = self.columns[col_idx]
 
             # Update proximal segment
             segment = column.segment
-            if activeColumns[colIdx] == 1:
-                segment.isActive.setForCurrStep(True)
+            if active_columns[col_idx] == 1:
+                segment.is_active.setForCurrStep(True)
             else:
-                segment.isActive.setForCurrStep(False)
+                segment.is_active.setForCurrStep(False)
 
             # Check if proximal segment is predicted by check if the column has any predicted cell
             for cell in column.cells:
-                if cell.index in self.temporalPooler.predictiveCells:
-                    segment.isPredicted.setForCurrStep(True)
+                if cell.index in self.temporal_pooler.predictiveCells:
+                    segment.is_predicted.setForCurrStep(True)
 
             # Update proximal synapses
-            if segment.isActive.atCurrStep() or segment.isPredicted.atCurrStep():
-                permanencesSynapses = []
-                self.spatialPooler.getPermanence(colIdx, permanencesSynapses)
-                connectedSynapses = []
-                self.spatialPooler.getConnectedSynapses(colIdx, connectedSynapses)
-                for synIdx in range(len(permanencesSynapses)):
+            if segment.is_active.atCurrStep() or segment.is_predicted.atCurrStep():
+                permanences_synapses = []
+                self.spatial_pooler.getPermanence(col_idx, permanences_synapses)
+                connected_synapses = []
+                self.spatial_pooler.getConnectedSynapses(col_idx, connected_synapses)
+                for syn_idx in range(len(permanences_synapses)):
                     # Get the proximal synapse given its position in the input map
                     # Create a new one if it doesn't exist
-                    synapse = segment.getSynapse(synIdx)
+                    synapse = segment.getSynapse(syn_idx)
 
                     # Update proximal synapse
-                    if permanencesSynapses[synIdx] > 0.:
+                    if permanences_synapses[syn_idx] > 0.0:
                         if synapse == None:
                             # Create a new synapse to a input element
                             # An input element is a column if feeder is a region
                             # or then a bit if feeder is a sensor
                             synapse = Synapse()
-                            synapse.inputElem = self._inputMap[synIdx]
-                            synapse.indexSP = synIdx
+                            synapse.input_elem = self.input_map[syn_idx]
+                            synapse.index_sp = syn_idx
                             segment.synapses.append(synapse)
 
                         # Update state
-                        synapse.isRemoved.setForCurrStep(False)
-                        synapse.permanence.setForCurrStep(permanencesSynapses[synIdx])
-                        if connectedSynapses[synIdx] == 1:
-                            synapse.isConnected.setForCurrStep(True)
+                        synapse.is_removed.setForCurrStep(False)
+                        synapse.permanence.setForCurrStep(permanences_synapses[syn_idx])
+                        if connected_synapses[syn_idx] == 1:
+                            synapse.is_connected.setForCurrStep(True)
                         else:
-                            synapse.isConnected.setForCurrStep(False)
+                            synapse.is_connected.setForCurrStep(False)
                     else:
                         if synapse != None:
-                            synapse.isRemoved.setForCurrStep(True)
+                            synapse.is_removed.setForCurrStep(True)
 
     def updateTemporalElements(self):
         """
@@ -400,107 +393,107 @@ class Region(Node):
         """
 
         # Update cells, distal segments and synapses according to active columns
-        for colIdx in range(len(self.columns)):
-            column = self.columns[colIdx]
+        for col_idx in range(len(self.columns)):
+            column = self.columns[col_idx]
 
             # Mark proximal segment and its connected synapses as predicted
-            if column.segment.isPredicted.atCurrStep():
+            if column.segment.is_predicted.atCurrStep():
                 for synapse in column.segment.synapses:
-                    if synapse.isConnected.atCurrStep():
-                        synapse.isPredicted.setForCurrStep(True)
-                        synapse.inputElem.isPredicted.setForCurrStep(True)
+                    if synapse.is_connected.atCurrStep():
+                        synapse.is_predicted.setForCurrStep(True)
+                        synapse.input_elem.is_predicted.setForCurrStep(True)
 
             # Mark proximal segment and its connected synapses that were predicted but are not active now
-            if column.segment.isPredicted.atPreviousStep():
-                if not column.segment.isActive.atCurrStep():
-                    column.segment.isFalselyPredicted.setForCurrStep(True)
+            if column.segment.is_predicted.atPreviousStep():
+                if not column.segment.is_active.atCurrStep():
+                    column.segment.is_falsely_predicted.setForCurrStep(True)
                 for synapse in column.segment.synapses:
-                    if (synapse.isPredicted.atPreviousStep() and not synapse.isConnected.atCurrStep()) or (synapse.isConnected.atCurrStep() and synapse.inputElem.isFalselyPredicted.atCurrStep()):
-                        synapse.isFalselyPredicted.setForCurrStep(True)
+                    if (synapse.is_predicted.atPreviousStep() and not synapse.is_connected.atCurrStep()) or (synapse.is_connected.atCurrStep() and synapse.input_elem.is_falsely_predicted.atCurrStep()):
+                        synapse.is_falsely_predicted.setForCurrStep(True)
 
             for cell in column.cells:
-                cellIdx = cell.index
+                cell_idx = cell.index
 
                 # Update cell's states
-                if cellIdx in self.temporalPooler.winnerCells:
-                    cell.isLearning.setForCurrStep(True)
-                if cellIdx in self.temporalPooler.activeCells:
-                    cell.isActive.setForCurrStep(True)
-                if cellIdx in self.temporalPooler.predictiveCells:
-                    cell.isPredicted.setForCurrStep(True)
-                if cell.isPredicted.atPreviousStep() and not cell.isActive.atCurrStep():
-                    cell.isFalselyPredicted.setForCurrStep(True)
+                if cell_idx in self.temporal_pooler.winnerCells:
+                    cell.is_learning.setForCurrStep(True)
+                if cell_idx in self.temporal_pooler.activeCells:
+                    cell.is_active.setForCurrStep(True)
+                if cell_idx in self.temporal_pooler.predictiveCells:
+                    cell.is_predicted.setForCurrStep(True)
+                if cell.is_predicted.atPreviousStep() and not cell.is_active.atCurrStep():
+                    cell.is_falsely_predicted.setForCurrStep(True)
 
                 # Get the indexes of the distal segments of this cell
-                segmentsForCell = self.temporalPooler.connections.segmentsForCell(cellIdx)
+                segments_for_cell = self.temporal_pooler.connections.segmentsForCell(cell_idx)
 
                 # Add the segments that appeared after last iteration
-                for segIdx in segmentsForCell:
+                for seg_idx in segments_for_cell:
                     # Check if segment already exists in the cell
-                    segFound = False
+                    seg_found = False
                     for segment in cell.segments:
-                        if segment.indexTP == segIdx:
-                            segFound = True
+                        if segment.index_tp == seg_idx:
+                            seg_found = True
                             break
 
                     # If segment is new, add it to cell
-                    if not segFound:
-                        segment = Segment(SegmentType.distal)
-                        segment.indexTP = segIdx
+                    if not seg_found:
+                        segment = Segment(SegmentType.DISTAL)
+                        segment.index_tp = seg_idx
                         cell.segments.append(segment)
 
                 # Update distal segments
                 for segment in cell.segments:
-                    segIdx = segment.indexTP
+                    seg_idx = segment.index_tp
 
                     # If segment not found in segments indexes returned in last iteration mark it as removed
-                    if segIdx in segmentsForCell:
+                    if seg_idx in segments_for_cell:
 
                         # Update segment's state
-                        if segIdx in self.temporalPooler.activeSegments:
-                            segment.isActive.setForCurrStep(True)
+                        if seg_idx in self.temporal_pooler.activeSegments:
+                            segment.is_active.setForCurrStep(True)
                         else:
-                            segment.isActive.setForCurrStep(False)
+                            segment.is_active.setForCurrStep(False)
 
                         # Get the indexes of the synapses of this segment
-                        synapsesForSegment = self.temporalPooler.connections.synapsesForSegment(segIdx)
+                        synapses_for_segment = self.temporal_pooler.connections.synapsesForSegment(seg_idx)
 
                         # Add the synapses that appeared after last iteration
-                        for synIdx in synapsesForSegment:
+                        for syn_idx in synapses_for_segment:
                             # Check if synapse already exists in the segment
-                            synFound = False
+                            syn_found = False
                             for synapse in segment.synapses:
-                                if synapse.indexTP == synIdx:
-                                    synFound = True
+                                if synapse.index_tp == syn_idx:
+                                    syn_found = True
                                     break
 
                             # If synapse is new, add it to segment
-                            if not synFound:
+                            if not syn_found:
                                 synapse = Synapse()
-                                synapse.indexTP = synIdx
+                                synapse.index_tp = syn_idx
                                 segment.synapses.append(synapse)
 
                         # Update synapses
                         for synapse in segment.synapses:
-                            synIdx = synapse.indexTP
+                            syn_idx = synapse.index_tp
 
                             # If synapse not found in synapses indexes returned in last iteration mark it as removed
-                            if synIdx in synapsesForSegment:
+                            if syn_idx in synapses_for_segment:
 
                                 # Update synapse's state
-                                synapseData = self.temporalPooler.connections.dataForSynapse(synIdx)
-                                synapse.permanence.setForCurrStep(synapseData.permanence)
-                                if synapseData.permanence >= self.distalSynConnectedPerm:
-                                    synapse.isConnected.setForCurrStep(True)
+                                synapse_data = self.temporal_pooler.connections.dataForSynapse(syn_idx)
+                                synapse.permanence.setForCurrStep(synapse_data.permanence)
+                                if synapse_data.permanence >= self.distal_syn_connected_perm:
+                                    synapse.is_connected.setForCurrStep(True)
                                 else:
-                                    synapse.isConnected.setForCurrStep(False)
+                                    synapse.is_connected.setForCurrStep(False)
 
                                 # Get cell given cell's index
-                                sourceColIdx = synapseData.presynapticCell / self.numCellsPerColumn
-                                sourceCellRelIdx = synapseData.presynapticCell % self.numCellsPerColumn
-                                sourceCell = self.columns[sourceColIdx].cells[sourceCellRelIdx]
-                                synapse.inputElem = sourceCell
+                                source_col_idx = synapse_data.presynapticCell / self.cells_per_column
+                                source_cell_rel_idx = synapse_data.presynapticCell % self.cells_per_column
+                                source_cell = self.columns[source_col_idx].cells[source_cell_rel_idx]
+                                synapse.input_elem = source_cell
                             else:
-                                synapse.isRemoved.setForCurrStep(True)
+                                synapse.is_removed.setForCurrStep(True)
                     else:
-                        segment.isRemoved.setForCurrStep(True)
+                        segment.is_removed.setForCurrStep(True)

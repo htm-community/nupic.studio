@@ -10,29 +10,29 @@ REPO_DIR = str(Path(__file__).parent)
 def versionList(versionString):
     """
     Transform a version from string to integer list in order to make possible versions comparison.
-
     :param versionString: a string containing the version in the format '9.9.9.xxx'
     :return: a integer list containing the version in the format ['9', '9', '9']. Alphanumerics are ignored.
     """
-
-    versionInt = []
-    versionSplit = versionString.split(".")
-    for v in versionSplit:
+    version_int = []
+    version_split = versionString.split(".")
+    for v in version_split:
         if v.isdigit():
-            versionInt.append(v)
+            version_int.append(v)
         else:
             break
-    return versionInt
+    return version_int
+
 
 try:
     import nupic
 except ImportError:
     raise ImportError("NuPIC library not found! Access https://github.com/numenta/nupic/ for get help on how install it.")
-foundNupic = pkg_resources.get_distribution("nupic")
-versionRequiredMin = "0.2.2"
-versionRequiredMax = "99.99.99"
-if not (versionList(versionRequiredMin) <= versionList(foundNupic.version) <= versionList(versionRequiredMax)):
-    raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s in %s." % (versionRequiredMin, versionRequiredMax, foundNupic.version, foundNupic.location))
+found_nupic = pkg_resources.get_distribution("nupic")
+version_required_min = "0.2.2"
+version_required_max = "99.99.99"
+if not (versionList(version_required_min) <= versionList(found_nupic.version) <= versionList(version_required_max)):
+    raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s in %s." % (version_required_min, version_required_max, found_nupic.version, found_nupic.location))
+
 
 try:
     from PyQt5 import QtGui, QtCore, QtWidgets, QtOpenGL
@@ -44,84 +44,70 @@ except ImportError:
         "    brew install pyqt"
     raise ImportError(msg)
 
+
 class MachineState(object):
     """
     This class consists of a queue with max length to store states for each time step.
     """
 
-    def __init__(self, defaultValue, maxLen):
-        self.defaultValue = defaultValue
-        self.maxLen = maxLen
-        self.list = [defaultValue] * maxLen
+    def __init__(self, default_value, max_len):
+        self.default_value = default_value
+        self.max_len = max_len
+        self.list = [default_value] * max_len
 
     def getList(self):
         """
         Get list with stored states machine.
         """
-
         return self.list
 
     def rotate(self):
         """
         Update states machine by remove the first element and add a new element in the end.
         """
-
         self.list.remove(self.list[0])
-        self.list.append(self.defaultValue)
+        self.list.append(self.default_value)
 
-    def atGivenStepAgo(self, timeStep):
+    def atGivenStepAgo(self, time_step):
         """
         Get the state for a given time step.
         """
-
-        return self.list[len(self.list) - timeStep - 1]
+        return self.list[len(self.list) - time_step - 1]
 
     def setForCurrStep(self, value):
         """
         Set the state for the current time step.
         """
-
         self.list[len(self.list) - 1] = value
 
     def atCurrStep(self):
         """
         Get the state of the current time step.
         """
-
         return self.list[len(self.list) - 1]
 
     def atPreviousStep(self):
         """
         Get the state of the previous time step.
         """
-
         return self.list[len(self.list) - 2]
 
     def atFirstStep(self):
         """
         Get the state of the firt time step.
         """
-
         return self.list[0]
 
-def getInstantiatedClass(moduleName, className, classParams):
+
+def getInstantiatedClass(module_name, class_name, class_params):
     """
     Return an instantiated class given a module, class, and constructor params
     """
-
-    # Remove single quote from parameter values
-    #    foo: 'bar' => foo: bar
-    classParams = classParams.replace(": '", ": ")
-    classParams = classParams.replace("', ", ", ")
-    classParams = classParams.replace("'}", "}")
-    classParams = classParams.replace("'", "\"")
-
-    module = __import__(moduleName, fromlist=[className])
-    class_ = getattr(module, className)
-    params = json.loads(classParams, object_pairs_hook=collections.OrderedDict)
-    instance = class_(**params)
-
+    module = __import__(module_name, fromlist=[class_name])
+    class_ = getattr(module, class_name)
+    instance = class_(**class_params)
     return instance
+
 
 class ArrayTableModel(QtGui.QStandardItemModel):
 
@@ -136,16 +122,16 @@ class ArrayTableModel(QtGui.QStandardItemModel):
         self.header = header
         self.data = data
 
-        numCols = len(self.header)
-        self.setColumnCount(numCols)
-        numRows = len(self.data)
-        self.setRowCount(numRows)
+        num_cols = len(self.header)
+        self.setColumnCount(num_cols)
+        num_rows = len(self.data)
+        self.setRowCount(num_rows)
 
-        for col in range(numCols):
+        for col in range(num_cols):
             self.setHeaderData(col, QtCore.Qt.Horizontal, self.header[col])
 
-        for row in range(numRows):
-            for col in range(numCols):
+        for row in range(num_rows):
+            for col in range(num_cols):
                 value = self.data[row][col]
                 self.setData(self.index(row, col, QtCore.QModelIndex()), value)
 

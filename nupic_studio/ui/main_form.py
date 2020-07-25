@@ -5,9 +5,10 @@ import webbrowser
 from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import MachineState
 from nupic_studio.simulation import Simulation
-from nupic_studio.htm import maxPreviousSteps, maxPreviousStepsWithInference
+from nupic_studio.htm import MAX_PREVIOUS_STEPS, MAX_PREVIOUS_STEPS_WITH_INFERENCE
 from nupic_studio.ui import Global, State
 from nupic_studio.ui.project_properties_form import ProjectPropertiesForm
+
 
 class MainForm(QtWidgets.QMainWindow):
 
@@ -15,14 +16,13 @@ class MainForm(QtWidgets.QMainWindow):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QMainWindow.__init__(self)
 
-        self.state = State.No_Started
+        self.state = State.NO_STARTED
         self.paused = False
         self.simulation = None
-        self._pendingProjectChanges = False
-        self._numStepsPending = 0
+        self.pending_project_changes = False
+        self.num_steps_pending = 0
 
         self.initUI()
 
@@ -32,257 +32,253 @@ class MainForm(QtWidgets.QMainWindow):
         self.update_timer = QtCore.QTimer(self)
         self.update_timer.timeout.connect(self.update)
 
-        # menuFileNew
-        self.menuFileNew = QtWidgets.QAction(self)
-        self.menuFileNew.setText("&New Project")
-        self.menuFileNew.setShortcut('Ctrl+N')
-        self.menuFileNew.triggered.connect(self.newProject)
+        # menu_file_new
+        self.menu_file_new = QtWidgets.QAction(self)
+        self.menu_file_new.setText("&New Project")
+        self.menu_file_new.setShortcut('Ctrl+N')
+        self.menu_file_new.triggered.connect(self.newProject)
 
-        # menuFileOpen
-        self.menuFileOpen = QtWidgets.QAction(self)
-        self.menuFileOpen.setText("&Open Project")
-        self.menuFileOpen.setShortcut('Ctrl+O')
-        self.menuFileOpen.triggered.connect(self.openProject)
+        # menu_file_open
+        self.menu_file_open = QtWidgets.QAction(self)
+        self.menu_file_open.setText("&Open Project")
+        self.menu_file_open.setShortcut('Ctrl+O')
+        self.menu_file_open.triggered.connect(self.openProject)
 
-        # menuFileSave
-        self.menuFileSave = QtWidgets.QAction(self)
-        self.menuFileSave.setText("&Save Project")
-        self.menuFileSave.setShortcut('Ctrl+S')
-        self.menuFileSave.triggered.connect(self.saveProject)
+        # menu_file_save
+        self.menu_file_save = QtWidgets.QAction(self)
+        self.menu_file_save.setText("&Save Project")
+        self.menu_file_save.setShortcut('Ctrl+S')
+        self.menu_file_save.triggered.connect(self.saveProject)
 
-        # menuFileExit
-        self.menuFileExit = QtWidgets.QAction(self)
-        self.menuFileExit.setText("&Exit")
-        self.menuFileExit.setShortcut('Ctrl+Q')
-        self.menuFileExit.triggered.connect(self.__menuFileExit_click)
+        # menu_file_exit
+        self.menu_file_exit = QtWidgets.QAction(self)
+        self.menu_file_exit.setText("&Exit")
+        self.menu_file_exit.setShortcut('Ctrl+Q')
+        self.menu_file_exit.triggered.connect(self.menuFileExit_click)
 
-        # menuFile
-        self.menuFile = QtWidgets.QMenu()
-        self.menuFile.addAction(self.menuFileNew)
-        self.menuFile.addAction(self.menuFileOpen)
-        self.menuFile.addAction(self.menuFileSave)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.menuFileExit)
-        self.menuFile.setTitle("&File")
+        # menu_file
+        self.menu_file = QtWidgets.QMenu()
+        self.menu_file.addAction(self.menu_file_new)
+        self.menu_file.addAction(self.menu_file_open)
+        self.menu_file.addAction(self.menu_file_save)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.menu_file_exit)
+        self.menu_file.setTitle("&File")
 
-        # menuViewArchitecture
-        self.menuViewArchitecture = QtWidgets.QAction(self)
-        self.menuViewArchitecture.setText("&Network Architecture")
-        self.menuViewArchitecture.triggered.connect(self.__menuViewArchitecture_click)
+        # menu_view_architecture
+        self.menu_view_architecture = QtWidgets.QAction(self)
+        self.menu_view_architecture.setText("&Network Architecture")
+        self.menu_view_architecture.triggered.connect(self.menuViewArchitecture_click)
 
-        # menuViewSimulation
-        self.menuViewSimulation = QtWidgets.QAction(self)
-        self.menuViewSimulation.setText("&Simulation")
-        self.menuViewSimulation.triggered.connect(self.__menuViewSimulation_click)
+        # menu_view_simulation
+        self.menu_view_simulation = QtWidgets.QAction(self)
+        self.menu_view_simulation.setText("&Simulation")
+        self.menu_view_simulation.triggered.connect(self.menuViewSimulation_click)
 
-        # menuViewNodeInformation
-        self.menuViewNodeInformation = QtWidgets.QAction(self)
-        self.menuViewNodeInformation.setText("Node &Information")
-        self.menuViewNodeInformation.triggered.connect(self.__menuViewNodeInformation_click)
+        # menu_view_node_information
+        self.menu_view_node_information = QtWidgets.QAction(self)
+        self.menu_view_node_information.setText("Node &Information")
+        self.menu_view_node_information.triggered.connect(self.menuViewNodeInformation_click)
 
-        # menuViewOutput
-        self.menuViewOutput = QtWidgets.QAction(self)
-        self.menuViewOutput.setText("&Output")
-        self.menuViewOutput.triggered.connect(self.__menuViewOutput_click)
+        # menu_view_output
+        self.menu_view_output = QtWidgets.QAction(self)
+        self.menu_view_output.setText("&Output")
+        self.menu_view_output.triggered.connect(self.menuViewOutput_click)
 
-        # menuViewToolWindows
-        self.menuViewToolWindows = QtWidgets.QMenu()
-        self.menuViewToolWindows.addAction(self.menuViewArchitecture)
-        self.menuViewToolWindows.addAction(self.menuViewNodeInformation)
-        self.menuViewToolWindows.addAction(self.menuViewSimulation)
-        self.menuViewToolWindows.addAction(self.menuViewOutput)
-        self.menuViewToolWindows.setTitle("Tool &Windows")
+        # menu_view_tool_windows
+        self.menu_view_tool_windows = QtWidgets.QMenu()
+        self.menu_view_tool_windows.addAction(self.menu_view_architecture)
+        self.menu_view_tool_windows.addAction(self.menu_view_node_information)
+        self.menu_view_tool_windows.addAction(self.menu_view_simulation)
+        self.menu_view_tool_windows.addAction(self.menu_view_output)
+        self.menu_view_tool_windows.setTitle("Tool &Windows")
 
-        # menuView
-        self.menuView = QtWidgets.QMenu()
-        self.menuView.addMenu(self.menuViewToolWindows)
-        self.menuView.setTitle("&View")
+        # menu_view
+        self.menu_view = QtWidgets.QMenu()
+        self.menu_view.addMenu(self.menu_view_tool_windows)
+        self.menu_view.setTitle("&View")
 
-        # menuEdit
-        self.menuEdit = QtWidgets.QMenu()
-        self.menuEdit.setTitle("&Edit")
+        # menu_edit
+        self.menu_edit = QtWidgets.QMenu()
+        self.menu_edit.setTitle("&Edit")
 
-        # menuProjectProperties
-        self.menuProjectProperties = QtWidgets.QAction(self)
-        self.menuProjectProperties.setText("Properties...")
-        self.menuProjectProperties.triggered.connect(self.__menuProjectProperties_click)
+        # menu_project_properties
+        self.menu_project_properties = QtWidgets.QAction(self)
+        self.menu_project_properties.setText("Properties...")
+        self.menu_project_properties.triggered.connect(self.menuProjectProperties_click)
 
-        # menuProject
-        self.menuProject = QtWidgets.QMenu()
-        self.menuProject.addAction(self.menuProjectProperties)
-        self.menuProject.setTitle("&Project")
+        # menu_project
+        self.menu_project = QtWidgets.QMenu()
+        self.menu_project.addAction(self.menu_project_properties)
+        self.menu_project.setTitle("&Project")
 
-        # menuTools
-        self.menuTools = QtWidgets.QMenu()
-        self.menuTools.setTitle("&Tools")
+        # menu_tools
+        self.menu_tools = QtWidgets.QMenu()
+        self.menu_tools.setTitle("&Tools")
 
-        # menuUserWiki
-        self.menuUserWiki = QtWidgets.QAction(self)
-        self.menuUserWiki.setText("User Wiki")
-        self.menuUserWiki.triggered.connect(self.__menuUserWiki_click)
+        # menu_user_wiki
+        self.menu_user_wiki = QtWidgets.QAction(self)
+        self.menu_user_wiki.setText("User Wiki")
+        self.menu_user_wiki.triggered.connect(self.menuUserWiki_click)
 
-        # menuGoToWebsite
-        self.menuGoToWebsite = QtWidgets.QAction(self)
-        self.menuGoToWebsite.setText("Project Website")
-        self.menuGoToWebsite.triggered.connect(self.__menuGoToWebsite_click)
+        # menu_go_to_website
+        self.menu_go_to_website = QtWidgets.QAction(self)
+        self.menu_go_to_website.setText("Project Website")
+        self.menu_go_to_website.triggered.connect(self.menuGoToWebsite_click)
 
-        # menuAbout
-        self.menuAbout = QtWidgets.QAction(self)
-        self.menuAbout.setText("About")
-        self.menuAbout.triggered.connect(self.__menuAbout_click)
+        # menu_about
+        self.menu_about = QtWidgets.QAction(self)
+        self.menu_about.setText("About")
+        self.menu_about.triggered.connect(self.menuAbout_click)
 
-        # menuHelp
-        self.menuHelp = QtWidgets.QMenu()
-        self.menuHelp.addAction(self.menuUserWiki)
-        self.menuHelp.addAction(self.menuGoToWebsite)
-        self.menuHelp.addAction(self.menuAbout)
-        self.menuHelp.setTitle("&Help")
+        # menu_help
+        self.menu_help = QtWidgets.QMenu()
+        self.menu_help.addAction(self.menu_user_wiki)
+        self.menu_help.addAction(self.menu_go_to_website)
+        self.menu_help.addAction(self.menu_about)
+        self.menu_help.setTitle("&Help")
 
-        # menuMain
-        self.menuMain = self.menuBar()
-        self.menuMain.addMenu(self.menuFile)
-        self.menuMain.addMenu(self.menuView)
-        self.menuMain.addMenu(self.menuProject)
-        self.menuMain.addMenu(self.menuHelp)
+        # menu_main
+        self.menu_main = self.menuBar()
+        self.menu_main.addMenu(self.menu_file)
+        self.menu_main.addMenu(self.menu_view)
+        self.menu_main.addMenu(self.menu_project)
+        self.menu_main.addMenu(self.menu_help)
 
-        # buttonInitHTM
-        self.buttonInitHTM = QtWidgets.QAction(self)
-        self.buttonInitHTM.setEnabled(False)
-        self.buttonInitHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_initialize.png'))
-        self.buttonInitHTM.setToolTip("Initialize simulation")
-        self.buttonInitHTM.triggered.connect(self.__buttonInitHTM_click)
+        # button_init
+        self.button_init = QtWidgets.QAction(self)
+        self.button_init.setEnabled(False)
+        self.button_init.setIcon(QtGui.QIcon(Global.app_path + '/images/button_initialize.png'))
+        self.button_init.setToolTip("Initialize simulation")
+        self.button_init.triggered.connect(self.buttonInit_click)
 
-        # buttonStepHTM
-        self.buttonStepHTM = QtWidgets.QAction(self)
-        self.buttonStepHTM.setEnabled(False)
-        self.buttonStepHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_step.png'))
-        self.buttonStepHTM.setToolTip("Forward one time step")
-        self.buttonStepHTM.triggered.connect(self.__buttonStepHTM_click)
+        # button_step
+        self.button_step = QtWidgets.QAction(self)
+        self.button_step.setEnabled(False)
+        self.button_step.setIcon(QtGui.QIcon(Global.app_path + '/images/button_step.png'))
+        self.button_step.setToolTip("Forward one time step")
+        self.button_step.triggered.connect(self.buttonStep_click)
 
-        # buttonMultipleStepsHTM
-        self.buttonMultipleStepsHTM = QtWidgets.QAction(self)
-        self.buttonMultipleStepsHTM.setEnabled(False)
-        self.buttonMultipleStepsHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_multiple_steps.png'))
-        self.buttonMultipleStepsHTM.setToolTip("Forward a specific number of time steps")
-        self.buttonMultipleStepsHTM.triggered.connect(self.__buttonMultipleStepsHTM_click)
+        # button_multiple_steps
+        self.button_multiple_steps = QtWidgets.QAction(self)
+        self.button_multiple_steps.setEnabled(False)
+        self.button_multiple_steps.setIcon(QtGui.QIcon(Global.app_path + '/images/button_multiple_steps.png'))
+        self.button_multiple_steps.setToolTip("Forward a specific number of time steps")
+        self.button_multiple_steps.triggered.connect(self.buttonMultipleSteps_click)
 
-        # buttonStopHTM
-        self.buttonStopHTM = QtWidgets.QAction(self)
-        self.buttonStopHTM.setEnabled(False)
-        self.buttonStopHTM.setIcon(QtGui.QIcon(Global.appPath + '/images/button_stop.png'))
-        self.buttonStopHTM.setToolTip("Stop simulation")
-        self.buttonStopHTM.triggered.connect(self.__buttonStopHTM_click)
+        # button_stop
+        self.button_stop = QtWidgets.QAction(self)
+        self.button_stop.setEnabled(False)
+        self.button_stop.setIcon(QtGui.QIcon(Global.app_path + '/images/button_stop.png'))
+        self.button_stop.setToolTip("Stop simulation")
+        self.button_stop.triggered.connect(self.buttonStop_click)
 
-        # textBoxStep
-        self.textBoxStep = QtWidgets.QLineEdit()
-        self.textBoxStep.setEnabled(False)
-        self.textBoxStep.setAlignment(QtCore.Qt.AlignRight)
-        self.textBoxStep.setFixedSize(QtCore.QSize(80, 20))
+        # text_box_step
+        self.text_box_step = QtWidgets.QLineEdit()
+        self.text_box_step.setEnabled(False)
+        self.text_box_step.setAlignment(QtCore.Qt.AlignRight)
+        self.text_box_step.setFixedSize(QtCore.QSize(80, 20))
 
-        # sliderStep
-        self.sliderStep = QtWidgets.QSlider()
-        self.sliderStep.setEnabled(False)
-        self.sliderStep.setOrientation(QtCore.Qt.Horizontal)
-        self.sliderStep.setSingleStep(1)
-        self.sliderStep.setRange(0, maxPreviousSteps - 1)
-        self.sliderStep.setValue(maxPreviousSteps - 1)
-        self.sliderStep.valueChanged.connect(self.__sliderStep_ValueChanged)
+        # slider_step
+        self.slider_step = QtWidgets.QSlider()
+        self.slider_step.setEnabled(False)
+        self.slider_step.setOrientation(QtCore.Qt.Horizontal)
+        self.slider_step.setSingleStep(1)
+        self.slider_step.setRange(0, MAX_PREVIOUS_STEPS - 1)
+        self.slider_step.setValue(MAX_PREVIOUS_STEPS - 1)
+        self.slider_step.valueChanged.connect(self.sliderStep_valueChanged)
 
-        # toolBar
-        self.toolBar = QtWidgets.QToolBar()
-        self.toolBar.addAction(self.buttonInitHTM)
-        self.toolBar.addAction(self.buttonStepHTM)
-        self.toolBar.addAction(self.buttonMultipleStepsHTM)
-        self.toolBar.addAction(self.buttonStopHTM)
-        self.toolBar.addWidget(self.textBoxStep)
-        self.toolBar.addWidget(self.sliderStep)
+        # tool_bar
+        self.tool_bar = QtWidgets.QToolBar()
+        self.tool_bar.addAction(self.button_init)
+        self.tool_bar.addAction(self.button_step)
+        self.tool_bar.addAction(self.button_multiple_steps)
+        self.tool_bar.addAction(self.button_stop)
+        self.tool_bar.addWidget(self.text_box_step)
+        self.tool_bar.addWidget(self.slider_step)
 
-        # dockArchitectureForm
-        self.dockArchitectureForm = QtWidgets.QDockWidget()
-        self.dockArchitectureForm.setWidget(Global.architectureForm)
-        self.dockArchitectureForm.setWindowTitle(Global.architectureForm.windowTitle())
+        # dock_architecture_form
+        self.dock_architecture_form = QtWidgets.QDockWidget()
+        self.dock_architecture_form.setWidget(Global.architecture_form)
+        self.dock_architecture_form.setWindowTitle(Global.architecture_form.windowTitle())
 
-        # dockSimulationForm
-        self.dockSimulationForm = QtWidgets.QDockWidget()
-        self.dockSimulationForm.setWidget(Global.simulationForm)
-        self.dockSimulationForm.setWindowTitle(Global.simulationForm.windowTitle())
+        # dock_simulation_form
+        self.dock_simulation_form = QtWidgets.QDockWidget()
+        self.dock_simulation_form.setWidget(Global.simulation_form)
+        self.dock_simulation_form.setWindowTitle(Global.simulation_form.windowTitle())
 
-        # dockNodeInformationForm
-        self.dockNodeInformationForm = QtWidgets.QDockWidget()
-        self.dockNodeInformationForm.setWidget(Global.nodeInformationForm)
-        self.dockNodeInformationForm.setWindowTitle(Global.nodeInformationForm.windowTitle())
+        # dock_node_information_form
+        self.dock_node_information_form = QtWidgets.QDockWidget()
+        self.dock_node_information_form.setWidget(Global.node_information_form)
+        self.dock_node_information_form.setWindowTitle(Global.node_information_form.windowTitle())
 
-        # dockOutputForm
-        self.dockOutputForm = QtWidgets.QDockWidget()
-        self.dockOutputForm.setWidget(Global.outputForm)
-        self.dockOutputForm.setWindowTitle(Global.outputForm.windowTitle())
+        # dock_output_form
+        self.dock_output_form = QtWidgets.QDockWidget()
+        self.dock_output_form.setWidget(Global.output_form)
+        self.dock_output_form.setWindowTitle(Global.output_form.windowTitle())
 
         # MainForm
-        self.addToolBar(self.toolBar)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockSimulationForm)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockOutputForm)
-        self.tabifyDockWidget(self.dockOutputForm, self.dockSimulationForm)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockArchitectureForm)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockNodeInformationForm)
-        self.tabifyDockWidget(self.dockNodeInformationForm, self.dockArchitectureForm)
-        #self.setCentralWidget(self.dockSimulationForm)
+        self.addToolBar(self.tool_bar)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dock_simulation_form)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dock_output_form)
+        self.tabifyDockWidget(self.dock_output_form, self.dock_simulation_form)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dock_architecture_form)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dock_node_information_form)
+        self.tabifyDockWidget(self.dock_node_information_form, self.dock_architecture_form)
+        #self.setCentralWidget(self.dock_simulation_form)
         self.setWindowTitle("NuPIC Studio")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
 
-    def __cleanUp(self):
+    def cleanUp(self):
         """
         Prepare UI to load a new configuration.
         """
-
-        self.__enableSimulationButtons(False)
-        self.__enableSteeringButtons(False)
+        self.enableSimulationButtons(False)
+        self.enableSteeringButtons(False)
 
         # Update architecture controls
-        Global.architectureForm.designPanel.topRegion = Global.project.network.nodes[0]
-        Global.architectureForm.designPanel.selectedNode = Global.project.network.nodes[0]
-        Global.architectureForm.designPanel.repaint()
-        Global.architectureForm.updateCode()
+        Global.architecture_form.design_panel.top_region = Global.project.network.nodes[0]
+        Global.architecture_form.design_panel.selected_node = Global.project.network.nodes[0]
+        Global.architecture_form.design_panel.repaint()
+        Global.architecture_form.updateCode()
 
         # Reset the controls
         self.clearControls()
 
-    def __enableSimulationButtons(self, enable):
+    def enableSimulationButtons(self, enable):
         """
         Enables or disables controls related to simulation.
         """
-
-        Global.simulationInitialized = enable
-        self.buttonInitHTM.setEnabled(not enable)
+        Global.simulation_initialized = enable
+        self.button_init.setEnabled(not enable)
         if not enable:
-            self.textBoxStep.setText("")
-            self.sliderStep.setEnabled(False)
-            self.sliderStep.setValue(self.sliderStep.maximum())
+            self.text_box_step.setText("")
+            self.slider_step.setEnabled(False)
+            self.slider_step.setValue(self.slider_step.maximum())
 
-    def __enableSteeringButtons(self, enable):
+    def enableSteeringButtons(self, enable):
         """
         Enables or disables buttons in toolbar.
         """
-
-        self.buttonStepHTM.setEnabled(enable)
-        self.buttonMultipleStepsHTM.setEnabled(enable)
-        self.buttonStopHTM.setEnabled(enable)
+        self.button_step.setEnabled(enable)
+        self.button_multiple_steps.setEnabled(enable)
+        self.button_stop.setEnabled(enable)
 
     def clearControls(self):
         """
         Reset the controls.
         """
-
-        Global.simulationForm.clearControls()
-        Global.outputForm.clearControls()
-        Global.nodeInformationForm.clearControls()
+        Global.simulation_form.clearControls()
+        Global.output_form.clearControls()
+        Global.node_information_form.clearControls()
 
     def update(self):
-        if self.state == State.Simulating:
+        if self.state == State.SIMULATING:
             self.simulation.taskMgr.step()
-            Global.simulationForm.update()
+            Global.simulation_form.update()
 
     def getProjectPath(self):
-        return os.path.dirname(Global.project.fileName)
+        return os.path.dirname(Global.project.file_name)
 
     def getRecordPath(self):
         return os.path.join(self.getProjectPath(), "record")
@@ -291,37 +287,35 @@ class MainForm(QtWidgets.QMainWindow):
         """
         Refresh controls for each time step.
         """
-
-        if Global.simulationInitialized :
-            maxTime = Global.currStep + 1
-            selStep = maxTime - (self.sliderStep.maximum() - self.sliderStep.value())
-            self.textBoxStep.setText(str(selStep) + "/" + str(maxTime))
+        if Global.simulation_initialized :
+            max_time = Global.curr_step + 1
+            sel_step = max_time - (self.slider_step.maximum() - self.slider_step.value())
+            self.text_box_step.setText(str(sel_step) + "/" + str(max_time))
         else:
-            self.textBoxStep.setText("")
+            self.text_box_step.setText("")
+        if self.dock_simulation_form.isVisible():
+            Global.simulation_form.refreshControls()
+        if self.dock_node_information_form.isVisible():
+            Global.node_information_form.refreshControls()
 
-        if self.dockSimulationForm.isVisible():
-            Global.simulationForm.refreshControls()
-        if self.dockNodeInformationForm.isVisible():
-            Global.nodeInformationForm.refreshControls()
-
-    def markProjectChanges(self, hasChanges):
+    def markProjectChanges(self, has_changes):
         """
         Provides an UI reaction to any project changes or a new or saved unchanged project.
         """
+        self.pending_project_changes = has_changes
+        self.menu_file_save.setEnabled(has_changes)
 
-        self._pendingProjectChanges = hasChanges
-        self.menuFileSave.setEnabled(hasChanges)
-
-    def __checkCurrentConfigChanges(self):
+    def checkCurrentConfigChanges(self):
         """
         Checks if the current file has changed.
         """
-
         result = QtWidgets.QMessageBox.No
 
         # If changes happened, ask to user if he wish saves them
-        if self._pendingProjectChanges:
-            result = QtWidgets.QMessageBox.question(self, "Question", "Current project has changed. Do you want save these changes?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Cancel)
+        if self.pending_project_changes:
+            result = QtWidgets.QMessageBox.question(self, "Question",
+                                                "Current project has changed. Do you want save these changes?",
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
             if result == QtWidgets.QMessageBox.Yes:
                 self.saveProject()
 
@@ -333,14 +327,14 @@ class MainForm(QtWidgets.QMainWindow):
         """
 
         # Check if the current project has changed before continue operation
-        if self.__checkCurrentConfigChanges() != QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentConfigChanges() != QtWidgets.QMessageBox.Cancel:
             # Create new project
             Global.project.new()
 
             # Initialize project state
             self.setWindowTitle(Global.project.name + " - NuPIC Studio")
             self.markProjectChanges(False)
-            self.__cleanUp()
+            self.cleanUp()
 
             return True
 
@@ -352,20 +346,20 @@ class MainForm(QtWidgets.QMainWindow):
         """
 
         # Check if the current project has changed before continue operation
-        if self.__checkCurrentConfigChanges() != QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentConfigChanges() != QtWidgets.QMessageBox.Cancel:
 
             # Ask user for an existing file
-            selectedFile = QtWidgets.QFileDialog().getOpenFileName(self, "Open Project", Global.appPath + '/projects', "NuPIC project files (*.nuproj)")[0]
+            selected_file = QtWidgets.QFileDialog().getOpenFileName(self, "Open Project", Global.app_path + '/projects', "NuPIC project files (*.nuproj)")[0]
 
             # If file exists, continue operation
-            if selectedFile != '':
+            if selected_file != '':
                 # Open the selected project
-                Global.project.open(selectedFile)
+                Global.project.open(selected_file)
 
                 # Initialize project state
-                self.setWindowTitle(Global.project.name + " - [" + Global.project.fileName + "] - NuPIC Studio")
+                self.setWindowTitle(Global.project.name + " - [" + Global.project.file_name + "] - NuPIC Studio")
                 self.markProjectChanges(False)
-                self.__cleanUp()
+                self.cleanUp()
 
                 return True
 
@@ -377,22 +371,22 @@ class MainForm(QtWidgets.QMainWindow):
         """
 
         # If current project is new, ask user for valid file
-        fileName = Global.project.fileName
-        if fileName == '':
+        file_name = Global.project.file_name
+        if file_name == '':
             # Ask user for valid file
-            selectedFile = QtWidgets.QFileDialog().getSaveFileName(self, "Save Project", Global.appPath + '/projects', "NuPIC project files (*.nuproj)")[0]
+            selected_file = QtWidgets.QFileDialog().getSaveFileName(self, "Save Project", Global.app_path + '/projects', "NuPIC project files (*.nuproj)")[0]
 
             # If file exists, continue operation
-            if selectedFile != '':
-                fileName = selectedFile
+            if selected_file != '':
+                file_name = selected_file
 
         # If file is Ok, continue operation
-        if fileName != '':
+        if file_name != '':
             # Save to the selected location
-            Global.project.save(fileName)
+            Global.project.save(file_name)
 
             # Initialize project state
-            self.setWindowTitle(Global.project.name + " - [" + Global.project.fileName + "] - NuPIC Studio")
+            self.setWindowTitle(Global.project.name + " - [" + Global.project.file_name + "] - NuPIC Studio")
             self.markProjectChanges(False)
 
             return True
@@ -402,162 +396,161 @@ class MainForm(QtWidgets.QMainWindow):
     def stopSimulation(self):
 
         # Destroy everything
-        destroy_world = True if self.state == State.Simulating else False
-        self.state = State.Stopped
+        destroy_world = True if self.state == State.SIMULATING else False
+        self.state = State.STOPPED
         self.paused = False
         self.update_timer.stop()
         if destroy_world:
             self.simulation.destroy()
 
         # Disable relevant buttons to reset
-        self.__enableSteeringButtons(False)
-        self.__enableSimulationButtons(False)
+        self.enableSteeringButtons(False)
+        self.enableSimulationButtons(False)
 
         # Reset controls
         self.clearControls()
 
     def isRunning(self):
-        return self.state == State.Simulating or self.state == State.Playbacking
+        return self.state == State.SIMULATING or self.state == State.PLAYBACKING
 
     def closeEvent(self, event):
-        if self.__checkCurrentConfigChanges() == QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentConfigChanges() == QtWidgets.QMessageBox.Cancel:
             event.ignore()
         else:
-            if self.buttonStopHTM.isEnabled():
+            if self.button_stop.isEnabled():
                 self.stopSimulation()
             sys.exit()
 
-    def __menuFileExit_click(self, event):
+    def menuFileExit_click(self, event):
         self.close()
 
-    def __menuProjectProperties_click(self, event):
+    def menuProjectProperties_click(self, event):
         # Open Project properties form
-        projectPropertiesForm = ProjectPropertiesForm()
-        projectPropertiesForm.setControlsValues()
-        dialogResult = projectPropertiesForm.exec_()
+        project_properties_form = ProjectPropertiesForm()
+        project_properties_form.setControlsValues()
+        dialog_result = project_properties_form.exec_()
+        if dialog_result == QtWidgets.QDialog.Accepted:
+            Global.main_form.markProjectChanges(True)
 
-        if dialogResult == QtWidgets.QDialog.Accepted:
-            Global.mainForm.markProjectChanges(True)
+    def menuViewArchitecture_click(self, event):
+        self.dock_architecture_form.show()
 
-    def __menuViewArchitecture_click(self, event):
-        self.dockArchitectureForm.show()
+    def menuViewSimulation_click(self, event):
+        self.dock_simulation_form.show()
+        Global.simulation_form.refreshControls()
 
-    def __menuViewSimulation_click(self, event):
-        self.dockSimulationForm.show()
-        Global.simulationForm.refreshControls()
+    def menuViewNodeInformation_click(self, event):
+        self.dock_node_information_form.show()
+        Global.node_information_form.refreshControls()
 
-    def __menuViewNodeInformation_click(self, event):
-        self.dockNodeInformationForm.show()
-        Global.nodeInformationForm.refreshControls()
+    def menuViewOutput_click(self, event):
+        self.dock_output_form.show()
 
-    def __menuViewOutput_click(self, event):
-        self.dockOutputForm.show()
-
-    def __menuUserWiki_click(self, event):
+    def menuUserWiki_click(self, event):
         webbrowser.open('https://github.com/nupic-community/nupic.studio/wiki')
 
-    def __menuGoToWebsite_click(self, event):
+    def menuGoToWebsite_click(self, event):
         webbrowser.open('https://github.com/nupic-community/nupic.studio')
 
-    def __menuAbout_click(self, event):
+    def menuAbout_click(self, event):
         QtWidgets.QMessageBox.information(self, "Information", "v. " + Global.version + "\nGet more info at our home page.")
 
-    def __buttonInitHTM_click(self, event):
+    def buttonInit_click(self, event):
         """
         Initializes the HTM-Network by creating the htm-controller to connect to events database
         """
 
         # Initialize the network starting from top region.
-        startTime = time.time()
-        endTime = time.time()
+        start_time = time.time()
+        end_time = time.time()
         initialized = Global.project.network.initialize()
 
         if initialized:
-            self.state = State.Simulating
+            self.state = State.SIMULATING
 
             # Create a simulation
             #TODO: self.simulation = Simulation(self.project, self.getProjectPath())
             self.simulation = Simulation(None, None)
 
             # Initialize time steps parameters
-            Global.currStep = 0
-            Global.selStep = 0
-            Global.timeStepsPredictionsChart = MachineState(0, maxPreviousStepsWithInference)
+            Global.curr_step = 0
+            Global.sel_step = 0
+            Global.time_steps_predictions_chart = MachineState(0, MAX_PREVIOUS_STEPS_WITH_INFERENCE)
 
-            Global.outputForm.addText("Initialization: " + "{0:.3f}".format(endTime - startTime) + " secs")
-            Global.outputForm.addText("")
-            Global.outputForm.addText("Step\tTime (secs)\tAccuracy (%)")
+            Global.output_form.addText("Initialization: " + "{0:.3f}".format(end_time - start_time) + " secs")
+            Global.output_form.addText("")
+            Global.output_form.addText("Step\tTime (secs)\tAccuracy (%)")
 
             # Perfoms actions related to time step progression.
-            startTime = time.time()
+            start_time = time.time()
             Global.project.network.nextStep()
             Global.project.network.calculateStatistics()
-            endTime = time.time()
-            Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.network.statsPrecisionRate))
+            end_time = time.time()
+            Global.output_form.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
 
             # Disable relevant buttons:
-            self.__enableSteeringButtons(True)
-            self.__enableSimulationButtons(True)
+            self.enableSteeringButtons(True)
+            self.enableSimulationButtons(True)
 
             # Update controls
-            Global.simulationForm.viewer_3d.initializeControls(Global.project.network.nodes[0])
+            Global.simulation_form.viewer_3d.initializeControls(Global.project.network.nodes[0])
             self.refreshControls()
 
             self.update_timer.setInterval(1)
             self.update_timer.start()
 
-    def __buttonStepHTM_click(self, event):
+    def buttonStep_click(self, event):
         """
         Performs a single simulation step.
         """
 
         # Update time steps parameters
-        Global.currStep += 1
-        if Global.currStep >= (maxPreviousSteps - 1):
-            self.sliderStep.setEnabled(True)
-        Global.selStep = self.sliderStep.maximum() - self.sliderStep.value()
-        Global.timeStepsPredictionsChart.rotate()
-        Global.timeStepsPredictionsChart.setForCurrStep(Global.currStep)
+        Global.curr_step += 1
+        if Global.curr_step >= (MAX_PREVIOUS_STEPS - 1):
+            self.slider_step.setEnabled(True)
+        Global.sel_step = self.slider_step.maximum() - self.slider_step.value()
+        Global.time_steps_predictions_chart.rotate()
+        Global.time_steps_predictions_chart.setForCurrStep(Global.curr_step)
 
         # Perfoms actions related to time step progression.
-        startTime = time.time()
+        start_time = time.time()
         Global.project.network.nextStep()
         Global.project.network.calculateStatistics()
-        endTime = time.time()
-        Global.outputForm.addText(str(Global.currStep + 1) + "\t{0:.3f}".format(endTime - startTime) + "\t{0:.3f}".format(Global.project.network.statsPrecisionRate))
+        end_time = time.time()
+        Global.output_form.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
 
         # Update controls
         self.refreshControls()
 
-    def __buttonMultipleStepsHTM_click(self, event):
+    def buttonMultipleSteps_click(self, event):
         """
         Performs full HTM simulation.
         """
 
         # Get number of steps to perform simulation
-        self._numStepsPending = -1
-        enteredInteger, ok = QtWidgets.QInputDialog.getInt(self, "Input Dialog", "Enter number of steps:")
+        self.num_steps_pending = -1
+        entered_integer, ok = QtWidgets.QInputDialog.getInt(self, "Input Dialog", "Enter number of steps:")
         if ok:
-            if enteredInteger < 2:
+            if entered_integer < 2:
                 QtWidgets.QMessageBox.warning(self, "Warning", "Invalid value specified!")
             else:
-                self._numStepsPending = enteredInteger
+                self.num_steps_pending = entered_integer
 
-        while self._numStepsPending > 0:
-            self.__buttonStepHTM_click(event)
+        while self.num_steps_pending > 0:
+            self.buttonStep_click(event)
             Global.app.processEvents()
-            self._numStepsPending -= 1
+            self.num_steps_pending -= 1
 
-    def __buttonStopHTM_click(self, event):
+    def buttonStop_click(self, event):
         # If multiple steps processing is running just stop the loop
         # otherwise, ask user to stop the simulation
-        if self._numStepsPending > 0:
-            self._numStepsPending = 0
+        if self.num_steps_pending > 0:
+            self.num_steps_pending = 0
         else:
-            dialogResult = QtWidgets.QMessageBox.question(self, "Question", "Current simulation (learning) will stop!\r\nDo you want proceed?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
-            if dialogResult == QtWidgets.QMessageBox.Yes:
+            dialog_result = QtWidgets.QMessageBox.question(self, "Question", "Current simulation (learning) will stop!\r\nDo you want proceed?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+            if dialog_result == QtWidgets.QMessageBox.Yes:
                 self.stopSimulation()
 
-    def __sliderStep_ValueChanged(self, value):
-        Global.selStep = Global.selStep = self.sliderStep.maximum() - self.sliderStep.value()
+    def sliderStep_valueChanged(self, value):
+        Global.sel_step = Global.sel_step = self.slider_step.maximum() - self.slider_step.value()
         self.refreshControls()

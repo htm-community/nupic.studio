@@ -1,10 +1,12 @@
 from nupic_studio import MachineState
-from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.htm import MAX_PREVIOUS_STEPS
 from nupic_studio.ui import Global
 
+
 class SegmentType:
-    proximal = 0
-    distal = 1
+    PROXIMAL = 0
+    DISTAL = 1
+
 
 class Segment:
     """
@@ -20,37 +22,38 @@ class Segment:
         self.type = type
 
         # Index of this segment in the temporal pooler.
-        self.indexTP = -1
+        self.index_tp = -1
 
         # List of distal synapses of this segment.
         self.synapses = []
 
         # States of this element
-        self.isActive = MachineState(False, maxPreviousSteps)
-        self.isPredicted = MachineState(False, maxPreviousSteps)
-        self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
-        self.isRemoved = MachineState(False, maxPreviousSteps)
+        self.is_active = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_predicted = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_falsely_predicted = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_removed = MachineState(False, MAX_PREVIOUS_STEPS)
 
-        self.statsActivationCount = 0
-        self.statsActivationRate = 0.
-        self.statsPreditionCount = 0
-        self.statsPrecisionRate = 0.
+        # Statistics
+        self.stats_activation_count = 0
+        self.stats_activation_rate = 0.0
+        self.stats_predition_count = 0
+        self.stats_precision_rate = 0.0
 
+        # 3D object reference
         self.tree3d_initialized = False
         self.tree3d_start_pos = (0, 0, 0)
         self.tree3d_end_pos = (0, 0, 0)
         self.tree3d_item_np = None
         self.tree3d_selected = False
 
-    def getSynapse(self, indexSP):
+    def getSynapse(self, index_sp):
         """
         Return the synapse connected to a given cell or sensor bit
         """
-
-        synapse = None
         for synapse in self.synapses:
-            if synapse.indexSP == indexSP:
+            if synapse.index_sp == index_sp:
                 return synapse
+        return None
 
     def nextStep(self):
         """
@@ -58,14 +61,14 @@ class Segment:
         """
 
         # Update states machine by remove the first element and add a new element in the end
-        self.isActive.rotate()
-        self.isPredicted.rotate()
-        self.isFalselyPredicted.rotate()
-        self.isRemoved.rotate()
+        self.is_active.rotate()
+        self.is_predicted.rotate()
+        self.is_falsely_predicted.rotate()
+        self.is_removed.rotate()
 
         # Remove synapses that are marked to be removed
         for synapse in self.synapses:
-            if synapse.isRemoved.atFirstStep():
+            if synapse.is_removed.atFirstStep():
                 self.synapses.remove(synapse)
                 del synapse
 
@@ -78,14 +81,14 @@ class Segment:
         """
 
         # Calculate statistics
-        if self.isActive.atCurrStep():
-            self.statsActivationCount += 1
-        if self.isPredicted.atCurrStep():
-            self.statsPreditionCount += 1
-        if Global.currStep > 0:
-            self.statsActivationRate = self.statsActivationCount / float(Global.currStep)
-        if self.statsActivationCount > 0:
-            self.statsPrecisionRate = self.statsPreditionCount / float(self.statsActivationCount)
+        if self.is_active.atCurrStep():
+            self.stats_activation_count += 1
+        if self.is_predicted.atCurrStep():
+            self.stats_predition_count += 1
+        if Global.curr_step > 0:
+            self.stats_activation_rate = self.stats_activation_count / float(Global.curr_step)
+        if self.stats_activation_count > 0:
+            self.stats_precision_rate = self.stats_predition_count / float(self.stats_activation_count)
 
         for synapse in self.synapses:
             synapse.calculateStatistics()

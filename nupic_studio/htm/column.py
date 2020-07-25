@@ -1,5 +1,6 @@
 from nupic_studio.htm.segment import Segment, SegmentType
 
+
 class Column:
     """
     A class only to group properties related to columns.
@@ -17,18 +18,18 @@ class Column:
         self.y = -1
 
         # Proximal segment of this column
-        self.segment = Segment(SegmentType.proximal)
+        self.segment = Segment(SegmentType.PROXIMAL)
 
         # List of cells that compose this column.
         self.cells = []
 
+        # 3D object reference
         self.tree3d_pos = (0, 0, 0)
 
     def getCell(self, z):
         """
         Return the cell located at given position
         """
-
         for cell in self.cells:
             if cell.z == z:
                 return cell
@@ -37,7 +38,6 @@ class Column:
         """
         Perfoms actions related to time step progression.
         """
-
         self.segment.nextStep()
         for cell in self.cells:
             cell.nextStep()
@@ -46,7 +46,6 @@ class Column:
         """
         Calculate statistics after an iteration.
         """
-
         self.segment.calculateStatistics()
         for cell in self.cells:
             cell.calculateStatistics()

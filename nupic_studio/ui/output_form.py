@@ -1,32 +1,31 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
+
 class OutputForm(QtWidgets.QWidget):
 
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QWidget.__init__(self)
-
         self.initUI()
 
     def initUI(self):
 
-        # textBoxOutput
-        self.textBoxOutput = QtWidgets.QTextEdit()
-        self.textBoxOutput.setReadOnly(True)
-        self.textBoxOutput.setAlignment(QtCore.Qt.AlignLeft)
+        # text_box_output
+        self.text_box_output = QtWidgets.QTextEdit()
+        self.text_box_output.setReadOnly(True)
+        self.text_box_output.setAlignment(QtCore.Qt.AlignLeft)
 
         # layout
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.textBoxOutput)
+        layout.addWidget(self.text_box_output)
 
         # OutputForm
         self.setLayout(layout)
         self.setWindowTitle("Output")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.setMinimumHeight(200)
         self.setMaximumHeight(300)
 
@@ -34,16 +33,14 @@ class OutputForm(QtWidgets.QWidget):
         """
         Reset all controls.
         """
-
-        self.textBoxOutput.setText("")
+        self.text_box_output.setText("")
 
     def addText(self, text):
         """
         Refresh controls for each time step.
         """
-
-        self.textBoxOutput.append(text)
-        cursor = self.textBoxOutput.textCursor()
+        self.text_box_output.append(text)
+        cursor = self.text_box_output.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
-        self.textBoxOutput.setTextCursor(cursor)
-        self.textBoxOutput.ensureCursorVisible()
+        self.text_box_output.setTextCursor(cursor)
+        self.text_box_output.ensureCursorVisible()

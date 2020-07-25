@@ -1,11 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Project>
-    <MetaData name="Counting" author="David Ragazzi" description="This example aims the use of a scalar encoder to predict a numeric sequence."/>
-    <Net>
-        <Node name="Top" type="Region" width="32" height="16" enableSpatialLearning="True" potentialRadius="1" potentialPct="1.0" globalInhibition="True" localAreaDensity="0.02" numActiveColumnsPerInhArea="0.0" stimulusThreshold="0" proximalSynConnectedPerm="0.1" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.05" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="2.0" spSeed="1956" enableTemporalLearning="True" numCellsPerColumn="10" distalSynInitialPerm="0.21" distalSynConnectedPerm="0.15" distalSynPermIncrement="0.1" distalSynPermDecrement="0.04" minThreshold="3" activationThreshold="4" maxNumNewSynapses="5" tpSeed="1960"/>
-        <Node name="Numbers" type="Sensor" width="50" height="1" dataSourceType="File" fileName="counting.csv" predictionsMethod="Reconstruction">
-            <Encoding dataSourceFieldName="Numbers" dataSourceFieldDataType="Decimal" enableInference="True" encoderModule="nupic.encoders.scalar" encoderClass="ScalarEncoder" encoderParams="{'w': '3', 'minval': '0.0', 'maxval': '100.0', 'n': '50', 'forced': 'true'}" encoderFieldName="Numbers" encoderFieldDataType="Decimal"/>
-        </Node>
-        <Link outNode="Numbers" inNode="Top"/>
-    </Net>
-</Project>
+{
+    'name': "Counting", 'author': "David Ragazzi", 'description': "This example aims the use of a scalar encoder to predict a numeric sequence.",
+    'nodes': [
+        {'name': "Top", 'type': "Region", 'width': 32, 'height': 16, 'enable_spatial_learning': True, 'potential_radius': 1, 'potential_pct': 1.0, 'global_inhibition': True, 'local_area_density': 0.02, 'num_active_columns_per_inh_area': 0.0, 'stimulus_threshold': 0, 'proximal_syn_connected_perm': 0.1, 'proximal_syn_perm_increment': 0.05, 'proximal_syn_perm_decrement': 0.05, 'min_pct_overlap_duty_cycle': 0.001, 'min_pct_active_duty_cycle': 0.001, 'duty_cycle_period': 1000, 'max_boost': 2.0, 'sp_seed': 1956, 'enable_temporal_learning': True, 'cells_per_column': 10, 'distal_syn_initial_perm': 0.21, 'distal_syn_connected_perm': 0.15, 'distal_syn_perm_increment': 0.1, 'distal_syn_perm_decrement': 0.04, 'min_threshold': 3, 'activation_threshold': 4, 'max_new_synapses': 5, 'tp_seed': 1960},
+        {'name': "Numbers", 'type': "Sensor", 'width': 50, 'height': 1, 'data_source_type': "File", 'file_name': "counting.csv", 'predictions_method': "Reconstruction",
+            'encodings': [
+                {'data_source_field_name': "Numbers", 'data_source_field_data_type': "Decimal", 'enable_inference': True, 'encoder_module': "nupic.encoders.scalar", 'encoder_class': "ScalarEncoder", 'encoder_params': {'w': 3, 'minval': 0.0, 'maxval': 100.0, 'n': 50, 'forced': True}, 'encoder_field_name': "Numbers", 'encoder_field_data_type': "Decimal"},
+            ],
+        },
+    ],
+    'links': [
+        {'out_node': "Numbers", 'in_node': "Top"},
+    ],
+}

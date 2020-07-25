@@ -5,153 +5,152 @@ from nupic_studio import ArrayTableModel
 from nupic_studio.ui import Global
 from nupic_studio.htm.encoding import Encoding, FieldDataType
 
+
 class EncodingForm(QtWidgets.QDialog):
 
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QDialog.__init__(self)
-
         self.initUI()
 
         # Index of the encoding that is being edited. If index is -1 the user is creating a new encoding.
-        self.encodingIdx = -1
+        self.encoding_idx = -1
 
         # Temporary list of encodings that is being edited.
         self.encodings = []
 
     def initUI(self):
 
-        # labelDataSourceFieldName
-        self.labelDataSourceFieldName = QtWidgets.QLabel()
-        self.labelDataSourceFieldName.setText("Datasource Field Name:")
-        self.labelDataSourceFieldName.setAlignment(QtCore.Qt.AlignRight)
+        # label_data_source_field_name
+        self.label_data_source_field_name = QtWidgets.QLabel()
+        self.label_data_source_field_name.setText("Datasource Field Name:")
+        self.label_data_source_field_name.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxDataSourceFieldName
-        self.textBoxDataSourceFieldName = QtWidgets.QLineEdit()
-        self.textBoxDataSourceFieldName.setAlignment(QtCore.Qt.AlignLeft)
+        # text_box_data_source_field_name
+        self.text_box_data_source_field_name = QtWidgets.QLineEdit()
+        self.text_box_data_source_field_name.setAlignment(QtCore.Qt.AlignLeft)
 
-        # labelDataSourceFieldDataType
-        self.labelDataSourceFieldDataType = QtWidgets.QLabel()
-        self.labelDataSourceFieldDataType.setText("Field Data Type:")
-        self.labelDataSourceFieldDataType.setAlignment(QtCore.Qt.AlignRight)
+        # label_data_source_field_data_type
+        self.label_data_source_field_data_type = QtWidgets.QLabel()
+        self.label_data_source_field_data_type.setText("Field Data Type:")
+        self.label_data_source_field_data_type.setAlignment(QtCore.Qt.AlignRight)
 
-        # comboBoxDataSourceFieldDataType
-        self.comboBoxDataSourceFieldDataType = QtWidgets.QComboBox()
-        self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.boolean)
-        self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.integer)
-        self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.decimal)
-        self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.dateTime)
-        self.comboBoxDataSourceFieldDataType.addItem(FieldDataType.string)
+        # combo_box_data_source_field_data_type
+        self.combo_box_data_source_field_data_type = QtWidgets.QComboBox()
+        self.combo_box_data_source_field_data_type.addItem(FieldDataType.BOOLEAN)
+        self.combo_box_data_source_field_data_type.addItem(FieldDataType.INTEGER)
+        self.combo_box_data_source_field_data_type.addItem(FieldDataType.DECIMAL)
+        self.combo_box_data_source_field_data_type.addItem(FieldDataType.DATE_TIME)
+        self.combo_box_data_source_field_data_type.addItem(FieldDataType.STRING)
 
-        # checkBoxEnableInference
-        self.checkBoxEnableInference = QtWidgets.QCheckBox()
-        self.checkBoxEnableInference.setText("Enable Inference")
+        # check_box_enable_inference
+        self.check_box_enable_inference = QtWidgets.QCheckBox()
+        self.check_box_enable_inference.setText("Enable Inference")
 
-        # labelEncoderModule
-        self.labelEncoderModule = QtWidgets.QLabel()
-        self.labelEncoderModule.setText("Module:")
-        self.labelEncoderModule.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoder_module
+        self.label_encoder_module = QtWidgets.QLabel()
+        self.label_encoder_module.setText("Module:")
+        self.label_encoder_module.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxEncoderModule
-        self.textBoxEncoderModule = QtWidgets.QLineEdit()
-        self.textBoxEncoderModule.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9._]+')))
+        # text_box_encoder_module
+        self.text_box_encoder_module = QtWidgets.QLineEdit()
+        self.text_box_encoder_module.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9._]+')))
 
-        # labelEncoderClass
-        self.labelEncoderClass = QtWidgets.QLabel()
-        self.labelEncoderClass.setText("Class:")
-        self.labelEncoderClass.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoder_class
+        self.label_encoder_class = QtWidgets.QLabel()
+        self.label_encoder_class.setText("Class:")
+        self.label_encoder_class.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxEncoderClass
-        self.textBoxEncoderClass = QtWidgets.QLineEdit()
-        self.textBoxEncoderClass.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9_]+')))
+        # text_box_encoder_class
+        self.text_box_encoder_class = QtWidgets.QLineEdit()
+        self.text_box_encoder_class.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp('[a-zA-Z0-9_]+')))
 
-        # labelEncoderParams
-        self.labelEncoderParams = QtWidgets.QLabel()
-        self.labelEncoderParams.setText("Params:")
-        self.labelEncoderParams.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoder_params
+        self.label_encoder_params = QtWidgets.QLabel()
+        self.label_encoder_params.setText("Params:")
+        self.label_encoder_params.setAlignment(QtCore.Qt.AlignRight)
 
-        # dataGridEncoderParams
+        # data_grid_encoder_params
         data = [['', ''] for i in xrange(6)]
-        self.dataGridEncoderParams = QtWidgets.QTableView()
-        self.dataGridEncoderParams.setModel(ArrayTableModel(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
-        self.dataGridEncoderParams.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
-        self.dataGridEncoderParams.verticalHeader().setDefaultSectionSize(18)
-        self.dataGridEncoderParams.model().update(['Parameter', 'Value'], data)
-        self.dataGridEncoderParams.resizeColumnsToContents()
-        self.dataGridEncoderParams.setMinimumHeight(140)
+        self.data_grid_encoder_params = QtWidgets.QTableView()
+        self.data_grid_encoder_params.setModel(ArrayTableModel(QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable))
+        self.data_grid_encoder_params.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+        self.data_grid_encoder_params.verticalHeader().setDefaultSectionSize(18)
+        self.data_grid_encoder_params.model().update(['Parameter', 'Value'], data)
+        self.data_grid_encoder_params.resizeColumnsToContents()
+        self.data_grid_encoder_params.setMinimumHeight(140)
 
-        # labelEncoderFieldName
-        self.labelEncoderFieldName = QtWidgets.QLabel()
-        self.labelEncoderFieldName.setText("Field Name:")
-        self.labelEncoderFieldName.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoder_field_name
+        self.label_encoder_field_name = QtWidgets.QLabel()
+        self.label_encoder_field_name.setText("Field Name:")
+        self.label_encoder_field_name.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxEncoderFieldName
-        self.textBoxEncoderFieldName = QtWidgets.QLineEdit()
-        self.textBoxEncoderFieldName.setAlignment(QtCore.Qt.AlignLeft)
+        # text_box_encoder_field_name
+        self.text_box_encoder_field_name = QtWidgets.QLineEdit()
+        self.text_box_encoder_field_name.setAlignment(QtCore.Qt.AlignLeft)
 
-        # labelEncoderFieldDataType
-        self.labelEncoderFieldDataType = QtWidgets.QLabel()
-        self.labelEncoderFieldDataType.setText("Field Data Type:")
-        self.labelEncoderFieldDataType.setAlignment(QtCore.Qt.AlignRight)
+        # label_encoder_field_data_type
+        self.label_encoder_field_data_type = QtWidgets.QLabel()
+        self.label_encoder_field_data_type.setText("Field Data Type:")
+        self.label_encoder_field_data_type.setAlignment(QtCore.Qt.AlignRight)
 
-        # comboBoxEncoderFieldDataType
-        self.comboBoxEncoderFieldDataType = QtWidgets.QComboBox()
-        self.comboBoxEncoderFieldDataType.addItem(FieldDataType.boolean)
-        self.comboBoxEncoderFieldDataType.addItem(FieldDataType.integer)
-        self.comboBoxEncoderFieldDataType.addItem(FieldDataType.decimal)
-        self.comboBoxEncoderFieldDataType.addItem(FieldDataType.dateTime)
-        self.comboBoxEncoderFieldDataType.addItem(FieldDataType.string)
+        # combo_box_encoder_field_data_type
+        self.combo_box_encoder_field_data_type = QtWidgets.QComboBox()
+        self.combo_box_encoder_field_data_type.addItem(FieldDataType.BOOLEAN)
+        self.combo_box_encoder_field_data_type.addItem(FieldDataType.INTEGER)
+        self.combo_box_encoder_field_data_type.addItem(FieldDataType.DECIMAL)
+        self.combo_box_encoder_field_data_type.addItem(FieldDataType.DATE_TIME)
+        self.combo_box_encoder_field_data_type.addItem(FieldDataType.STRING)
 
-        # groupBoxEncoderLayout
-        groupBoxEncoderLayout = QtWidgets.QGridLayout()
-        groupBoxEncoderLayout.addWidget(self.labelEncoderModule, 0, 0)
-        groupBoxEncoderLayout.addWidget(self.textBoxEncoderModule, 0, 1)
-        groupBoxEncoderLayout.addWidget(self.labelEncoderClass, 1, 0)
-        groupBoxEncoderLayout.addWidget(self.textBoxEncoderClass, 1, 1)
-        groupBoxEncoderLayout.addWidget(self.labelEncoderParams, 2, 0)
-        groupBoxEncoderLayout.addWidget(self.dataGridEncoderParams, 2, 1)
-        groupBoxEncoderLayout.addWidget(self.labelEncoderFieldName, 3, 0)
-        groupBoxEncoderLayout.addWidget(self.textBoxEncoderFieldName, 3, 1)
-        groupBoxEncoderLayout.addWidget(self.labelEncoderFieldDataType, 4, 0)
-        groupBoxEncoderLayout.addWidget(self.comboBoxEncoderFieldDataType, 4, 1)
+        # group_box_encoder_layout
+        group_box_encoder_layout = QtWidgets.QGridLayout()
+        group_box_encoder_layout.addWidget(self.label_encoder_module, 0, 0)
+        group_box_encoder_layout.addWidget(self.text_box_encoder_module, 0, 1)
+        group_box_encoder_layout.addWidget(self.label_encoder_class, 1, 0)
+        group_box_encoder_layout.addWidget(self.text_box_encoder_class, 1, 1)
+        group_box_encoder_layout.addWidget(self.label_encoder_params, 2, 0)
+        group_box_encoder_layout.addWidget(self.data_grid_encoder_params, 2, 1)
+        group_box_encoder_layout.addWidget(self.label_encoder_field_name, 3, 0)
+        group_box_encoder_layout.addWidget(self.text_box_encoder_field_name, 3, 1)
+        group_box_encoder_layout.addWidget(self.label_encoder_field_data_type, 4, 0)
+        group_box_encoder_layout.addWidget(self.combo_box_encoder_field_data_type, 4, 1)
 
-        # groupBoxEncoder
-        self.groupBoxEncoder = QtWidgets.QGroupBox()
-        self.groupBoxEncoder.setLayout(groupBoxEncoderLayout)
-        self.groupBoxEncoder.setTitle("Encoder")
+        # group_box_encoder
+        self.group_box_encoder = QtWidgets.QGroupBox()
+        self.group_box_encoder.setLayout(group_box_encoder_layout)
+        self.group_box_encoder.setTitle("Encoder")
 
-        # groupBoxMainLayout
-        groupBoxMainLayout = QtWidgets.QGridLayout()
-        groupBoxMainLayout.addWidget(self.labelDataSourceFieldName, 0, 0)
-        groupBoxMainLayout.addWidget(self.textBoxDataSourceFieldName, 0, 1)
-        groupBoxMainLayout.addWidget(self.labelDataSourceFieldDataType, 1, 0)
-        groupBoxMainLayout.addWidget(self.comboBoxDataSourceFieldDataType, 1, 1)
-        groupBoxMainLayout.addWidget(self.checkBoxEnableInference, 2, 1)
-        groupBoxMainLayout.addWidget(self.groupBoxEncoder, 3, 1)
+        # group_box_main_layout
+        group_box_main_layout = QtWidgets.QGridLayout()
+        group_box_main_layout.addWidget(self.label_data_source_field_name, 0, 0)
+        group_box_main_layout.addWidget(self.text_box_data_source_field_name, 0, 1)
+        group_box_main_layout.addWidget(self.label_data_source_field_data_type, 1, 0)
+        group_box_main_layout.addWidget(self.combo_box_data_source_field_data_type, 1, 1)
+        group_box_main_layout.addWidget(self.check_box_enable_inference, 2, 1)
+        group_box_main_layout.addWidget(self.group_box_encoder, 3, 1)
 
-        # groupBoxMain
-        self.groupBoxMain = QtWidgets.QGroupBox()
-        self.groupBoxMain.setLayout(groupBoxMainLayout)
+        # group_box_main
+        self.group_box_main = QtWidgets.QGroupBox()
+        self.group_box_main.setLayout(group_box_main_layout)
 
-        # buttonBox
-        self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_click)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulationInitialized)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_click)
+        # button_box
+        self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.buttonOk_click)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulation_initialized)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.buttonCancel_click)
 
         # layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.groupBoxMain)
-        layout.addWidget(self.buttonBox)
+        layout.addWidget(self.group_box_main)
+        layout.addWidget(self.button_box)
 
         # SensorForm
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Sensor Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.resize(400, 200)
 
     def setControlsValues(self):
@@ -160,125 +159,118 @@ class EncodingForm(QtWidgets.QDialog):
         """
 
         # Set controls value with encoding params
-        if self.encodingIdx >= 0:
-            encoding = self.encodings[self.encodingIdx]
-            self.checkBoxEnableInference.setChecked(encoding.enableInference)
-            self.textBoxDataSourceFieldName.setText(encoding.dataSourceFieldName)
-            self.comboBoxDataSourceFieldDataType.setCurrentIndex(self.comboBoxDataSourceFieldDataType.findText(encoding.dataSourceFieldDataType, QtCore.Qt.MatchFixedString))
+        if self.encoding_idx >= 0:
+            encoding = self.encodings[self.encoding_idx]
+            self.check_box_enable_inference.setChecked(encoding.enable_inference)
+            self.text_box_data_source_field_name.setText(encoding.data_source_field_name)
+            self.combo_box_data_source_field_data_type.setCurrentIndex(self.combo_box_data_source_field_data_type.findText(encoding.data_source_field_data_type, QtCore.Qt.MatchFixedString))
 
             # Set encoding parameters
-            self.textBoxEncoderModule.setText(encoding.encoderModule)
-            self.textBoxEncoderClass.setText(encoding.encoderClass)
-            encoderParams = json.loads(encoding.encoderParams.replace("'", "\""), object_pairs_hook=collections.OrderedDict)
-            gridData = self.dataGridEncoderParams.model().data
+            self.text_box_encoder_module.setText(encoding.encoder_module)
+            self.text_box_encoder_class.setText(encoding.encoder_class)
+            encoder_params = encoding.encoder_params
+            grid_data = self.data_grid_encoder_params.model().data
             row = 0
-            for key, value in encoderParams.iteritems():
-                gridData[row][0] = key
-                gridData[row][1] = value
+            for key, value in encoder_params.iteritems():
+                grid_data[row][0] = key
+                grid_data[row][1] = value
                 row += 1
-            self.textBoxEncoderFieldName.setText(encoding.encoderFieldName)
-            self.comboBoxEncoderFieldDataType.setCurrentIndex(self.comboBoxEncoderFieldDataType.findText(encoding.encoderFieldDataType, QtCore.Qt.MatchFixedString))
+            self.text_box_encoder_field_name.setText(encoding.encoder_field_name)
+            self.combo_box_encoder_field_data_type.setCurrentIndex(self.combo_box_encoder_field_data_type.findText(encoding.encoder_field_data_type, QtCore.Qt.MatchFixedString))
 
-    def duplicatedFieldName(self, fieldName):
+    def duplicatedFieldName(self, field_name):
         """
         Check if exists an encoding with the same name.
         """
         duplicated = False
-
         if len(self.encodings) > 0:
             for i in range(len(self.encodings)):
-                if self.encodings[i].encoderFieldName == fieldName and i != self.encodingIdx:
+                if self.encodings[i].encoder_field_name == field_name and i != self.encoding_idx:
                     duplicated = True
                     break
-
         return duplicated
 
-    def __buttonOk_click(self, event):
+    def buttonOk_click(self, event):
         """
         Check if values changed and save the,.
         """
 
-        encoderParamsDict = collections.OrderedDict()
-        if self.textBoxDataSourceFieldName.text() == '':
+        encoder_params = collections.OrderedDict()
+        if self.text_box_data_source_field_name.text() == '':
             QtWidgets.QMessageBox.warning(self, "Warning", "Record field name was not specified.")
             return
-        elif self.textBoxEncoderModule.text() == '':
+        elif self.text_box_encoder_module.text() == '':
             QtWidgets.QMessageBox.warning(self, "Warning", "Encoder module was not specified.")
             return
-        elif self.textBoxEncoderClass.text() == '':
+        elif self.text_box_encoder_class.text() == '':
             QtWidgets.QMessageBox.warning(self, "Warning", "Encoder class was not specified.")
             return
-        elif self.textBoxEncoderFieldName.text() == '':
+        elif self.text_box_encoder_field_name.text() == '':
             QtWidgets.QMessageBox.warning(self, "Warning", "Encoder field name was not specified.")
             return
-        elif self.duplicatedFieldName(self.textBoxEncoderFieldName.text()):
+        elif self.duplicatedFieldName(self.text_box_encoder_field_name.text()):
             QtWidgets.QMessageBox.warning(self, "Warning", "Encoder field name already is used by other encoding.")
             return
         else:
-            gridData = self.dataGridEncoderParams.model().data
-            for row in range(len(gridData)):
-                if gridData[row][0] != '':
+            grid_data = self.data_grid_encoder_params.model().data
+            for row in range(len(grid_data)):
+                if grid_data[row][0] != '':
                     # Valid parameter name
                     try:
-                        gridData[row][0] = gridData[row][0].toString()
+                        grid_data[row][0] = grid_data[row][0].toString()
                     except:
                         pass
-                    param = str(gridData[row][0])
-                    validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
-                    if not validExpr.exactMatch(param):
+                    param = str(grid_data[row][0])
+                    valid_expr = QtCore.QRegExp('[a-zA-Z0-9_]+')
+                    if not valid_expr.exactMatch(param):
                         QtWidgets.QMessageBox.warning(self, "Warning", "'" + param + "' is not a valid name.")
                         return
 
                     # Valid parameter value
                     try:
-                        gridData[row][1] = gridData[row][1].toString()
+                        grid_data[row][1] = grid_data[row][1].toString()
                     except:
                         pass
-                    value = str(gridData[row][1])
+                    value = str(grid_data[row][1])
                     if len(value) == 0:
                         QtWidgets.QMessageBox.warning(self, "Warning", "'" + param + "' value is empty.")
                         return
 
                     # Add param name and its value to dictionary
-                    encoderParamsDict[param] = value
+                    encoder_params[param] = value
 
-        dataSourceFieldName = str(self.textBoxDataSourceFieldName.text())
-        dataSourceFieldDataType = str(self.comboBoxDataSourceFieldDataType.currentText())
-        enableInference = self.checkBoxEnableInference.isChecked()
-        encoderModule = str(self.textBoxEncoderModule.text())
-        encoderClass = str(self.textBoxEncoderClass.text())
-        encoderParams = json.dumps(encoderParamsDict)
-        encoderFieldName = str(self.textBoxEncoderFieldName.text())
-        encoderFieldDataType = str(self.comboBoxEncoderFieldDataType.currentText())
-
-        # Remove double quotes from param values
-        encoderParams = encoderParams.replace("\"", "'")
-        encoderParams = encoderParams.replace("True", "true")
-        encoderParams = encoderParams.replace("False", "false")
+        data_source_field_name = str(self.text_box_data_source_field_name.text())
+        data_source_field_data_type = str(self.combo_box_data_source_field_data_type.currentText())
+        enable_inference = self.check_box_enable_inference.isChecked()
+        encoder_module = str(self.text_box_encoder_module.text())
+        encoder_class = str(self.text_box_encoder_class.text())
+        encoder_field_name = str(self.text_box_encoder_field_name.text())
+        encoder_field_data_type = str(self.combo_box_encoder_field_data_type.currentText())
 
         # If this is a new encoding get it from list else create a new one
-        if self.encodingIdx >= 0:
-            encoding = self.encodings[self.encodingIdx]
+        if self.encoding_idx >= 0:
+            encoding = self.encodings[self.encoding_idx]
         else:
             encoding = Encoding()
             self.encodings.append(encoding)
 
         # If anything has changed
-        if encoding.dataSourceFieldName != dataSourceFieldName or encoding.dataSourceFieldDataType != dataSourceFieldDataType or encoding.enableInference != enableInference or encoding.encoderModule != encoderModule or encoding.encoderClass != encoderClass or encoding.encoderParams != encoderParams or encoding.encoderFieldName != encoderFieldName or encoding.encoderFieldDataType != encoderFieldDataType:
+        if encoding.data_source_field_name != data_source_field_name or encoding.data_source_field_data_type != data_source_field_data_type or encoding.enable_inference != enable_inference or encoding.encoder_module != encoder_module or encoding.encoder_class != encoder_class or encoding.encoder_params != encoder_params or encoding.encoder_field_name != encoder_field_name or encoding.encoder_field_data_type != encoder_field_data_type:
+
             # Set encoding params with controls values
-            encoding.dataSourceFieldName = dataSourceFieldName
-            encoding.dataSourceFieldDataType = dataSourceFieldDataType
-            encoding.enableInference = enableInference
-            encoding.encoderModule = encoderModule
-            encoding.encoderClass = encoderClass
-            encoding.encoderParams = encoderParams
-            encoding.encoderFieldName = encoderFieldName
-            encoding.encoderFieldDataType = encoderFieldDataType
+            encoding.data_source_field_name = data_source_field_name
+            encoding.data_source_field_data_type = data_source_field_data_type
+            encoding.enable_inference = enable_inference
+            encoding.encoder_module = encoder_module
+            encoding.encoder_class = encoder_class
+            encoding.encoder_params = encoder_params
+            encoding.encoder_field_name = encoder_field_name
+            encoding.encoder_field_data_type = encoder_field_data_type
 
             self.accept()
 
         self.close()
 
-    def __buttonCancel_click(self, event):
+    def buttonCancel_click(self, event):
         self.reject()
         self.close()

@@ -1,12 +1,13 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 
+
 class NodeType:
     """
     Types of nodes in the hierarchy.
     """
+    REGION = 1
+    SENSOR = 2
 
-    region = 1
-    sensor = 2
 
 class Node:
     """
@@ -31,31 +32,30 @@ class Node:
         self.height = 64
 
         # An array representing the current output from this node.
-        self._output = []
+        self.output = []
 
-        self.tree2d_x = 0.
-        self.tree2d_y = 0.
+        # 2D object reference
+        self.tree2d_x = 0.0
+        self.tree2d_y = 0.0
         self.tree2d_polygon = QtGui.QPolygon()
 
+        # 3D object reference
         self.tree3d_pos = (0, 0, 0)
 
     def initialize(self):
         """
         Initialize this node.
         """
-
         pass
 
     def nextStep(self):
         """
         Perfoms actions related to time step progression.
         """
-
         pass
 
     def getOutput(self):
         """
         Get output from this node.
         """
-
-        return self._output
+        return self.output

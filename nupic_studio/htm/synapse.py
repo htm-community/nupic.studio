@@ -1,6 +1,7 @@
 from nupic_studio import MachineState
-from nupic_studio.htm import maxPreviousSteps
+from nupic_studio.htm import MAX_PREVIOUS_STEPS
 from nupic_studio.ui import Global
+
 
 class Synapse:
     """
@@ -13,28 +14,30 @@ class Synapse:
         """
 
         # Index of this cell in the spatial pooler.
-        self.indexSP = -1
+        self.index_sp = -1
 
         # Index of this synapse in the temporal pooler.
-        self.indexTP = -1
+        self.index_tp = -1
 
         # An input element is a cell in case of the source be a column or then a bit in case of the source be a sensor.
-        self.inputElem = None
+        self.input_elem = None
 
         # Permanence of this synapse.
-        self.permanence = MachineState(0., maxPreviousSteps)
+        self.permanence = MachineState(0.0, MAX_PREVIOUS_STEPS)
 
         # States of this element
-        self.isConnected = MachineState(False, maxPreviousSteps)
-        self.isPredicted = MachineState(False, maxPreviousSteps)
-        self.isFalselyPredicted = MachineState(False, maxPreviousSteps)
-        self.isRemoved = MachineState(False, maxPreviousSteps)
+        self.is_connected = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_predicted = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_falsely_predicted = MachineState(False, MAX_PREVIOUS_STEPS)
+        self.is_removed = MachineState(False, MAX_PREVIOUS_STEPS)
 
-        self.statsConnectionCount = 0
-        self.statsConnectionRate = 0.
-        self.statsPreditionCount = 0
-        self.statsPrecisionRate = 0.
+        # Statistics
+        self.stats_connection_count = 0
+        self.stats_connection_rate = 0.0
+        self.stats_predition_count = 0
+        self.stats_precision_rate = 0.0
 
+        # 3D object reference
         self.tree3d_initialized = False
         self.tree3d_item_np = None
         self.tree3d_selected = False
@@ -46,10 +49,10 @@ class Synapse:
 
         # Update states machine by remove the first element and add a new element in the end
         self.permanence.rotate()
-        self.isConnected.rotate()
-        self.isPredicted.rotate()
-        self.isFalselyPredicted.rotate()
-        self.isRemoved.rotate()
+        self.is_connected.rotate()
+        self.is_predicted.rotate()
+        self.is_falsely_predicted.rotate()
+        self.is_removed.rotate()
 
     def calculateStatistics(self):
         """
@@ -57,11 +60,11 @@ class Synapse:
         """
 
         # Calculate statistics
-        if self.isConnected.atCurrStep():
-            self.statsConnectionCount += 1
-        if self.isPredicted.atCurrStep():
-            self.statsPreditionCount += 1
-        if Global.currStep > 0:
-            self.statsConnectionRate = self.statsConnectionCount / float(Global.currStep)
-        if self.statsConnectionCount > 0:
-            self.statsPrecisionRate = self.statsPreditionCount / float(self.statsConnectionCount)
+        if self.is_connected.atCurrStep():
+            self.stats_connection_count += 1
+        if self.is_predicted.atCurrStep():
+            self.stats_predition_count += 1
+        if Global.curr_step > 0:
+            self.stats_connection_rate = self.stats_connection_count / float(Global.curr_step)
+        if self.stats_connection_count > 0:
+            self.stats_precision_rate = self.stats_predition_count / float(self.stats_connection_count)

@@ -1,92 +1,91 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
+
 class SimulationLegendForm(QtWidgets.QDialog):
 
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QWidget.__init__(self)
-
         self.initUI()
 
     def initUI(self):
 
-        # buttonInactiveElement
-        self.buttonInactiveElement = QtWidgets.QPushButton()
-        self.buttonInactiveElement.setStyleSheet("background-color: rgb(190, 190, 190)")
-        self.buttonInactiveElement.setEnabled(False)
+        # button_inactive_element
+        self.button_inactive_element = QtWidgets.QPushButton()
+        self.button_inactive_element.setStyleSheet("background-color: rgb(190, 190, 190)")
+        self.button_inactive_element.setEnabled(False)
 
-        # labelInactiveElement
-        self.labelInactiveElement = QtWidgets.QLabel()
-        self.labelInactiveElement.setText("Inactive")
+        # label_inactive_element
+        self.label_inactive_element = QtWidgets.QLabel()
+        self.label_inactive_element.setText("Inactive")
 
-        # buttonFalselyPredictedElement
-        self.buttonFalselyPredictedElement = QtWidgets.QPushButton()
-        self.buttonFalselyPredictedElement.setStyleSheet("background-color: rgb(255, 0, 0)")
-        self.buttonFalselyPredictedElement.setEnabled(False)
+        # button_falsely_predicted_element
+        self.button_falsely_predicted_element = QtWidgets.QPushButton()
+        self.button_falsely_predicted_element.setStyleSheet("background-color: rgb(255, 0, 0)")
+        self.button_falsely_predicted_element.setEnabled(False)
 
-        # labelFalselyPredictedElement
-        self.labelFalselyPredictedElement = QtWidgets.QLabel()
-        self.labelFalselyPredictedElement.setText("Falsely Predicted")
+        # label_falsely_predicted_element
+        self.label_falsely_predicted_element = QtWidgets.QLabel()
+        self.label_falsely_predicted_element.setText("Falsely Predicted")
 
-        # buttonPredictedElement
-        self.buttonPredictedElement = QtWidgets.QPushButton()
-        self.buttonPredictedElement.setStyleSheet("background-color: rgb(255, 215, 80)")
-        self.buttonPredictedElement.setEnabled(False)
+        # button_predicted_element
+        self.button_predicted_element = QtWidgets.QPushButton()
+        self.button_predicted_element.setStyleSheet("background-color: rgb(255, 215, 80)")
+        self.button_predicted_element.setEnabled(False)
 
-        # labelPredictedElement
-        self.labelPredictedElement = QtWidgets.QLabel()
-        self.labelPredictedElement.setText("Predicted")
+        # label_predicted_element
+        self.label_predicted_element = QtWidgets.QLabel()
+        self.label_predicted_element.setText("Predicted")
 
-        # buttonActiveElement
-        self.buttonActiveElement = QtWidgets.QPushButton()
-        self.buttonActiveElement.setStyleSheet("background-color: rgb(50, 205, 50)")
-        self.buttonActiveElement.setEnabled(False)
+        # button_active_element
+        self.button_active_element = QtWidgets.QPushButton()
+        self.button_active_element.setStyleSheet("background-color: rgb(50, 205, 50)")
+        self.button_active_element.setEnabled(False)
 
-        # labelActiveElement
-        self.labelActiveElement = QtWidgets.QLabel()
-        self.labelActiveElement.setText("Active/Connected")
+        # label_active_element
+        self.label_active_element = QtWidgets.QLabel()
+        self.label_active_element.setText("Active/Connected")
 
-        # buttonLearningElement
-        self.buttonLearningElement = QtWidgets.QPushButton()
-        self.buttonLearningElement.setStyleSheet("background-color: rgb(125, 255, 0)")
-        self.buttonLearningElement.setEnabled(False)
+        # button_learning_element
+        self.button_learning_element = QtWidgets.QPushButton()
+        self.button_learning_element.setStyleSheet("background-color: rgb(125, 255, 0)")
+        self.button_learning_element.setEnabled(False)
 
-        # labelLearningElement
-        self.labelLearningElement = QtWidgets.QLabel()
-        self.labelLearningElement.setText("Learning")
+        # label_learning_element
+        self.label_learning_element = QtWidgets.QLabel()
+        self.label_learning_element.setText("Learning")
 
-        # buttonSelectedElement
-        self.buttonSelectedElement = QtWidgets.QPushButton()
-        self.buttonSelectedElement.setStyleSheet("background-color: rgb(0, 0, 255)")
-        self.buttonSelectedElement.setEnabled(False)
+        # button_selected_element
+        self.button_selected_element = QtWidgets.QPushButton()
+        self.button_selected_element.setStyleSheet("background-color: rgb(0, 0, 255)")
+        self.button_selected_element.setEnabled(False)
 
-        # labelSelectedElement
-        self.labelSelectedElement = QtWidgets.QLabel()
-        self.labelSelectedElement.setText("Selected")
+        # label_selected_element
+        self.label_selected_element = QtWidgets.QLabel()
+        self.label_selected_element.setText("Selected")
 
         # layout
         layout = QtWidgets.QGridLayout()
-        layout.addWidget(self.buttonInactiveElement, 0, 0)
-        layout.addWidget(self.labelInactiveElement, 0, 1)
-        layout.addWidget(self.buttonFalselyPredictedElement, 1, 0)
-        layout.addWidget(self.labelFalselyPredictedElement, 1, 1)
-        layout.addWidget(self.buttonPredictedElement, 2, 0)
-        layout.addWidget(self.labelPredictedElement, 2, 1)
-        layout.addWidget(self.buttonActiveElement, 3, 0)
-        layout.addWidget(self.labelActiveElement, 3, 1)
-        layout.addWidget(self.buttonLearningElement, 4, 0)
-        layout.addWidget(self.labelLearningElement, 4, 1)
-        layout.addWidget(self.buttonSelectedElement, 5, 0)
-        layout.addWidget(self.labelSelectedElement, 5, 1)
+        layout.addWidget(self.button_inactive_element, 0, 0)
+        layout.addWidget(self.label_inactive_element, 0, 1)
+        layout.addWidget(self.button_falsely_predicted_element, 1, 0)
+        layout.addWidget(self.label_falsely_predicted_element, 1, 1)
+        layout.addWidget(self.button_predicted_element, 2, 0)
+        layout.addWidget(self.label_predicted_element, 2, 1)
+        layout.addWidget(self.button_active_element, 3, 0)
+        layout.addWidget(self.label_active_element, 3, 1)
+        layout.addWidget(self.button_learning_element, 4, 0)
+        layout.addWidget(self.label_learning_element, 4, 1)
+        layout.addWidget(self.button_selected_element, 5, 0)
+        layout.addWidget(self.label_selected_element, 5, 1)
         layout.setRowStretch(1, 100)
 
         # SimulationLegendForm
         self.setLayout(layout)
         self.setWindowTitle("Simulation Legend")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.setMinimumWidth(100)
         self.setMinimumHeight(150)

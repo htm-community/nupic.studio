@@ -1,13 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Project>
-    <MetaData name="HotGym" author="Numenta" description="This example has been around for a long time, and was one of the first real-world applications of NuPIC that actually worked. The data used is real energy consumption data from a gym in Australia. It is aggregated hourly already, so the input files simply contains a timestamp and float value for energy consumption during that hour."/>
-    <Net>
-        <Node name="Top" type="Region" width="64" height="32" enableSpatialLearning="True" potentialRadius="16" potentialPct="0.8" globalInhibition="True" localAreaDensity="-1.0" numActiveColumnsPerInhArea="40.0" stimulusThreshold="0" proximalSynConnectedPerm="0.1" proximalSynPermIncrement="0.0001" proximalSynPermDecrement="0.0005" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="1.0" spSeed="1956" enableTemporalLearning="True" numCellsPerColumn="32" distalSynInitialPerm="0.21" distalSynConnectedPerm="0.5" distalSynPermIncrement="0.1" distalSynPermDecrement="0.1" minThreshold="9" activationThreshold="12" maxNumNewSynapses="20" tpSeed="1960"/>
-        <Node name="HourlyConsumption" type="Sensor" width="146" height="1" dataSourceType="File" fileName="hot_gym.csv" predictionsMethod="Classification" enableClassificationLearning="True" enableClassificationInference="True">
-            <Encoding dataSourceFieldName="consumption" dataSourceFieldDataType="Decimal" enableInference="True" encoderModule="nupic.encoders.scalar" encoderClass="ScalarEncoder" encoderParams="{'w': '21', 'minval': '0.0', 'maxval': '100.0', 'n': '50'}" encoderFieldName="consumption" encoderFieldDataType="Decimal"/>
-            <Encoding dataSourceFieldName="timestamp" dataSourceFieldDataType="DateTime" enableInference="False" encoderModule="nupic.encoders.date" encoderClass="DateEncoder" encoderParams="{'timeOfDay': '[21, 9.5]'}" encoderFieldName="timestamp_timeOfDay.timeOfDay" encoderFieldDataType="Decimal"/>
-            <Encoding dataSourceFieldName="timestamp" dataSourceFieldDataType="DateTime" enableInference="False" encoderModule="nupic.encoders.date" encoderClass="DateEncoder" encoderParams="{'weekend': '21'}" encoderFieldName="timestamp_weekend.weekend" encoderFieldDataType="Decimal"/>
-        </Node>
-        <Link outNode="HourlyConsumption" inNode="Top"/>
-    </Net>
-</Project>
+{
+    'name': "HotGym", 'author': "Numenta", 'description': "This example has been around for a long time, and was one of the first real-world applications of NuPIC that actually worked. The data used is real energy consumption data from a gym in Australia. It is aggregated hourly already, so the input files simply contains a timestamp and float value for energy consumption during that hour.",
+    'nodes': [
+        {'name': "Top", 'type': "Region", 'width': 64, 'height': 32, 'enable_spatial_learning': True, 'potential_radius': 16, 'potential_pct': 0.8, 'global_inhibition': True, 'local_area_density': -1.0, 'num_active_columns_per_inh_area': 40.0, 'stimulus_threshold': 0, 'proximal_syn_connected_perm': 0.1, 'proximal_syn_perm_increment': 0.0001, 'proximal_syn_perm_decrement': 0.0005, 'min_pct_overlap_duty_cycle': 0.001, 'min_pct_active_duty_cycle': 0.001, 'duty_cycle_period': 1000, 'max_boost': 1.0, 'sp_seed': 1956, 'enable_temporal_learning': True, 'cells_per_column': 32, 'distal_syn_initial_perm': 0.21, 'distal_syn_connected_perm': 0.5, 'distal_syn_perm_increment': 0.1, 'distal_syn_perm_decrement': 0.1, 'min_threshold': 9, 'activation_threshold': 12, 'max_new_synapses': 20, 'tp_seed': 1960},
+        {'name': "HourlyConsumption", 'type': "Sensor", 'width': 146, 'height': 1, 'data_source_type': "File", 'file_name': "hot_gym.csv", 'predictions_method': "Classification", 'enable_classification_learning': True, 'enable_classification_inference': True,
+            'encodings': [
+                {'data_source_field_name': "consumption", 'data_source_field_data_type': "Decimal", 'enable_inference': True, 'encoder_module': "nupic.encoders.scalar", 'encoder_class': "ScalarEncoder", 'encoder_params': {'w': 21, 'minval': 0.0, 'maxval': 100.0, 'n': 50}, 'encoder_field_name': "consumption", 'encoder_field_data_type': "Decimal"},
+                {'data_source_field_name': "timestamp", 'data_source_field_data_type': "DateTime", 'enable_inference': False, 'encoder_module': "nupic.encoders.date", 'encoder_class': "DateEncoder", 'encoder_params': {'timeOfDay': [21, 9.5]}, 'encoder_field_name': "timestamp_timeOfDay.timeOfDay", 'encoder_field_data_type': "Decimal"},
+                {'data_source_field_name': "timestamp", 'data_source_field_data_type': "DateTime", 'enable_inference': False, 'encoder_module': "nupic.encoders.date", 'encoder_class': "DateEncoder", 'encoder_params': {'weekend': 21}, 'encoder_field_name': "timestamp_weekend.weekend", 'encoder_field_data_type': "Decimal"},
+            ],
+        },
+    ],
+    'links': [
+        {'out_node': "HourlyConsumption", 'in_node': "Top"},
+    ],
+}

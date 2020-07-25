@@ -1,15 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Project>
-    <MetaData name="Squares" author="David Ragazzi" description="This example has the purpose of verify how the neural network predict the next image(s) of a square and its mirror image."/>
-    <Net>
-        <Node name="Top" type="Region" width="15" height="10" enableSpatialLearning="True" potentialRadius="8" potentialPct="1.0" globalInhibition="True" localAreaDensity="-1.0" numActiveColumnsPerInhArea="8.0" stimulusThreshold="0" proximalSynConnectedPerm="0.15" proximalSynPermIncrement="0.05" proximalSynPermDecrement="0.05" minPctOverlapDutyCycle="0.001" minPctActiveDutyCycle="0.001" dutyCyclePeriod="1000" maxBoost="1.0" spSeed="1956" enableTemporalLearning="True" numCellsPerColumn="5" distalSynInitialPerm="0.15" distalSynConnectedPerm="0.1" distalSynPermIncrement="0.05" distalSynPermDecrement="0.05" minThreshold="1" activationThreshold="3" maxNumNewSynapses="3" tpSeed="1960"/>
-        <Node name="LeftMirror" type="Sensor" width="16" height="6" dataSourceType="File" fileName="squares_left.csv" predictionsMethod="Reconstruction">
-            <Encoding dataSourceFieldName="Square" dataSourceFieldDataType="String" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="String"/>
-        </Node>
-        <Node name="RightMirror" type="Sensor" width="16" height="6" dataSourceType="File" fileName="squares_right.csv" predictionsMethod="Reconstruction">
-            <Encoding dataSourceFieldName="Square" dataSourceFieldDataType="String" enableInference="True" encoderModule="nupic.encoders.pass_through_encoder" encoderClass="PassThroughEncoder" encoderParams="{'n': '96'}" encoderFieldName="Square" encoderFieldDataType="String"/>
-        </Node>
-        <Link outNode="LeftMirror" inNode="Top"/>
-        <Link outNode="RightMirror" inNode="Top"/>
-    </Net>
-</Project>
+{
+    'name': "Squares", 'author': "David Ragazzi", 'description': "This example has the purpose of verify how the neural network predict the next image(s) of a square and its mirror image.",
+    'nodes': [
+        {'name': "Top", 'type': "Region", 'width': 15, 'height': 10, 'enable_spatial_learning': True, 'potential_radius': 8, 'potential_pct': 1.0, 'global_inhibition': True, 'local_area_density': -1.0, 'num_active_columns_per_inh_area': 8.0, 'stimulus_threshold': 0, 'proximal_syn_connected_perm': 0.15, 'proximal_syn_perm_increment': 0.05, 'proximal_syn_perm_decrement': 0.05, 'min_pct_overlap_duty_cycle': 0.001, 'min_pct_active_duty_cycle': 0.001, 'duty_cycle_period': 1000, 'max_boost': 1.0, 'sp_seed': 1956, 'enable_temporal_learning': True, 'cells_per_column': 5, 'distal_syn_initial_perm': 0.15, 'distal_syn_connected_perm': 0.1, 'distal_syn_perm_increment': 0.05, 'distal_syn_perm_decrement': 0.05, 'min_threshold': 1, 'activation_threshold': 3, 'max_new_synapses': 3, 'tp_seed': 1960},
+        {'name': "LeftMirror", 'type': "Sensor", 'width': 16, 'height': 6, 'data_source_type': "File", 'file_name': "squares_left.csv", 'predictions_method': "Reconstruction",
+            'encodings': [
+                {'data_source_field_name': "Square", 'data_source_field_data_type': "String", 'enable_inference': True, 'encoder_module': "nupic.encoders.pass_through_encoder", 'encoder_class': "PassThroughEncoder", 'encoder_params': {'n': 96}, 'encoder_field_name': "Square", 'encoder_field_data_type': "String"},
+            ],
+        },
+        {'name': "RightMirror", 'type': "Sensor", 'width': 16, 'height': 6, 'data_source_type': "File", 'file_name': "squares_right.csv", 'predictions_method': "Reconstruction",
+            'encodings': [
+                {'data_source_field_name': "Square", 'data_source_field_data_type': "String", 'enable_inference': True, 'encoder_module': "nupic.encoders.pass_through_encoder", 'encoder_class': "PassThroughEncoder", 'encoder_params': {'n': 96}, 'encoder_field_name': "Square", 'encoder_field_data_type': "String"},
+            ],
+        },
+    ],
+    'links': [
+        {'out_node': "LeftMirror", 'in_node': "Top"},
+        {'out_node': "RightMirror", 'in_node': "Top"},
+    ],
+}

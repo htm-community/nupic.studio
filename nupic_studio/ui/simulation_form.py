@@ -4,7 +4,7 @@ from PIL import Image
 from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.htm.node import Node, NodeType
 from nupic_studio.htm.segment import SegmentType
-from nupic_studio.ui import Global, State, View
+from nupic_studio.ui import Global, State, NEW_VIEW
 from nupic_studio.ui.simulation_legend_form import SimulationLegendForm
 from nupic_studio.util import Texture3D
 
@@ -31,7 +31,7 @@ class SimulationForm(QtWidgets.QWidget):
         # Form
         self.setLayout(layout)
         self.setWindowTitle("Simulation")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.setMinimumSize(300, 300)
         self.setToolTip("Left-Button-Pressed: Rotate\r\nLeft-Button-DoubleClick: Reset observer camera\r\nRight-Button-Pressed: Shows menu\r\nMiddle-Button-Pressed: Pan\r\nWheel: Zoom in/out")
 
@@ -53,6 +53,7 @@ class SimulationForm(QtWidgets.QWidget):
         """
         self.viewer_3d.updateElements3d()
 
+
 class Viewer3D(QtWidgets.QLabel):
 
     def __init__(self):
@@ -61,292 +62,293 @@ class Viewer3D(QtWidgets.QLabel):
         self.mouse_working_area = None
 
         # Views
-        self.defaultViewMenu = None
-        self.selectedViewMenu = None
+        self.default_view = None
+        self.selected_view = None
 
         # Tree
-        self.topRegion = None
-        self.treeWidth = 0
-        self.treeHeight = 0
+        self.top_region = None
+        self.tree_width = 0
+        self.tree_height = 0
 
         # Space to skip horizontally between siblings and vertically between generations
-        self.offsetHorizontalNodes = 20
-        self.offsetVerticalNodes = 25
+        self.offset_horizontal_nodes = 20
+        self.offset_vertical_nodes = 25
 
         # Horizontal space between two columns
-        self.offsetColumns = 10
+        self.offset_columns = 10
 
         # Vertical space between two cells
-        self.offsetCells = 5
+        self.offset_cells = 5
 
         self.initUI()
 
         # Create views menus
         for view in Global.views:
-            view.menu = QtWidgets.QAction(self)
-            view.menu.setText(view.name)
-            view.menu.setCheckable(True)
-            view.menu.triggered.connect(self.menuView_click)
-            self.menuViews.addAction(view.menu)
+            menu = QtWidgets.QAction(self)
+            menu.setText(view['name'])
+            menu.setCheckable(True)
+            menu.triggered.connect(self.menuView_click)
+            self.menu_views.addAction(menu)
+            view['menu'] = menu
 
             # If this is the first menu, set it as default
-            if self.defaultViewMenu == None:
-                self.defaultViewMenu = view.menu
+            if self.default_view is None:
+                self.default_view = view
 
         # Load default view
-        self.selectView(self.defaultViewMenu)
+        self.selectView(self.default_view)
 
     def initUI(self):
 
-        # menuViewsNew
-        self.menuViewsNew = QtWidgets.QAction(self)
-        self.menuViewsNew.setText("Create new view")
-        self.menuViewsNew.triggered.connect(self.menuViewsNew_click)
+        # menu_views_new
+        self.menu_views_new = QtWidgets.QAction(self)
+        self.menu_views_new.setText("Create new view")
+        self.menu_views_new.triggered.connect(self.menuViewsNew_click)
 
-        # menuViewsSave
-        self.menuViewsSave = QtWidgets.QAction(self)
-        self.menuViewsSave.setText("Save selected view")
-        self.menuViewsSave.triggered.connect(self.menuViewsSave_click)
+        # menu_views_save
+        self.menu_views_save = QtWidgets.QAction(self)
+        self.menu_views_save.setText("Save selected view")
+        self.menu_views_save.triggered.connect(self.menuViewsSave_click)
 
-        # menuViewsDelete
-        self.menuViewsDelete = QtWidgets.QAction(self)
-        self.menuViewsDelete.setText("Delete selected view")
-        self.menuViewsDelete.triggered.connect(self.menuViewsDelete_click)
+        # menu_views_delete
+        self.menu_views_delete = QtWidgets.QAction(self)
+        self.menu_views_delete.setText("Delete selected view")
+        self.menu_views_delete.triggered.connect(self.menuViewsDelete_click)
 
-        # menuViews
-        self.menuViews = QtWidgets.QMenu()
-        self.menuViews.addAction(self.menuViewsNew)
-        self.menuViews.addAction(self.menuViewsSave)
-        self.menuViews.addAction(self.menuViewsDelete)
-        self.menuViews.addSeparator()
-        self.menuViews.setTitle("&View")
+        # menu_views
+        self.menu_views = QtWidgets.QMenu()
+        self.menu_views.addAction(self.menu_views_new)
+        self.menu_views.addAction(self.menu_views_save)
+        self.menu_views.addAction(self.menu_views_delete)
+        self.menu_views.addSeparator()
+        self.menu_views.setTitle("&View")
 
-        # menuShowBitsNone
-        self.menuShowBitsNone = QtWidgets.QAction(self)
-        self.menuShowBitsNone.setText("&None")
-        self.menuShowBitsNone.setCheckable(True)
-        self.menuShowBitsNone.triggered.connect(self.menuShowBits_click)
+        # menu_show_bits_none
+        self.menu_show_bits_none = QtWidgets.QAction(self)
+        self.menu_show_bits_none.setText("&None")
+        self.menu_show_bits_none.setCheckable(True)
+        self.menu_show_bits_none.triggered.connect(self.menuShowBits_click)
 
-        # menuShowBitsActive
-        self.menuShowBitsActive = QtWidgets.QAction(self)
-        self.menuShowBitsActive.setText("&Active")
-        self.menuShowBitsActive.setCheckable(True)
-        self.menuShowBitsActive.triggered.connect(self.menuShowBits_click)
+        # menu_show_bits_active
+        self.menu_show_bits_active = QtWidgets.QAction(self)
+        self.menu_show_bits_active.setText("&Active")
+        self.menu_show_bits_active.setCheckable(True)
+        self.menu_show_bits_active.triggered.connect(self.menuShowBits_click)
 
-        # menuShowBitsPredicted
-        self.menuShowBitsPredicted = QtWidgets.QAction(self)
-        self.menuShowBitsPredicted.setText("&Predicted")
-        self.menuShowBitsPredicted.setCheckable(True)
-        self.menuShowBitsPredicted.triggered.connect(self.menuShowBits_click)
+        # menu_show_bits_predicted
+        self.menu_show_bits_predicted = QtWidgets.QAction(self)
+        self.menu_show_bits_predicted.setText("&Predicted")
+        self.menu_show_bits_predicted.setCheckable(True)
+        self.menu_show_bits_predicted.triggered.connect(self.menuShowBits_click)
 
-        # menuShowBitsFalselyPredicted
-        self.menuShowBitsFalselyPredicted = QtWidgets.QAction(self)
-        self.menuShowBitsFalselyPredicted.setText("&Falsely Predicted")
-        self.menuShowBitsFalselyPredicted.setCheckable(True)
-        self.menuShowBitsFalselyPredicted.triggered.connect(self.menuShowBits_click)
+        # menu_show_bits_falsely_predicted
+        self.menu_show_bits_falsely_predicted = QtWidgets.QAction(self)
+        self.menu_show_bits_falsely_predicted.setText("&Falsely Predicted")
+        self.menu_show_bits_falsely_predicted.setCheckable(True)
+        self.menu_show_bits_falsely_predicted.triggered.connect(self.menuShowBits_click)
 
-        # menuShowBits
-        self.menuShowBits = QtWidgets.QMenu()
-        self.menuShowBits.addAction(self.menuShowBitsNone)
-        self.menuShowBits.addAction(self.menuShowBitsActive)
-        self.menuShowBits.addAction(self.menuShowBitsPredicted)
-        self.menuShowBits.addAction(self.menuShowBitsFalselyPredicted)
-        self.menuShowBits.setTitle("&Sensor bits")
+        # menu_show_bits
+        self.menu_show_bits = QtWidgets.QMenu()
+        self.menu_show_bits.addAction(self.menu_show_bits_none)
+        self.menu_show_bits.addAction(self.menu_show_bits_active)
+        self.menu_show_bits.addAction(self.menu_show_bits_predicted)
+        self.menu_show_bits.addAction(self.menu_show_bits_falsely_predicted)
+        self.menu_show_bits.setTitle("&Sensor bits")
 
-        # menuShowCellsNone
-        self.menuShowCellsNone = QtWidgets.QAction(self)
-        self.menuShowCellsNone.setText("&None")
-        self.menuShowCellsNone.setCheckable(True)
-        self.menuShowCellsNone.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_none
+        self.menu_show_cells_none = QtWidgets.QAction(self)
+        self.menu_show_cells_none.setText("&None")
+        self.menu_show_cells_none.setCheckable(True)
+        self.menu_show_cells_none.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCellsLearning
-        self.menuShowCellsLearning = QtWidgets.QAction(self)
-        self.menuShowCellsLearning.setText("&Learning")
-        self.menuShowCellsLearning.setCheckable(True)
-        self.menuShowCellsLearning.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_learning
+        self.menu_show_cells_learning = QtWidgets.QAction(self)
+        self.menu_show_cells_learning.setText("&Learning")
+        self.menu_show_cells_learning.setCheckable(True)
+        self.menu_show_cells_learning.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCellsActive
-        self.menuShowCellsActive = QtWidgets.QAction(self)
-        self.menuShowCellsActive.setText("&Active")
-        self.menuShowCellsActive.setCheckable(True)
-        self.menuShowCellsActive.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_active
+        self.menu_show_cells_active = QtWidgets.QAction(self)
+        self.menu_show_cells_active.setText("&Active")
+        self.menu_show_cells_active.setCheckable(True)
+        self.menu_show_cells_active.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCellsInactive
-        self.menuShowCellsInactive = QtWidgets.QAction(self)
-        self.menuShowCellsInactive.setText("&Inactive")
-        self.menuShowCellsInactive.setCheckable(True)
-        self.menuShowCellsInactive.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_inactive
+        self.menu_show_cells_inactive = QtWidgets.QAction(self)
+        self.menu_show_cells_inactive.setText("&Inactive")
+        self.menu_show_cells_inactive.setCheckable(True)
+        self.menu_show_cells_inactive.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCellsPredicted
-        self.menuShowCellsPredicted = QtWidgets.QAction(self)
-        self.menuShowCellsPredicted.setText("&Predicted")
-        self.menuShowCellsPredicted.setCheckable(True)
-        self.menuShowCellsPredicted.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_predicted
+        self.menu_show_cells_predicted = QtWidgets.QAction(self)
+        self.menu_show_cells_predicted.setText("&Predicted")
+        self.menu_show_cells_predicted.setCheckable(True)
+        self.menu_show_cells_predicted.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCellsFalselyPredicted
-        self.menuShowCellsFalselyPredicted = QtWidgets.QAction(self)
-        self.menuShowCellsFalselyPredicted.setText("&Falsely Predicted")
-        self.menuShowCellsFalselyPredicted.setCheckable(True)
-        self.menuShowCellsFalselyPredicted.triggered.connect(self.menuShowCells_click)
+        # menu_show_cells_falsely_predicted
+        self.menu_show_cells_falsely_predicted = QtWidgets.QAction(self)
+        self.menu_show_cells_falsely_predicted.setText("&Falsely Predicted")
+        self.menu_show_cells_falsely_predicted.setCheckable(True)
+        self.menu_show_cells_falsely_predicted.triggered.connect(self.menuShowCells_click)
 
-        # menuShowCells
-        self.menuShowCells = QtWidgets.QMenu()
-        self.menuShowCells.addAction(self.menuShowCellsNone)
-        self.menuShowCells.addAction(self.menuShowCellsLearning)
-        self.menuShowCells.addAction(self.menuShowCellsActive)
-        self.menuShowCells.addAction(self.menuShowCellsPredicted)
-        self.menuShowCells.addAction(self.menuShowCellsFalselyPredicted)
-        self.menuShowCells.addAction(self.menuShowCellsInactive)
-        self.menuShowCells.setTitle("C&ells")
+        # menu_show_cells
+        self.menu_show_cells = QtWidgets.QMenu()
+        self.menu_show_cells.addAction(self.menu_show_cells_none)
+        self.menu_show_cells.addAction(self.menu_show_cells_learning)
+        self.menu_show_cells.addAction(self.menu_show_cells_active)
+        self.menu_show_cells.addAction(self.menu_show_cells_predicted)
+        self.menu_show_cells.addAction(self.menu_show_cells_falsely_predicted)
+        self.menu_show_cells.addAction(self.menu_show_cells_inactive)
+        self.menu_show_cells.setTitle("C&ells")
 
-        # menuShowProximalSegmentsNone
-        self.menuShowProximalSegmentsNone = QtWidgets.QAction(self)
-        self.menuShowProximalSegmentsNone.setText("&None")
-        self.menuShowProximalSegmentsNone.setCheckable(True)
-        self.menuShowProximalSegmentsNone.triggered.connect(self.menuShowProximalSegments_click)
+        # menu_show_proximal_segments_none
+        self.menu_show_proximal_segments_none = QtWidgets.QAction(self)
+        self.menu_show_proximal_segments_none.setText("&None")
+        self.menu_show_proximal_segments_none.setCheckable(True)
+        self.menu_show_proximal_segments_none.triggered.connect(self.menuShowProximalSegments_click)
 
-        # menuShowProximalSegmentsActive
-        self.menuShowProximalSegmentsActive = QtWidgets.QAction(self)
-        self.menuShowProximalSegmentsActive.setText("&Active")
-        self.menuShowProximalSegmentsActive.setCheckable(True)
-        self.menuShowProximalSegmentsActive.triggered.connect(self.menuShowProximalSegments_click)
+        # menu_show_proximal_segments_active
+        self.menu_show_proximal_segments_active = QtWidgets.QAction(self)
+        self.menu_show_proximal_segments_active.setText("&Active")
+        self.menu_show_proximal_segments_active.setCheckable(True)
+        self.menu_show_proximal_segments_active.triggered.connect(self.menuShowProximalSegments_click)
 
-        # menuShowProximalSegmentsPredicted
-        self.menuShowProximalSegmentsPredicted = QtWidgets.QAction(self)
-        self.menuShowProximalSegmentsPredicted.setText("&Predicted")
-        self.menuShowProximalSegmentsPredicted.setCheckable(True)
-        self.menuShowProximalSegmentsPredicted.triggered.connect(self.menuShowProximalSegments_click)
+        # menu_show_proximal_segments_predicted
+        self.menu_show_proximal_segments_predicted = QtWidgets.QAction(self)
+        self.menu_show_proximal_segments_predicted.setText("&Predicted")
+        self.menu_show_proximal_segments_predicted.setCheckable(True)
+        self.menu_show_proximal_segments_predicted.triggered.connect(self.menuShowProximalSegments_click)
 
-        # menuShowProximalSegmentsFalselyPredicted
-        self.menuShowProximalSegmentsFalselyPredicted = QtWidgets.QAction(self)
-        self.menuShowProximalSegmentsFalselyPredicted.setText("&Falsely Predicted")
-        self.menuShowProximalSegmentsFalselyPredicted.setCheckable(True)
-        self.menuShowProximalSegmentsFalselyPredicted.triggered.connect(self.menuShowProximalSegments_click)
+        # menu_show_proximal_segments_falsely_predicted
+        self.menu_show_proximal_segments_falsely_predicted = QtWidgets.QAction(self)
+        self.menu_show_proximal_segments_falsely_predicted.setText("&Falsely Predicted")
+        self.menu_show_proximal_segments_falsely_predicted.setCheckable(True)
+        self.menu_show_proximal_segments_falsely_predicted.triggered.connect(self.menuShowProximalSegments_click)
 
-        # menuShowProximalSegments
-        self.menuShowProximalSegments = QtWidgets.QMenu()
-        self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsNone)
-        self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsActive)
-        self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsPredicted)
-        self.menuShowProximalSegments.addAction(self.menuShowProximalSegmentsFalselyPredicted)
-        self.menuShowProximalSegments.setTitle("&Segments")
+        # menu_show_proximal_segments
+        self.menu_show_proximal_segments = QtWidgets.QMenu()
+        self.menu_show_proximal_segments.addAction(self.menu_show_proximal_segments_none)
+        self.menu_show_proximal_segments.addAction(self.menu_show_proximal_segments_active)
+        self.menu_show_proximal_segments.addAction(self.menu_show_proximal_segments_predicted)
+        self.menu_show_proximal_segments.addAction(self.menu_show_proximal_segments_falsely_predicted)
+        self.menu_show_proximal_segments.setTitle("&Segments")
 
-        # menuShowProximalSynapsesNone
-        self.menuShowProximalSynapsesNone = QtWidgets.QAction(self)
-        self.menuShowProximalSynapsesNone.setText("&None")
-        self.menuShowProximalSynapsesNone.setCheckable(True)
-        self.menuShowProximalSynapsesNone.triggered.connect(self.menuShowProximalSynapses_click)
+        # menu_show_proximal_synapses_none
+        self.menu_show_proximal_synapses_none = QtWidgets.QAction(self)
+        self.menu_show_proximal_synapses_none.setText("&None")
+        self.menu_show_proximal_synapses_none.setCheckable(True)
+        self.menu_show_proximal_synapses_none.triggered.connect(self.menuShowProximalSynapses_click)
 
-        # menuShowProximalSynapsesConnected
-        self.menuShowProximalSynapsesConnected = QtWidgets.QAction(self)
-        self.menuShowProximalSynapsesConnected.setText("&Connected")
-        self.menuShowProximalSynapsesConnected.setCheckable(True)
-        self.menuShowProximalSynapsesConnected.triggered.connect(self.menuShowProximalSynapses_click)
+        # menu_show_proximal_synapses_connected
+        self.menu_show_proximal_synapses_connected = QtWidgets.QAction(self)
+        self.menu_show_proximal_synapses_connected.setText("&Connected")
+        self.menu_show_proximal_synapses_connected.setCheckable(True)
+        self.menu_show_proximal_synapses_connected.triggered.connect(self.menuShowProximalSynapses_click)
 
-        # menuShowProximalSynapsesActive
-        self.menuShowProximalSynapsesActive = QtWidgets.QAction(self)
-        self.menuShowProximalSynapsesActive.setText("&Active")
-        self.menuShowProximalSynapsesActive.setCheckable(True)
-        self.menuShowProximalSynapsesActive.triggered.connect(self.menuShowProximalSynapses_click)
+        # menu_show_proximal_synapses_active
+        self.menu_show_proximal_synapses_active = QtWidgets.QAction(self)
+        self.menu_show_proximal_synapses_active.setText("&Active")
+        self.menu_show_proximal_synapses_active.setCheckable(True)
+        self.menu_show_proximal_synapses_active.triggered.connect(self.menuShowProximalSynapses_click)
 
-        # menuShowProximalSynapsesPredicted
-        self.menuShowProximalSynapsesPredicted = QtWidgets.QAction(self)
-        self.menuShowProximalSynapsesPredicted.setText("&Predicted")
-        self.menuShowProximalSynapsesPredicted.setCheckable(True)
-        self.menuShowProximalSynapsesPredicted.triggered.connect(self.menuShowProximalSynapses_click)
+        # menu_show_proximal_synapses_predicted
+        self.menu_show_proximal_synapses_predicted = QtWidgets.QAction(self)
+        self.menu_show_proximal_synapses_predicted.setText("&Predicted")
+        self.menu_show_proximal_synapses_predicted.setCheckable(True)
+        self.menu_show_proximal_synapses_predicted.triggered.connect(self.menuShowProximalSynapses_click)
 
-        # menuShowProximalSynapsesFalselyPredicted
-        self.menuShowProximalSynapsesFalselyPredicted = QtWidgets.QAction(self)
-        self.menuShowProximalSynapsesFalselyPredicted.setText("&Falsely Predicted")
-        self.menuShowProximalSynapsesFalselyPredicted.setCheckable(True)
-        self.menuShowProximalSynapsesFalselyPredicted.triggered.connect(self.menuShowProximalSynapses_click)
+        # menu_show_proximal_synapses_falsely_predicted
+        self.menu_show_proximal_synapses_falsely_predicted = QtWidgets.QAction(self)
+        self.menu_show_proximal_synapses_falsely_predicted.setText("&Falsely Predicted")
+        self.menu_show_proximal_synapses_falsely_predicted.setCheckable(True)
+        self.menu_show_proximal_synapses_falsely_predicted.triggered.connect(self.menuShowProximalSynapses_click)
 
-        # menuShowProximalSynapses
-        self.menuShowProximalSynapses = QtWidgets.QMenu()
-        self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesNone)
-        self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesConnected)
-        self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesActive)
-        self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesPredicted)
-        self.menuShowProximalSynapses.addAction(self.menuShowProximalSynapsesFalselyPredicted)
-        self.menuShowProximalSynapses.setTitle("&Synapses")
+        # menu_show_proximal_synapses
+        self.menu_show_proximal_synapses = QtWidgets.QMenu()
+        self.menu_show_proximal_synapses.addAction(self.menu_show_proximal_synapses_none)
+        self.menu_show_proximal_synapses.addAction(self.menu_show_proximal_synapses_connected)
+        self.menu_show_proximal_synapses.addAction(self.menu_show_proximal_synapses_active)
+        self.menu_show_proximal_synapses.addAction(self.menu_show_proximal_synapses_predicted)
+        self.menu_show_proximal_synapses.addAction(self.menu_show_proximal_synapses_falsely_predicted)
+        self.menu_show_proximal_synapses.setTitle("&Synapses")
 
-        # menuShowProximal
-        self.menuShowProximal = QtWidgets.QMenu()
-        self.menuShowProximal.addMenu(self.menuShowProximalSegments)
-        self.menuShowProximal.addMenu(self.menuShowProximalSynapses)
-        self.menuShowProximal.setTitle("&Proximal")
+        # menu_show_proximal
+        self.menu_show_proximal = QtWidgets.QMenu()
+        self.menu_show_proximal.addMenu(self.menu_show_proximal_segments)
+        self.menu_show_proximal.addMenu(self.menu_show_proximal_synapses)
+        self.menu_show_proximal.setTitle("&Proximal")
 
-        # menuShowDistalSegmentsNone
-        self.menuShowDistalSegmentsNone = QtWidgets.QAction(self)
-        self.menuShowDistalSegmentsNone.setText("&None")
-        self.menuShowDistalSegmentsNone.setCheckable(True)
-        self.menuShowDistalSegmentsNone.triggered.connect(self.menuShowDistalSegments_click)
+        # menu_show_distal_segments_none
+        self.menu_show_distal_segments_none = QtWidgets.QAction(self)
+        self.menu_show_distal_segments_none.setText("&None")
+        self.menu_show_distal_segments_none.setCheckable(True)
+        self.menu_show_distal_segments_none.triggered.connect(self.menuShowDistalSegments_click)
 
-        # menuShowDistalSegmentsActive
-        self.menuShowDistalSegmentsActive = QtWidgets.QAction(self)
-        self.menuShowDistalSegmentsActive.setText("&Active")
-        self.menuShowDistalSegmentsActive.setCheckable(True)
-        self.menuShowDistalSegmentsActive.triggered.connect(self.menuShowDistalSegments_click)
+        # menu_show_distal_segments_active
+        self.menu_show_distal_segments_active = QtWidgets.QAction(self)
+        self.menu_show_distal_segments_active.setText("&Active")
+        self.menu_show_distal_segments_active.setCheckable(True)
+        self.menu_show_distal_segments_active.triggered.connect(self.menuShowDistalSegments_click)
 
-        # menuShowDistalSegments
-        self.menuShowDistalSegments = QtWidgets.QMenu()
-        self.menuShowDistalSegments.addAction(self.menuShowDistalSegmentsNone)
-        self.menuShowDistalSegments.addAction(self.menuShowDistalSegmentsActive)
-        self.menuShowDistalSegments.setTitle("&Segments")
+        # menu_show_distal_segments
+        self.menu_show_distal_segments = QtWidgets.QMenu()
+        self.menu_show_distal_segments.addAction(self.menu_show_distal_segments_none)
+        self.menu_show_distal_segments.addAction(self.menu_show_distal_segments_active)
+        self.menu_show_distal_segments.setTitle("&Segments")
 
-        # menuShowDistalSynapsesNone
-        self.menuShowDistalSynapsesNone = QtWidgets.QAction(self)
-        self.menuShowDistalSynapsesNone.setText("&None")
-        self.menuShowDistalSynapsesNone.setCheckable(True)
-        self.menuShowDistalSynapsesNone.triggered.connect(self.menuShowDistalSynapses_click)
+        # menu_show_distal_synapses_none
+        self.menu_show_distal_synapses_none = QtWidgets.QAction(self)
+        self.menu_show_distal_synapses_none.setText("&None")
+        self.menu_show_distal_synapses_none.setCheckable(True)
+        self.menu_show_distal_synapses_none.triggered.connect(self.menuShowDistalSynapses_click)
 
-        # menuShowDistalSynapsesConnected
-        self.menuShowDistalSynapsesConnected = QtWidgets.QAction(self)
-        self.menuShowDistalSynapsesConnected.setText("&Connected")
-        self.menuShowDistalSynapsesConnected.setCheckable(True)
-        self.menuShowDistalSynapsesConnected.triggered.connect(self.menuShowDistalSynapses_click)
+        # menu_show_distal_synapses_connected
+        self.menu_show_distal_synapses_connected = QtWidgets.QAction(self)
+        self.menu_show_distal_synapses_connected.setText("&Connected")
+        self.menu_show_distal_synapses_connected.setCheckable(True)
+        self.menu_show_distal_synapses_connected.triggered.connect(self.menuShowDistalSynapses_click)
 
-        # menuShowDistalSynapsesActive
-        self.menuShowDistalSynapsesActive = QtWidgets.QAction(self)
-        self.menuShowDistalSynapsesActive.setText("&Active")
-        self.menuShowDistalSynapsesActive.setCheckable(True)
-        self.menuShowDistalSynapsesActive.triggered.connect(self.menuShowDistalSynapses_click)
+        # menu_show_distal_synapses_active
+        self.menu_show_distal_synapses_active = QtWidgets.QAction(self)
+        self.menu_show_distal_synapses_active.setText("&Active")
+        self.menu_show_distal_synapses_active.setCheckable(True)
+        self.menu_show_distal_synapses_active.triggered.connect(self.menuShowDistalSynapses_click)
 
-        # menuShowDistalSynapses
-        self.menuShowDistalSynapses = QtWidgets.QMenu()
-        self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesNone)
-        self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesConnected)
-        self.menuShowDistalSynapses.addAction(self.menuShowDistalSynapsesActive)
-        self.menuShowDistalSynapses.setTitle("&Synapses")
+        # menu_show_distal_synapses
+        self.menu_show_distal_synapses = QtWidgets.QMenu()
+        self.menu_show_distal_synapses.addAction(self.menu_show_distal_synapses_none)
+        self.menu_show_distal_synapses.addAction(self.menu_show_distal_synapses_connected)
+        self.menu_show_distal_synapses.addAction(self.menu_show_distal_synapses_active)
+        self.menu_show_distal_synapses.setTitle("&Synapses")
 
-        # menuShowDistal
-        self.menuShowDistal = QtWidgets.QMenu()
-        self.menuShowDistal.addMenu(self.menuShowDistalSegments)
-        self.menuShowDistal.addMenu(self.menuShowDistalSynapses)
-        self.menuShowDistal.setTitle("&Distal")
+        # menu_show_distal
+        self.menu_show_distal = QtWidgets.QMenu()
+        self.menu_show_distal.addMenu(self.menu_show_distal_segments)
+        self.menu_show_distal.addMenu(self.menu_show_distal_synapses)
+        self.menu_show_distal.setTitle("&Distal")
 
-        # menuShow
-        self.menuShow = QtWidgets.QMenu()
-        self.menuShow.addMenu(self.menuShowBits)
-        self.menuShow.addMenu(self.menuShowCells)
-        self.menuShow.addMenu(self.menuShowProximal)
-        self.menuShow.addMenu(self.menuShowDistal)
-        self.menuShow.setTitle("&Show")
+        # menu_show
+        self.menu_show = QtWidgets.QMenu()
+        self.menu_show.addMenu(self.menu_show_bits)
+        self.menu_show.addMenu(self.menu_show_cells)
+        self.menu_show.addMenu(self.menu_show_proximal)
+        self.menu_show.addMenu(self.menu_show_distal)
+        self.menu_show.setTitle("&Show")
 
-        # menuLegend
-        self.menuLegend = QtWidgets.QAction(self)
-        self.menuLegend.setText("&Legend")
-        self.menuLegend.triggered.connect(self.menuLegend_click)
+        # menu_legend
+        self.menu_legend = QtWidgets.QAction(self)
+        self.menu_legend.setText("&Legend")
+        self.menu_legend.triggered.connect(self.menuLegend_click)
 
-        # menuSimulation
-        self.menuSimulation = QtWidgets.QMenu()
-        self.menuSimulation.addMenu(self.menuViews)
-        self.menuSimulation.addMenu(self.menuShow)
-        self.menuSimulation.addAction(self.menuLegend)
-        self.menuSimulation.setTitle("&Simulation")
+        # menu_simulation
+        self.menu_simulation = QtWidgets.QMenu()
+        self.menu_simulation.addMenu(self.menu_views)
+        self.menu_simulation.addMenu(self.menu_show)
+        self.menu_simulation.addAction(self.menu_legend)
+        self.menu_simulation.setTitle("&Simulation")
 
         # image
-        self.pivot_image = QtGui.QImage(os.path.join(Global.appPath + '/images', 'cross.png'))
+        self.pivot_image = QtGui.QImage(os.path.join(Global.app_path + '/images', 'cross.png'))
 
         # pivot
         self.pivot = QtWidgets.QLabel(self)
@@ -366,47 +368,43 @@ class Viewer3D(QtWidgets.QLabel):
         """
         Refresh controls for each time step.
         """
-        self.topRegion = top_region
+        self.top_region = top_region
 
         # Set the colors of the states.
-        self.ColorInactive = Texture3D.Gray
-        self.ColorSelected = Texture3D.Blue
-        self.ColorBitActive = Texture3D.Green
-        self.ColorBitPredicted = Texture3D.Yellow
-        self.ColorBitFalselyPredicted = Texture3D.Red
-        self.ColorCellLearning = Texture3D.GreenYellow
-        self.ColorCellActive = Texture3D.Green
-        self.ColorCellPredicted = Texture3D.Yellow
-        self.ColorCellFalselyPredicted = Texture3D.Red
-        self.ColorSegmentActive = Texture3D.Green
-        self.ColorSegmentPredicted = Texture3D.Yellow
-        self.ColorSegmentFalselyPredicted = Texture3D.Red
-        self.ColorSynapseConnected = Texture3D.Green
-        self.ColorSynapsePredicted = Texture3D.Yellow
-        self.ColorSynapseFalselyPredicted = Texture3D.Red
+        self.COLOR_INACTIVE = Texture3D.GRAY
+        self.COLOR_SELECTED = Texture3D.BLUE
+        self.COLOR_BIT_ACTIVE = Texture3D.Green
+        self.COLOR_BIT_PREDICTED = Texture3D.YELLOW
+        self.COLOR_BIT_FALSELY_PREDICTED = Texture3D.RED
+        self.COLOR_CELL_LEARNING = Texture3D.GREEN_YELLOW
+        self.COLOR_CELL_ACTIVE = Texture3D.Green
+        self.COLOR_CELL_PREDICTED = Texture3D.YELLOW
+        self.COLOR_CELL_FALSELY_PREDICTED = Texture3D.RED
+        self.COLOR_SEGMENT_ACTIVE = Texture3D.Green
+        self.COLOR_SEGMENT_PREDICTED = Texture3D.YELLOW
+        self.COLOR_SEGMENT_FALSELY_PREDICTED = Texture3D.RED
+        self.COLOR_SYNAPSE_CONNECTED = Texture3D.Green
+        self.COLOR_SYNAPSE_PREDICTED = Texture3D.YELLOW
+        self.COLOR_SYNAPSE_FALSELY_PREDICTED = Texture3D.RED
 
         # Arrange the tree once to see how big it is.
-        self.treeWidth = 0
-        self.treeHeight = 0
-        minX = 0
-        minZ = 0
-        minX, minZ = self.__arrangeNode(self.topRegion, minX, minZ)
+        self.tree_width = 0
+        self.tree_height = 0
+        self.arrangeNode(self.top_region, 0, 0)
 
-        x, y, z = self.topRegion.tree3d_pos
+        x, _, _ = self.top_region.tree3d_pos
 
         # Rearrange the tree again to center it horizontally.
-        offsetX = x
-        self.__centerNode(self.topRegion, offsetX)
+        self.centerNode(self.top_region, x)
 
         # Rearrange the tree again to invert it vertically.
-        offsetZ = 50
-        self.__invertNode(self.topRegion, offsetZ)
+        self.invertNode(self.top_region, 50)
 
         # Once we have the final position of the regions, we can calculate the position of every column and cell.
-        self.__calculateNodeElementsPosition(self.topRegion)
+        self.calculateNodeElementsPosition(self.top_region)
 
         # Draw the tree recursively from top region.
-        self.__drawNode(self.topRegion, True)
+        self.drawNode(self.top_region, True)
 
     def clear(self):
         """
@@ -418,35 +416,34 @@ class Viewer3D(QtWidgets.QLabel):
         """
         Refresh controls for each time step.
         """
-        if Global.mainForm.isRunning():
+        if Global.main_form.isRunning():
 
             # Get the image to be draw on this viewer.
             image = None
-            if Global.mainForm.state == State.Simulating:
-                texture = Global.mainForm.simulation.screen_texture
+            if Global.main_form.state == State.SIMULATING:
+                texture = Global.main_form.simulation.screen_texture
                 size = (texture.getXSize(), texture.getYSize())
                 format = "RGBA"
                 if texture.mightHaveRamImage():
                     image = Image.frombuffer(format, size, texture.getRamImageAs(format), "raw", format, 0, 0)
                 else:
                     image = Image.new(format, size)
-            elif Global.mainForm.state == State.Playbacking:
-                playback_file = os.path.join(Global.mainForm.getRecordPath(), "main_camera_" + "{:08d}".format(Global.mainForm.get_step()) + ".png")
+            elif Global.main_form.state == State.PLAYBACKING:
+                playback_file = os.path.join(Global.main_form.getRecordPath(), "main_camera_" + "{:08d}".format(Global.main_form.get_step()) + ".png")
                 if os.path.isfile(playback_file):
                     image = Image.open(playback_file)
 
             # Draw the image.
-            _image = image.toqimage()
-            self.pixel_map = QtGui.QPixmap.fromImage(_image)
+            image = image.toqimage()
+            self.pixel_map = QtGui.QPixmap.fromImage(image)
             self.adjustMouseWorkingArea()
 
     def showContextMenu(self, pos):
         """
         Event handling right-click contextMenu
         """
-
-        if Global.simulationInitialized:
-            self.menuSimulation.exec_(self.mapToGlobal(pos))
+        if Global.simulation_initialized:
+            self.menu_simulation.exec_(self.mapToGlobal(pos))
         else:
             QtWidgets.QMessageBox.information(self, "Information", "Context menu available only during the simulation.")
 
@@ -456,8 +453,7 @@ class Viewer3D(QtWidgets.QLabel):
         image_size = self.pixmap().size()
         horizontal_margin = (viewer_size.width() - image_size.width()) / 2
         vertical_margin = (viewer_size.height() - image_size.height()) / 2
-        self.mouse_working_area = (
-        horizontal_margin, vertical_margin, horizontal_margin + image_size.width(), vertical_margin + image_size.height())
+        self.mouse_working_area = (horizontal_margin, vertical_margin, horizontal_margin + image_size.width(), vertical_margin + image_size.height())
 
     def resizeEvent(self, event):
         if self.mouse_working_area is not None:
@@ -469,7 +465,7 @@ class Viewer3D(QtWidgets.QLabel):
         key_pressed = event.key()
 
         # Check if key is in the user's key map an then call associated function
-        for k, value in Global.mainForm.simulation.key_map.items():
+        for k, value in Global.main_form.simulation.key_map.items():
             if "-" in k:
                 [key_ascii, key_state] = k.split("-")
             else:
@@ -481,7 +477,7 @@ class Viewer3D(QtWidgets.QLabel):
                 break
 
     def isSimulating(self):
-        return (Global.mainForm.state == State.Simulating and not Global.mainForm.paused) and Global.mainForm.simulation is not None
+        return (Global.main_form.state == State.SIMULATING and not Global.main_form.paused) and Global.main_form.simulation is not None
 
     def keyPressEvent(self, event):
         if self.isSimulating():
@@ -506,7 +502,7 @@ class Viewer3D(QtWidgets.QLabel):
 
     def mouseDoubleClickEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.LeftButton:
-            Global.mainForm.simulation.resetCamera()
+            Global.main_form.simulation.resetCamera()
 
     def mouseMoveEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None:
@@ -530,11 +526,11 @@ class Viewer3D(QtWidgets.QLabel):
             height = yn - y0
 
             # Transform coordinates from PyQt (0, n) to Panda (-1, 1)
-            Global.mainForm.simulation.mouse_x = pyqtToPanda(x, width)
-            Global.mainForm.simulation.mouse_y = pyqtToPanda(y, height) * (-1)
+            Global.main_form.simulation.mouse_x = pyqtToPanda(x, width)
+            Global.main_form.simulation.mouse_y = pyqtToPanda(y, height) * (-1)
 
             # Pass the movement commands to Panda
-            if self.mouse_inside_working_area and Global.mainForm.simulation.mouse_feature == "":
+            if self.mouse_inside_working_area and Global.main_form.simulation.mouse_feature == "":
                 feature = ""
                 if event.buttons() == QtCore.Qt.LeftButton:
                     feature = "rotate"
@@ -543,53 +539,51 @@ class Viewer3D(QtWidgets.QLabel):
                 if feature != "":
                     start_fn = self.createStartMouseWorkFn(self.width() / 2, self.height() / 2)
                     stop_fn = self.createStopMouseWorkFn()
-                    Global.mainForm.simulation.startMouseWork(feature, start_fn, stop_fn)
+                    Global.main_form.simulation.startMouseWork(feature, start_fn, stop_fn)
 
     def mousePressEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.RightButton:
             self.showContextMenu(event.pos())
 
     def mouseReleaseEvent(self, event):
-        if self.isSimulating() and Global.mainForm.simulation.mouse_feature != "":
-            Global.mainForm.simulation.stopMouseWork()
+        if self.isSimulating() and Global.main_form.simulation.mouse_feature != "":
+            Global.main_form.simulation.stopMouseWork()
 
     def wheelEvent(self, event):
         if self.isSimulating()and self.mouse_inside_working_area:
             mouse_pos = event.pos()
             start_fn = self.createStartMouseWorkFn(mouse_pos.x(), mouse_pos.y())
             stop_fn = self.createStopMouseWorkFn()
-            Global.mainForm.simulation.startMouseWork("zoom", start_fn, stop_fn)
-            Global.mainForm.simulation.mouse_steps = event.angleDelta().y()
+            Global.main_form.simulation.startMouseWork("zoom", start_fn, stop_fn)
+            Global.main_form.simulation.mouse_steps = event.angleDelta().y()
 
     def updateElements3d(self):
         """
         Refresh controls for each time step.
         """
-
-        if Global.simulationInitialized:
+        if Global.simulation_initialized:
             # Draw the tree recursively from top region.
-            self.__drawNode(self.topRegion, False)
+            self.drawNode(self.top_region, False)
 
-    def __centerNode(self, node, offsetX):
+    def centerNode(self, node, offset_x):
         """
         Rearrange the node in order to tree is in the center (0, 0, 0) of the scene.
         """
-
         x, y, z = node.tree3d_pos
-        node.tree3d_pos = (x - offsetX, y, z)
+        node.tree3d_pos = (x - offset_x, y, z)
         for feeder in Global.project.network.getFeederNodes(node):
-            self.__centerNode(feeder, offsetX)
+            self.centerNode(feeder, offset_x)
 
-    def __invertNode(self, node, offsetZ):
+    def invertNode(self, node, offset_z):
         """
         Rearrange the node in order to tree is inverted from top to bottom.
         """
         x, y, z = node.tree3d_pos
-        node.tree3d_pos = (x, y, offsetZ - z)
+        node.tree3d_pos = (x, y, offset_z - z)
         for feeder in Global.project.network.getFeederNodes(node):
-            self.__invertNode(feeder, offsetZ)
+            self.invertNode(feeder, offset_z)
 
-    def __calculateNodeElementsPosition(self, node):
+    def calculateNodeElementsPosition(self, node):
         """
         Calculate the position of columns and cells of this node.
         """
@@ -599,241 +593,241 @@ class Viewer3D(QtWidgets.QLabel):
         x0 = (node.width / 2) * (-1)
         y0 = (node.height / 2) * (-1)
 
-        xNode, yNode, zNode = node.tree3d_pos
+        x_node, y_node, z_node = node.tree3d_pos
 
         # Calculate the absolute position of each column
         for y in range(node.height):
             for x in range(node.width):
                 # The absolute X is calculated by multiply its relative position with offset
-                xCol = xNode + ((x0 + x) * self.offsetColumns)
+                x_col = x_node + ((x0 + x) * self.offset_columns)
 
                 # The absolute Y is calculated by multiply its relative position with offset
-                yCol = yNode + ((y0 + y) * self.offsetColumns)
+                y_col = y_node + ((y0 + y) * self.offset_columns)
 
                 # Calculate positions of the columns of cells if node is a region
                 # or input bits if node is a sensor
-                zCol = zNode
+                z_col = z_node
 
-                if node.type == NodeType.region:
+                if node.type == NodeType.REGION:
                     column = node.getColumn(x, y)
-                    column.tree3d_pos = (xCol, yCol, zCol)
+                    column.tree3d_pos = (x_col, y_col, z_col)
 
                     # The proximal segment transverse all cells on this column
-                    column.segment.tree3d_start_pos = (xCol, yCol, zCol + ((node.numCellsPerColumn - 1) * self.offsetCells))
-                    column.segment.tree3d_end_pos = (xCol, yCol, zCol - self.offsetCells)    # Segment down towards to feeder nodes
+                    column.segment.tree3d_start_pos = (x_col, y_col, z_col + ((node.cells_per_column - 1) * self.offset_cells))
+                    column.segment.tree3d_end_pos = (x_col, y_col, z_col - self.offset_cells)    # Segment down towards to feeder nodes
 
                     # Calculate the absolute position of each cell
                     for z in range(len(column.cells)):
                         # The absolute Z is calculated by multiply its relative position with offset
                         cell = column.getCell(z)
-                        cell.tree3d_pos = (xCol, yCol, zCol + (z * self.offsetCells))
+                        cell.tree3d_pos = (x_col, y_col, z_col + (z * self.offset_cells))
                 else:
                     bit = node.getBit(x, y)
-                    bit.tree3d_pos = (xCol, yCol, zCol)
+                    bit.tree3d_pos = (x_col, y_col, z_col)
 
         # Perform the same actions for the lower nodes that feed this node
         for feeder in Global.project.network.getFeederNodes(node):
-            self.__calculateNodeElementsPosition(feeder)
+            self.calculateNodeElementsPosition(feeder)
 
-    def __arrangeNode(self, node, minX, minZ):
+    def arrangeNode(self, node, min_x, min_z):
         """
         Arrange the node and the lower nodes that feed it in the allowed area.
-        Set minX to indicate the right edge of our subtree.
-        Set minZ to indicate the bottom edge of our subtree.
+        Set min_x to indicate the right edge of our subtree.
+        Set min_z to indicate the bottom edge of our subtree.
         """
 
         # See how big this node is.
-        width = node.width * self.offsetColumns
+        width = node.width * self.offset_columns
         height = node.height
-        if node.type == NodeType.region:
-            depth = node.numCellsPerColumn * self.offsetCells
+        if node.type == NodeType.REGION:
+            depth = node.cells_per_column * self.offset_cells
         else:
-            depth = self.offsetCells
+            depth = self.offset_cells
 
         # Recursively arrange the lower nodes that feed this node,
         # allowing room for this node.
-        x = minX
-        biggestMinZ = minZ + depth
-        subtreeMinZ = minZ + depth + self.offsetVerticalNodes
-        numFeeders = 0
+        x = min_x
+        biggest_min_z = min_z + depth
+        subtree_min_z = min_z + depth + self.offset_vertical_nodes
+        feeders_count = 0
         for feeder in Global.project.network.getFeederNodes(node):
             # Arrange this feeder's subtree.
-            feederMinZ = subtreeMinZ
-            x, feederMinZ = self.__arrangeNode(feeder, x, feederMinZ)
+            feeder_min_z = subtree_min_z
+            x, feeder_min_z = self.arrangeNode(feeder, x, feeder_min_z)
 
-            # See if this increases the biggest minZ value.
-            if biggestMinZ < feederMinZ:
-                biggestMinZ = feederMinZ
+            # See if this increases the biggest min_z value.
+            if biggest_min_z < feeder_min_z:
+                biggest_min_z = feeder_min_z
 
             # Allow room before the next sibling.
-            x += self.offsetHorizontalNodes
+            x += self.offset_horizontal_nodes
 
-            numFeeders += 1
+            feeders_count += 1
 
         # Remove the spacing after the last feeder.
-        if numFeeders > 0:
-            x -= self.offsetHorizontalNodes
+        if feeders_count > 0:
+            x -= self.offset_horizontal_nodes
 
         # See if this node is wider than the subtree under it.
-        subtreeWidth = x - minX
-        if width > subtreeWidth:
+        subtree_width = x - min_x
+        if width > subtree_width:
             # Center the subtree under this node.
             # Make the lower nodes that feed this node rearrange themselves
             # moved to center their subtrees.
-            x = minX + (width - subtreeWidth) / 2
+            x = min_x + (width - subtree_width) / 2
             for feeder in Global.project.network.getFeederNodes(node):
                 # Arrange this feeder's subtree.
-                x, subtreeMinZ = self.__arrangeNode(feeder, x, subtreeMinZ)
+                x, subtree_min_z = self.arrangeNode(feeder, x, subtree_min_z)
 
                 # Allow room before the next sibling.
-                x += self.offsetHorizontalNodes
+                x += self.offset_horizontal_nodes
 
             # The subtree's width is this node's width.
-            subtreeWidth = width
+            subtree_width = width
 
         # Set this node's center position.
-        node.tree3d_pos = (minX + (subtreeWidth / 2), 0, minZ + (depth / 2))
+        node.tree3d_pos = (min_x + (subtree_width / 2), 0, min_z + (depth / 2))
 
-        # Increase minX to allow room for the subtree before returning.
-        minX += subtreeWidth
+        # Increase min_x to allow room for the subtree before returning.
+        min_x += subtree_width
 
-        if subtreeWidth > self.treeWidth:
-            self.treeWidth = subtreeWidth
+        if subtree_width > self.tree_width:
+            self.tree_width = subtree_width
 
-        if height > self.treeHeight:
-            self.treeHeight = height
+        if height > self.tree_height:
+            self.tree_height = height
 
-        # Set the return value for minZ.
-        minZ = biggestMinZ
+        # Set the return value for min_z.
+        min_z = biggest_min_z
 
-        return minX, minZ
+        return min_x, min_z
 
-    def __drawNode(self, node, initialize):
+    def drawNode(self, node, initialize):
         """
         Draw the nodes for the subtree rooted at this node.
         """
 
         # Recursively make the node draw its feeders.
         for feeder in Global.project.network.getFeederNodes(node):
-            self.__drawNode(feeder, initialize)
+            self.drawNode(feeder, initialize)
 
         # Draw a column of cells if node is a region
         # or an input bit if node is a sensor
-        if node.type == NodeType.region:
+        if node.type == NodeType.REGION:
             for column in node.columns:
                 if initialize:
                     for cell in column.cells:
                         cell.tree3d_initialized = False
-                self.__drawColumn(column)
+                self.drawColumn(column)
         else:
             for bit in node.bits:
                 if initialize:
                     bit.tree3d_initialized = False
-                self.__drawBit(bit)
+                self.drawBit(bit)
 
-    def __drawBit(self, bit):
+    def drawBit(self, bit):
 
         # Update properties according to state
-        isVisible = True
-        if self.menuShowBitsNone.isChecked():
-            isVisible = False
-        elif bit.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsFalselyPredicted.isChecked():
-            color = self.ColorBitFalselyPredicted
-        elif bit.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowBitsPredicted.isChecked():
-            color = self.ColorBitPredicted
-        elif bit.isActive.atGivenStepAgo(Global.selStep) and self.menuShowBitsActive.isChecked():
-            color = self.ColorBitActive
+        is_visible = True
+        if self.menu_show_bits_none.isChecked():
+            is_visible = False
+        elif bit.is_falsely_predicted.atGivenStepAgo(Global.sel_step) and self.menu_show_bits_falsely_predicted.isChecked():
+            color = self.COLOR_BIT_FALSELY_PREDICTED
+        elif bit.is_predicted.atGivenStepAgo(Global.sel_step) and self.menu_show_bits_predicted.isChecked():
+            color = self.COLOR_BIT_PREDICTED
+        elif bit.is_active.atGivenStepAgo(Global.sel_step) and self.menu_show_bits_active.isChecked():
+            color = self.COLOR_BIT_ACTIVE
         else:
-            color = self.ColorInactive
+            color = self.COLOR_INACTIVE
 
-        if isVisible:
+        if is_visible:
             # Draw the input bit
             if not bit.tree3d_initialized:
-                bit.tree3d_item_np = Global.mainForm.simulation.createBit(bit.tree3d_pos)
+                bit.tree3d_item_np = Global.main_form.simulation.createBit(bit.tree3d_pos)
                 bit.tree3d_initialized = True
 
             # Update the color
             if bit.tree3d_selected:
-                color = self.ColorSelected
+                color = self.COLOR_SELECTED
             bit.tree3d_item_np.setTexture(color)
 
         if bit.tree3d_item_np != None:
-            bit.tree3d_item_np.show() if isVisible else bit.tree3d_item_np.hide()
+            bit.tree3d_item_np.show() if is_visible else bit.tree3d_item_np.hide()
 
-    def __drawColumn(self, column):
+    def drawColumn(self, column):
 
         # Update proximal segment
-        self.__drawSegment(column.segment)
+        self.drawSegment(column.segment)
         for cell in column.cells:
-            self.__drawCell(cell)
+            self.drawCell(cell)
 
-    def __drawCell(self, cell):
+    def drawCell(self, cell):
 
         # Update properties according to state
-        isVisible = True
-        if self.menuShowCellsNone.isChecked():
-            isVisible = False
-        elif cell.isFalselyPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsFalselyPredicted.isChecked():
-            color = self.ColorCellFalselyPredicted
-        elif cell.isPredicted.atGivenStepAgo(Global.selStep) and self.menuShowCellsPredicted.isChecked():
-            color = self.ColorCellPredicted
-        elif cell.isLearning.atGivenStepAgo(Global.selStep) and self.menuShowCellsLearning.isChecked():
-            color = self.ColorCellLearning
-        elif cell.isActive.atGivenStepAgo(Global.selStep) and self.menuShowCellsActive.isChecked():
-            color = self.ColorCellActive
-        elif self.menuShowCellsInactive.isChecked():
-            color = self.ColorInactive
+        is_visible = True
+        if self.menu_show_cells_none.isChecked():
+            is_visible = False
+        elif cell.is_falsely_predicted.atGivenStepAgo(Global.sel_step) and self.menu_show_cells_falsely_predicted.isChecked():
+            color = self.COLOR_CELL_FALSELY_PREDICTED
+        elif cell.is_predicted.atGivenStepAgo(Global.sel_step) and self.menu_show_cells_predicted.isChecked():
+            color = self.COLOR_CELL_PREDICTED
+        elif cell.is_learning.atGivenStepAgo(Global.sel_step) and self.menu_show_cells_learning.isChecked():
+            color = self.COLOR_CELL_LEARNING
+        elif cell.is_active.atGivenStepAgo(Global.sel_step) and self.menu_show_cells_active.isChecked():
+            color = self.COLOR_CELL_ACTIVE
+        elif self.menu_show_cells_inactive.isChecked():
+            color = self.COLOR_INACTIVE
         else:
-            isVisible = False
+            is_visible = False
 
-        if isVisible:
+        if is_visible:
             # Draw the cell
             if not cell.tree3d_initialized:
-                cell.tree3d_item_np = Global.mainForm.simulation.createCell(cell.tree3d_pos)
+                cell.tree3d_item_np = Global.main_form.simulation.createCell(cell.tree3d_pos)
                 cell.tree3d_initialized = True
 
             # Update the color
             if cell.tree3d_selected:
-                color = self.ColorSelected
+                color = self.COLOR_SELECTED
             cell.tree3d_item_np.setTexture(color)
 
         if cell.tree3d_item_np != None:
-            cell.tree3d_item_np.show() if isVisible else cell.tree3d_item_np.hide()
+            cell.tree3d_item_np.show() if is_visible else cell.tree3d_item_np.hide()
 
         # Draw/update all distal segments
         for segment in cell.segments:
             segment.tree3d_start_pos = cell.tree3d_pos
-            segment.tree3d_end_pos = self.__calculateSegmentEndPos(segment, segment.tree3d_start_pos)
-            self.__drawSegment(segment)
+            segment.tree3d_end_pos = self.calculateSegmentEndPos(segment, segment.tree3d_start_pos)
+            self.drawSegment(segment)
 
-    def __calculateSegmentEndPos(self, segment, start_pos):
+    def calculateSegmentEndPos(self, segment, start_pos):
         """
         Calculates an average position of the segment's end through their synapses' end positions.
         """
-        xSeg1, ySeg1, zSeg1 = start_pos
+        x_seg1, y_seg1, z_seg1 = start_pos
 
-        sumK = 0.
-        numXBelow = 0
-        numXAbove = 0
+        sum_k = 0.0
+        num_x_below = 0
+        num_x_above = 0
         for synapse in segment.synapses:
-            xSyn, ySyn, zSyn = synapse.inputElem.tree3d_pos
+            x_syn, y_syn, z_syn = synapse.input_elem.tree3d_pos
 
             # Calculate 'k' (slope) of the straight line representing this synapse
-            deltaY = ySyn - ySeg1
-            deltaX = xSyn - xSeg1
-            if deltaX != 0:
-                k = float(deltaY / deltaX)
+            delta_y = y_syn - y_seg1
+            delta_x = x_syn - x_seg1
+            if delta_x != 0:
+                k = float(delta_y / delta_x)
             else:
                 k = 3
-            sumK += k
+            sum_k += k
 
-            if xSyn >= xSeg1:
-                numXAbove += 1
+            if x_syn >= x_seg1:
+                num_x_above += 1
             else:
-                numXBelow += 1
+                num_x_below += 1
 
         # Calculate direction of the straight line with base on the number of synapses X's below or above the segment X's
-        if numXAbove >= numXBelow:
+        if num_x_above >= num_x_below:
             direction = 1
         else:
             direction = -1
@@ -842,314 +836,288 @@ class Viewer3D(QtWidgets.QLabel):
         # It is an average value among the 'k' of the synapses
         k = 0
         if len(segment.synapses) > 0:
-            k = int(sumK / len(segment.synapses))
+            k = int(sum_k / len(segment.synapses))
 
         # Find the 'b' of the straight line equation using 'k' and segment's start position:
         #    y = ax + b (where 'a' = 'k')
-        b = ySeg1 - (k * xSeg1)
+        b = y_seg1 - (k * x_seg1)
 
         # Calculate the segment's end position
         # TODO: Optimize this routine, i.e. discard loop to find max value
-        maxX = xSeg1 + ((self.offsetColumns / 3) * direction)
-        maxY = ySeg1 + ((self.offsetColumns / 3) * direction)
-        incX = (self.offsetColumns / 10) * direction
-        xSeg2 = xSeg1
+        max_x = x_seg1 + ((self.offset_columns / 3) * direction)
+        max_y = y_seg1 + ((self.offset_columns / 3) * direction)
+        inc_x = (self.offset_columns / 10) * direction
+        x_seg2 = x_seg1
         while True:
-            ySeg2 = (xSeg2 * k) + b
-            if ((xSeg2 <= maxX or ySeg2 <= maxY) and direction < 0) or ((xSeg2 >= maxX or ySeg2 >= maxY) and direction > 0):
+            y_seg2 = (x_seg2 * k) + b
+            if ((x_seg2 <= max_x or y_seg2 <= max_y) and direction < 0) or ((x_seg2 >= max_x or y_seg2 >= max_y) and direction > 0):
                 break
-            xSeg2 += incX
-        zSeg2 = zSeg1
+            x_seg2 += inc_x
+        z_seg2 = z_seg1
 
-        return int(xSeg2), int(ySeg2), zSeg2
+        return int(x_seg2), int(y_seg2), z_seg2
 
-    def __drawSegment(self, segment):
+    def drawSegment(self, segment):
 
         # Update properties according to state
-        isVisible = True
-        if segment.isRemoved.atGivenStepAgo(Global.selStep) or (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsNone.isChecked()):
-            isVisible = False
+        is_visible = True
+        if segment.is_removed.atGivenStepAgo(Global.sel_step) or (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_segments_none.isChecked()) or (segment.type == SegmentType.DISTAL and self.menu_show_distal_segments_none.isChecked()):
+            is_visible = False
         else:
-            if segment.isFalselyPredicted.atGivenStepAgo(Global.selStep):
-                if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsFalselyPredicted.isChecked():
-                    color = self.ColorSegmentFalselyPredicted
+            if segment.is_falsely_predicted.atGivenStepAgo(Global.sel_step):
+                if segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_segments_falsely_predicted.isChecked():
+                    color = self.COLOR_SEGMENT_FALSELY_PREDICTED
                 else:
-                    isVisible = False
-            elif segment.isPredicted.atGivenStepAgo(Global.selStep):
-                if segment.type == SegmentType.proximal and self.menuShowProximalSegmentsPredicted.isChecked():
-                    color = self.ColorSegmentPredicted
+                    is_visible = False
+            elif segment.is_predicted.atGivenStepAgo(Global.sel_step):
+                if segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_segments_predicted.isChecked():
+                    color = self.COLOR_SEGMENT_PREDICTED
                 else:
-                    isVisible = False
-            elif segment.isActive.atGivenStepAgo(Global.selStep):
-                if (segment.type == SegmentType.proximal and self.menuShowProximalSegmentsActive.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSegmentsActive.isChecked()):
-                    color = self.ColorSegmentActive
+                    is_visible = False
+            elif segment.is_active.atGivenStepAgo(Global.sel_step):
+                if (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_segments_active.isChecked()) or (segment.type == SegmentType.DISTAL and self.menu_show_distal_segments_active.isChecked()):
+                    color = self.COLOR_SEGMENT_ACTIVE
                 else:
-                    isVisible = False
+                    is_visible = False
             else:
-                if segment.type == SegmentType.proximal:
-                    color = self.ColorInactive
+                if segment.type == SegmentType.PROXIMAL:
+                    color = self.COLOR_INACTIVE
                 else:
-                    isVisible = False
+                    is_visible = False
 
-        if isVisible:
+        if is_visible:
             # Draw the segment
             if not segment.tree3d_initialized:
-                segment.tree3d_item_np = Global.mainForm.simulation.createSegment(segment.tree3d_start_pos, segment.tree3d_end_pos)
+                segment.tree3d_item_np = Global.main_form.simulation.createSegment(segment.tree3d_start_pos, segment.tree3d_end_pos)
                 segment.tree3d_initialized = True
 
             # Update the color
             if segment.tree3d_selected:
-                color = self.ColorSelected
+                color = self.COLOR_SELECTED
             segment.tree3d_item_np.setTexture(color)
         else:
             segment.tree3d_initialized = False
             if segment.tree3d_item_np is not None:
-                Global.mainForm.simulation.removeElement(segment.tree3d_item_np)
+                Global.main_form.simulation.removeElement(segment.tree3d_item_np)
 
         # Draw/update all synapses of this segment
         for synapse in segment.synapses:
-            self.__drawSynapse(segment, synapse, isVisible)
+            self.drawSynapse(segment, synapse, is_visible)
 
-    def __drawSynapse(self, segment, synapse, segmentIsVisible):
+    def drawSynapse(self, segment, synapse, segment_is_visible):
 
         # Update properties according to state
-        isVisible = True
-        if synapse.isRemoved.atGivenStepAgo(Global.selStep) or (not segment.isActive.atGivenStepAgo(Global.selStep) and not segment.isPredicted.atGivenStepAgo(Global.selStep) and not segment.isFalselyPredicted.atGivenStepAgo(Global.selStep)) or (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesNone.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesNone.isChecked()):
-            isVisible = False
+        is_visible = True
+        if synapse.is_removed.atGivenStepAgo(Global.sel_step) or (not segment.is_active.atGivenStepAgo(Global.sel_step) and not segment.is_predicted.atGivenStepAgo(Global.sel_step) and not segment.is_falsely_predicted.atGivenStepAgo(Global.sel_step)) or (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_synapses_none.isChecked()) or (segment.type == SegmentType.DISTAL and self.menu_show_distal_synapses_none.isChecked()):
+            is_visible = False
         else:
-            if synapse.isFalselyPredicted.atGivenStepAgo(Global.selStep):
-                if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesFalselyPredicted.isChecked()):
-                    color = self.ColorSynapseFalselyPredicted
+            if synapse.is_falsely_predicted.atGivenStepAgo(Global.sel_step):
+                if (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_synapses_falsely_predicted.isChecked()):
+                    color = self.COLOR_SYNAPSE_FALSELY_PREDICTED
                 else:
-                    isVisible = False
-            elif synapse.isPredicted.atGivenStepAgo(Global.selStep):
-                if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesPredicted.isChecked()):
-                    color = self.ColorSynapsePredicted
+                    is_visible = False
+            elif synapse.is_predicted.atGivenStepAgo(Global.sel_step):
+                if (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_synapses_predicted.isChecked()):
+                    color = self.COLOR_SYNAPSE_PREDICTED
                 else:
-                    isVisible = False
-            elif synapse.isConnected.atGivenStepAgo(Global.selStep):
-                if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesConnected.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesConnected.isChecked()):
-                    color = self.ColorSynapseConnected
+                    is_visible = False
+            elif synapse.is_connected.atGivenStepAgo(Global.sel_step):
+                if (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_synapses_connected.isChecked()) or (segment.type == SegmentType.DISTAL and self.menu_show_distal_synapses_connected.isChecked()):
+                    color = self.COLOR_SYNAPSE_CONNECTED
                 else:
-                    isVisible = False
+                    is_visible = False
             else:
-                if (segment.type == SegmentType.proximal and self.menuShowProximalSynapsesActive.isChecked()) or (segment.type == SegmentType.distal and self.menuShowDistalSynapsesActive.isChecked()):
-                    color = self.ColorInactive
+                if (segment.type == SegmentType.PROXIMAL and self.menu_show_proximal_synapses_active.isChecked()) or (segment.type == SegmentType.DISTAL and self.menu_show_distal_synapses_active.isChecked()):
+                    color = self.COLOR_INACTIVE
                 else:
-                    isVisible = False
+                    is_visible = False
 
-        if isVisible and segmentIsVisible:
+        if is_visible and segment_is_visible:
             # Draw the synapse
             if not synapse.tree3d_initialized:
-                synapse.tree3d_item_np = Global.mainForm.simulation.createSynapse(segment.tree3d_end_pos, synapse.inputElem.tree3d_pos)
+                synapse.tree3d_item_np = Global.main_form.simulation.createSynapse(segment.tree3d_end_pos, synapse.input_elem.tree3d_pos)
                 synapse.tree3d_initialized = True
 
             # Update the color
             if synapse.tree3d_selected:
-                color = self.ColorSelected
+                color = self.COLOR_SELECTED
             synapse.tree3d_item_np.setTexture(color)
         else:
             synapse.tree3d_initialized = False
             if synapse.tree3d_item_np is not None:
-                Global.mainForm.simulation.removeElement(synapse.tree3d_item_np)
+                Global.main_form.simulation.removeElement(synapse.tree3d_item_np)
 
-    def selectView(self, viewMenu):
+    def selectView(self, view):
         """
         Load a pre-defined view and refresh controls.
         """
 
-        if self.selectedViewMenu != None:
-            self.selectedViewMenu.setChecked(False)
-        self.selectedViewMenu = viewMenu
-        self.selectedViewMenu.setChecked(True)
+        if self.selected_view != None:
+            self.selected_view['menu'].setChecked(False)
+        self.selected_view = view
+        self.selected_view['menu'].setChecked(True)
 
-        # Find the specified view in the views list
-        for view in Global.views:
-            if view.menu == viewMenu:
+        # Update menus
+        self.menu_show_bits_none.setChecked(view['show_bits_none'])
+        self.menu_show_bits_active.setChecked(view['show_bits_active'])
+        self.menu_show_bits_predicted.setChecked(view['show_bits_predicted'])
+        self.menu_show_bits_falsely_predicted.setChecked(view['show_bits_falsely_predicted'])
+        self.menu_show_cells_none.setChecked(view['show_cells_none'])
+        self.menu_show_cells_learning.setChecked(view['show_cells_learning'])
+        self.menu_show_cells_active.setChecked(view['show_cells_active'])
+        self.menu_show_cells_predicted.setChecked(view['show_cells_predicted'])
+        self.menu_show_cells_falsely_predicted.setChecked(view['show_cells_falsely_predicted'])
+        self.menu_show_cells_inactive.setChecked(view['show_cells_inactive'])
+        self.menu_show_proximal_segments_none.setChecked(view['show_proximal_segments_none'])
+        self.menu_show_proximal_segments_active.setChecked(view['show_proximal_segments_active'])
+        self.menu_show_proximal_segments_predicted.setChecked(view['show_proximal_segments_predicted'])
+        self.menu_show_proximal_segments_falsely_predicted.setChecked(view['show_proximal_segments_falsely_predicted'])
+        self.menu_show_proximal_synapses_none.setChecked(view['show_proximal_synapses_none'])
+        self.menu_show_proximal_synapses_connected.setChecked(view['show_proximal_synapses_connected'])
+        self.menu_show_proximal_synapses_active.setChecked(view['show_proximal_synapses_active'])
+        self.menu_show_proximal_synapses_predicted.setChecked(view['show_proximal_synapses_predicted'])
+        self.menu_show_proximal_synapses_falsely_predicted.setChecked(view['show_proximal_synapses_falsely_predicted'])
+        self.menu_show_distal_segments_none.setChecked(view['show_distal_segments_none'])
+        self.menu_show_distal_segments_active.setChecked(view['show_distal_segments_active'])
+        self.menu_show_distal_synapses_none.setChecked(view['show_distal_synapses_none'])
+        self.menu_show_distal_synapses_connected.setChecked(view['show_distal_synapses_connected'])
+        self.menu_show_distal_synapses_active.setChecked(view['show_distal_synapses_active'])
 
-                # Update menus
-                self.menuShowBitsNone.setChecked(view.showBitsNone)
-                self.menuShowBitsActive.setChecked(view.showBitsActive)
-                self.menuShowBitsPredicted.setChecked(view.showBitsPredicted)
-                self.menuShowBitsFalselyPredicted.setChecked(view.showBitsFalselyPredicted)
-                self.menuShowCellsNone.setChecked(view.showCellsNone)
-                self.menuShowCellsLearning.setChecked(view.showCellsLearning)
-                self.menuShowCellsActive.setChecked(view.showCellsActive)
-                self.menuShowCellsPredicted.setChecked(view.showCellsPredicted)
-                self.menuShowCellsFalselyPredicted.setChecked(view.showCellsFalselyPredicted)
-                self.menuShowCellsInactive.setChecked(view.showCellsInactive)
-                self.menuShowProximalSegmentsNone.setChecked(view.showProximalSegmentsNone)
-                self.menuShowProximalSegmentsActive.setChecked(view.showProximalSegmentsActive)
-                self.menuShowProximalSegmentsPredicted.setChecked(view.showProximalSegmentsPredicted)
-                self.menuShowProximalSegmentsFalselyPredicted.setChecked(view.showProximalSegmentsFalselyPredicted)
-                self.menuShowProximalSynapsesNone.setChecked(view.showProximalSynapsesNone)
-                self.menuShowProximalSynapsesConnected.setChecked(view.showProximalSynapsesConnected)
-                self.menuShowProximalSynapsesActive.setChecked(view.showProximalSynapsesActive)
-                self.menuShowProximalSynapsesPredicted.setChecked(view.showProximalSynapsesPredicted)
-                self.menuShowProximalSynapsesFalselyPredicted.setChecked(view.showProximalSynapsesFalselyPredicted)
-                self.menuShowDistalSegmentsNone.setChecked(view.showDistalSegmentsNone)
-                self.menuShowDistalSegmentsActive.setChecked(view.showDistalSegmentsActive)
-                self.menuShowDistalSynapsesNone.setChecked(view.showDistalSynapsesNone)
-                self.menuShowDistalSynapsesConnected.setChecked(view.showDistalSynapsesConnected)
-                self.menuShowDistalSynapsesActive.setChecked(view.showDistalSynapsesActive)
-
-                # Update simulation
-                self.updateElements3d()
-
-                break
+        # Update simulation
+        self.updateElements3d()
 
         # Disable change options for the 'Default' view
-        defaultViewSelected = False
-        if self.selectedViewMenu == self.defaultViewMenu:
-            defaultViewSelected = True
-        self.menuViewsSave.setEnabled(not defaultViewSelected)
-        self.menuViewsDelete.setEnabled(not defaultViewSelected)
+        default_view_selected = False
+        if self.selected_view == self.default_view:
+            default_view_selected = True
+        self.menu_views_save.setEnabled(not default_view_selected)
+        self.menu_views_delete.setEnabled(not default_view_selected)
 
     def menuLegend_click(self, event):
-        simulationLegendForm = SimulationLegendForm()
-        simulationLegendForm.exec_()
+        simulation_legend_form = SimulationLegendForm()
+        simulation_legend_form.exec_()
 
     def menuShowBits_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowBitsNone:
-            if self.menuShowBitsNone.isChecked():
-                self.menuShowBitsActive.setChecked(False)
-                self.menuShowBitsPredicted.setChecked(False)
-                self.menuShowBitsFalselyPredicted.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_bits_none:
+            if self.menu_show_bits_none.isChecked():
+                self.menu_show_bits_active.setChecked(False)
+                self.menu_show_bits_predicted.setChecked(False)
+                self.menu_show_bits_falsely_predicted.setChecked(False)
         else:
-            self.menuShowBitsNone.setChecked(False)
-
+            self.menu_show_bits_none.setChecked(False)
         self.updateElements3d()
 
     def menuShowCells_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowCellsNone:
-            if self.menuShowCellsNone.isChecked():
-                self.menuShowCellsLearning.setChecked(False)
-                self.menuShowCellsActive.setChecked(False)
-                self.menuShowCellsPredicted.setChecked(False)
-                self.menuShowCellsFalselyPredicted.setChecked(False)
-                self.menuShowCellsInactive.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_cells_none:
+            if self.menu_show_cells_none.isChecked():
+                self.menu_show_cells_learning.setChecked(False)
+                self.menu_show_cells_active.setChecked(False)
+                self.menu_show_cells_predicted.setChecked(False)
+                self.menu_show_cells_falsely_predicted.setChecked(False)
+                self.menu_show_cells_inactive.setChecked(False)
         else:
-            self.menuShowCellsNone.setChecked(False)
-
+            self.menu_show_cells_none.setChecked(False)
         self.updateElements3d()
 
     def menuShowProximalSegments_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowProximalSegmentsNone:
-            if self.menuShowProximalSegmentsNone.isChecked():
-                self.menuShowProximalSegmentsActive.setChecked(False)
-                self.menuShowProximalSegmentsPredicted.setChecked(False)
-                self.menuShowProximalSegmentsFalselyPredicted.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_proximal_segments_none:
+            if self.menu_show_proximal_segments_none.isChecked():
+                self.menu_show_proximal_segments_active.setChecked(False)
+                self.menu_show_proximal_segments_predicted.setChecked(False)
+                self.menu_show_proximal_segments_falsely_predicted.setChecked(False)
         else:
-            self.menuShowProximalSegmentsNone.setChecked(False)
-
+            self.menu_show_proximal_segments_none.setChecked(False)
         self.updateElements3d()
 
     def menuShowProximalSynapses_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowProximalSynapsesNone:
-            if self.menuShowProximalSynapsesNone.isChecked():
-                self.menuShowProximalSynapsesConnected.setChecked(False)
-                self.menuShowProximalSynapsesActive.setChecked(False)
-                self.menuShowProximalSynapsesPredicted.setChecked(False)
-                self.menuShowProximalSynapsesFalselyPredicted.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_proximal_synapses_none:
+            if self.menu_show_proximal_synapses_none.isChecked():
+                self.menu_show_proximal_synapses_connected.setChecked(False)
+                self.menu_show_proximal_synapses_active.setChecked(False)
+                self.menu_show_proximal_synapses_predicted.setChecked(False)
+                self.menu_show_proximal_synapses_falsely_predicted.setChecked(False)
         else:
-            self.menuShowProximalSynapsesNone.setChecked(False)
-
+            self.menu_show_proximal_synapses_none.setChecked(False)
         self.updateElements3d()
 
     def menuShowDistalSegments_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowDistalSegmentsNone:
-            if self.menuShowDistalSegmentsNone.isChecked():
-                self.menuShowDistalSegmentsActive.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_distal_segments_none:
+            if self.menu_show_distal_segments_none.isChecked():
+                self.menu_show_distal_segments_active.setChecked(False)
         else:
-            self.menuShowDistalSegmentsNone.setChecked(False)
-
+            self.menu_show_distal_segments_none.setChecked(False)
         self.updateElements3d()
 
     def menuShowDistalSynapses_click(self, event):
-        menuClicked = self.sender()
-
-        if menuClicked == self.menuShowDistalSynapsesNone:
-            if self.menuShowDistalSynapsesNone.isChecked():
-                self.menuShowDistalSynapsesConnected.setChecked(False)
-                self.menuShowDistalSynapsesActive.setChecked(False)
+        menu_clicked = self.sender()
+        if menu_clicked == self.menu_show_distal_synapses_none:
+            if self.menu_show_distal_synapses_none.isChecked():
+                self.menu_show_distal_synapses_connected.setChecked(False)
+                self.menu_show_distal_synapses_active.setChecked(False)
         else:
-            self.menuShowDistalSynapsesNone.setChecked(False)
-
+            self.menu_show_distal_synapses_none.setChecked(False)
         self.updateElements3d()
 
     def menuView_click(self, event):
-        menuClicked = self.sender()
-        self.selectView(menuClicked)
+        menu_clicked = self.sender()
+        for view in Global.views:
+            if view['menu'] == menu_clicked:
+                self.selectView(view)
+                break
 
     def menuViewsNew_click(self, event):
 
         # Ask for views's name
-        enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter views' name:")
+        entered_text, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter views' name:")
         if ok:
-            view = View()
-            view.name = enteredText
-            view.menu = QtWidgets.QAction(self)
-            view.menu.setText(view.name)
-            view.menu.setCheckable(True)
-            view.menu.triggered.connect(self.menuView_click)
+            menu = QtWidgets.QAction(self)
+            menu.setText(entered_text)
+            menu.setCheckable(True)
+            menu.triggered.connect(self.menuView_click)
 
+            view = NEW_VIEW
+            view['name'] = entered_text
+            view['menu'] = menu
             Global.views.append(view)
-            self.menuViews.addAction(view.menu)
+            self.menu_views.addAction(menu)
 
-            self.selectView(view.menu)
+            self.selectView(view)
 
     def menuViewsSave_click(self, event):
-
-        # Find the specified view in the views list
-        for view in Global.views:
-            if view.menu == self.selectedViewMenu:
-                view.showBitsNone = self.menuShowBitsNone.isChecked()
-                view.showBitsActive = self.menuShowBitsActive.isChecked()
-                view.showBitsPredicted = self.menuShowBitsPredicted.isChecked()
-                view.showBitsFalselyPredicted = self.menuShowBitsFalselyPredicted.isChecked()
-                view.showCellsNone = self.menuShowCellsNone.isChecked()
-                view.showCellsLearning = self.menuShowCellsLearning.isChecked()
-                view.showCellsActive = self.menuShowCellsActive.isChecked()
-                view.showCellsPredicted = self.menuShowCellsPredicted.isChecked()
-                view.showCellsFalselyPredicted = self.menuShowCellsFalselyPredicted.isChecked()
-                view.showCellsInactive = self.menuShowCellsInactive.isChecked()
-                view.showProximalSegmentsNone = self.menuShowProximalSegmentsNone.isChecked()
-                view.showProximalSegmentsActive = self.menuShowProximalSegmentsActive.isChecked()
-                view.showProximalSegmentsPredicted = self.menuShowProximalSegmentsPredicted.isChecked()
-                view.showProximalSegmentsFalselyPredicted = self.menuShowProximalSegmentsFalselyPredicted.isChecked()
-                view.showProximalSynapsesNone = self.menuShowProximalSynapsesNone.isChecked()
-                view.showProximalSynapsesConnected = self.menuShowProximalSynapsesConnected.isChecked()
-                view.showProximalSynapsesActive = self.menuShowProximalSynapsesActive.isChecked()
-                view.showProximalSynapsesPredicted = self.menuShowProximalSynapsesPredicted.isChecked()
-                view.showProximalSynapsesFalselyPredicted = self.menuShowProximalSynapsesFalselyPredicted.isChecked()
-                view.showDistalSegmentsNone = self.menuShowDistalSegmentsNone.isChecked()
-                view.showDistalSegmentsActive = self.menuShowDistalSegmentsActive.isChecked()
-                view.showDistalSynapsesNone = self.menuShowDistalSynapsesNone.isChecked()
-                view.showDistalSynapsesConnected = self.menuShowDistalSynapsesConnected.isChecked()
-                view.showDistalSynapsesActive = self.menuShowDistalSynapsesActive.isChecked()
-
-                Global.saveConfig()
-
-                break
+        self.selected_view['show_bits_none'] = self.menu_show_bits_none.isChecked()
+        self.selected_view['show_bits_active'] = self.menu_show_bits_active.isChecked()
+        self.selected_view['show_bits_predicted'] = self.menu_show_bits_predicted.isChecked()
+        self.selected_view['show_bits_falsely_predicted'] = self.menu_show_bits_falsely_predicted.isChecked()
+        self.selected_view['show_cells_none'] = self.menu_show_cells_none.isChecked()
+        self.selected_view['show_cells_learning'] = self.menu_show_cells_learning.isChecked()
+        self.selected_view['show_cells_active'] = self.menu_show_cells_active.isChecked()
+        self.selected_view['show_cells_predicted'] = self.menu_show_cells_predicted.isChecked()
+        self.selected_view['show_cells_falsely_predicted'] = self.menu_show_cells_falsely_predicted.isChecked()
+        self.selected_view['show_cells_inactive'] = self.menu_show_cells_inactive.isChecked()
+        self.selected_view['show_proximal_segments_none'] = self.menu_show_proximal_segments_none.isChecked()
+        self.selected_view['show_proximal_segments_active'] = self.menu_show_proximal_segments_active.isChecked()
+        self.selected_view['show_proximal_segments_predicted'] = self.menu_show_proximal_segments_predicted.isChecked()
+        self.selected_view['show_proximal_segments_falsely_predicted'] = self.menu_show_proximal_segments_falsely_predicted.isChecked()
+        self.selected_view['show_proximal_synapses_none'] = self.menu_show_proximal_synapses_none.isChecked()
+        self.selected_view['show_proximal_synapses_connected'] = self.menu_show_proximal_synapses_connected.isChecked()
+        self.selected_view['show_proximal_synapses_active'] = self.menu_show_proximal_synapses_active.isChecked()
+        self.selected_view['show_proximal_synapses_predicted'] = self.menu_show_proximal_synapses_predicted.isChecked()
+        self.selected_view['show_proximal_synapses_falsely_predicted'] = self.menu_show_proximal_synapses_falsely_predicted.isChecked()
+        self.selected_view['show_distal_segments_none'] = self.menu_show_distal_segments_none.isChecked()
+        self.selected_view['show_distal_segments_active'] = self.menu_show_distal_segments_active.isChecked()
+        self.selected_view['show_distal_synapses_none'] = self.menu_show_distal_synapses_none.isChecked()
+        self.selected_view['show_distal_synapses_connected'] = self.menu_show_distal_synapses_connected.isChecked()
+        self.selected_view['show_distal_synapses_active'] = self.menu_show_distal_synapses_active.isChecked()
+        Global.saveConfig()
 
     def menuViewsDelete_click(self, event):
-
-        # Find the specified view in the views list
-        for view in Global.views:
-            if view.menu == self.selectedViewMenu:
-                Global.views.remove(view)
-                self.menuViews.removeAction(view.menu)
-                break
+        self.menu_views.removeAction(self.selected_view['menu'])
+        Global.views.remove(self.selected_view)
 
         # Set 'Default' view as initial view
-        self.selectView(self.defaultViewMenu)
+        self.selectView(self.default_view)

@@ -1,71 +1,70 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio.ui import Global
 
+
 class ProjectPropertiesForm(QtWidgets.QDialog):
 
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QDialog.__init__(self)
-
         self.initUI()
 
     def initUI(self):
 
-        # labelName
-        self.labelName = QtWidgets.QLabel()
-        self.labelName.setText("Name")
-        self.labelName.setAlignment(QtCore.Qt.AlignRight)
+        # label_name
+        self.label_name = QtWidgets.QLabel()
+        self.label_name.setText("Name")
+        self.label_name.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxName
-        self.textBoxName = QtWidgets.QLineEdit()
+        # text_box_name
+        self.text_box_name = QtWidgets.QLineEdit()
 
-        # labelAuthor
-        self.labelAuthor = QtWidgets.QLabel()
-        self.labelAuthor.setText("Author")
-        self.labelAuthor.setAlignment(QtCore.Qt.AlignRight)
+        # label_author
+        self.label_author = QtWidgets.QLabel()
+        self.label_author.setText("Author")
+        self.label_author.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxAuthor
-        self.textBoxAuthor = QtWidgets.QLineEdit()
+        # text_box_author
+        self.text_box_author = QtWidgets.QLineEdit()
 
-        # labelDescription
-        self.labelDescription = QtWidgets.QLabel()
-        self.labelDescription.setText("Description")
-        self.labelDescription.setAlignment(QtCore.Qt.AlignRight)
+        # label_description
+        self.label_description = QtWidgets.QLabel()
+        self.label_description.setText("Description")
+        self.label_description.setAlignment(QtCore.Qt.AlignRight)
 
-        # textBoxDescription
-        self.textBoxDescription = QtWidgets.QTextEdit()
+        # text_box_description
+        self.text_box_description = QtWidgets.QTextEdit()
 
-        # groupBoxMainLayout
-        groupBoxMainLayout = QtWidgets.QGridLayout()
-        groupBoxMainLayout.addWidget(self.labelName, 0, 0)
-        groupBoxMainLayout.addWidget(self.textBoxName, 0, 1)
-        groupBoxMainLayout.addWidget(self.labelAuthor, 1, 0)
-        groupBoxMainLayout.addWidget(self.textBoxAuthor, 1, 1)
-        groupBoxMainLayout.addWidget(self.labelDescription, 2, 0)
-        groupBoxMainLayout.addWidget(self.textBoxDescription, 2, 1)
+        # group_box_main_layout
+        group_box_main_layout = QtWidgets.QGridLayout()
+        group_box_main_layout.addWidget(self.label_name, 0, 0)
+        group_box_main_layout.addWidget(self.text_box_name, 0, 1)
+        group_box_main_layout.addWidget(self.label_author, 1, 0)
+        group_box_main_layout.addWidget(self.text_box_author, 1, 1)
+        group_box_main_layout.addWidget(self.label_description, 2, 0)
+        group_box_main_layout.addWidget(self.text_box_description, 2, 1)
 
-        # groupBoxMain
-        self.groupBoxMain = QtWidgets.QGroupBox()
-        self.groupBoxMain.setLayout(groupBoxMainLayout)
+        # group_box_main
+        self.group_box_main = QtWidgets.QGroupBox()
+        self.group_box_main.setLayout(group_box_main_layout)
 
-        # buttonBox
-        self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.__buttonOk_click)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.__buttonCancel_click)
+        # button_box
+        self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.buttonOk_click)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.buttonCancel_click)
 
         # layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.groupBoxMain)
-        layout.addWidget(self.buttonBox)
+        layout.addWidget(self.group_box_main)
+        layout.addWidget(self.button_box)
 
         # ProjectPropertiesForm
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Project Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.resize(450, 200)
 
     def setControlsValues(self):
@@ -74,14 +73,14 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
         """
 
         # Set controls values with project properties
-        self.textBoxName.setText(Global.project.name)
-        self.textBoxAuthor.setText(Global.project.author)
-        self.textBoxDescription.setText(Global.project.description)
+        self.text_box_name.setText(Global.project.name)
+        self.text_box_author.setText(Global.project.author)
+        self.text_box_description.setText(Global.project.description)
 
-    def __buttonOk_click(self, event):
-        name = self.textBoxName.text()
-        author = self.textBoxAuthor.text()
-        description = self.textBoxDescription.toPlainText()
+    def buttonOk_click(self, event):
+        name = self.text_box_name.text()
+        author = self.text_box_author.text()
+        description = self.text_box_description.toPlainText()
 
         # If anything has changed
         if Global.project.name != name or Global.project.author != author or Global.project.description != description:
@@ -93,6 +92,6 @@ class ProjectPropertiesForm(QtWidgets.QDialog):
 
         self.close()
 
-    def __buttonCancel_click(self, event):
+    def buttonCancel_click(self, event):
         self.reject()
         self.close()

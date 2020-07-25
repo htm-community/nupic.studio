@@ -6,68 +6,67 @@ from nupic_studio.htm.node_sensor import Sensor
 from nupic_studio.ui.node_region_form import RegionForm
 from nupic_studio.ui.node_sensor_form import SensorForm
 
+
 class ArchitectureForm(QtWidgets.QWidget):
 
     def __init__(self):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QWidget.__init__(self)
-
         self.initUI()
 
     def initUI(self):
 
-        # DesignPanel
-        self.designPanel = DesignPanel()
+        # design_panel
+        self.design_panel = DesignPanel()
 
-        # tabPageDesignLayout
-        tabPageDesignLayout = QtWidgets.QHBoxLayout()
-        tabPageDesignLayout.addWidget(self.designPanel)
+        # tab_page_design_layout
+        tab_page_design_layout = QtWidgets.QHBoxLayout()
+        tab_page_design_layout.addWidget(self.design_panel)
 
-        # tabPageDesign
-        self.tabPageDesign = QtWidgets.QWidget()
-        self.tabPageDesign.setLayout(tabPageDesignLayout)
+        # tab_page_design
+        self.tab_page_design = QtWidgets.QWidget()
+        self.tab_page_design.setLayout(tab_page_design_layout)
 
-        # textBoxCode
-        self.textBoxCode = QtWidgets.QTextEdit()
-        self.textBoxCode.setReadOnly(True)
-        self.textBoxCode.setAlignment(QtCore.Qt.AlignLeft)
-        self.textBoxCode.setWordWrapMode(QtGui.QTextOption.NoWrap)
-        self.textBoxCode.setFont(QtGui.QFont("Courier New", 9))
+        # textbox_code
+        self.textbox_code = QtWidgets.QTextEdit()
+        self.textbox_code.setReadOnly(True)
+        self.textbox_code.setAlignment(QtCore.Qt.AlignLeft)
+        self.textbox_code.setWordWrapMode(QtGui.QTextOption.NoWrap)
+        self.textbox_code.setFont(QtGui.QFont("Courier New", 9))
 
-        # tabPageCodeLayout
-        tabPageCodeLayout = QtWidgets.QHBoxLayout()
-        tabPageCodeLayout.addWidget(self.textBoxCode)
+        # tab_page_code_layout
+        tab_page_code_layout = QtWidgets.QHBoxLayout()
+        tab_page_code_layout.addWidget(self.textbox_code)
 
-        # tabPageCode
-        self.tabPageCode = QtWidgets.QWidget()
-        self.tabPageCode.setLayout(tabPageCodeLayout)
+        # tab_page_code
+        self.tab_page_code = QtWidgets.QWidget()
+        self.tab_page_code.setLayout(tab_page_code_layout)
 
-        # tabControlMain
-        self.tabControlMain = QtWidgets.QTabWidget()
-        self.tabControlMain.addTab(self.tabPageDesign, "Design")
-        self.tabControlMain.addTab(self.tabPageCode, "Code")
+        # tab_control_main
+        self.tab_control_main = QtWidgets.QTabWidget()
+        self.tab_control_main.addTab(self.tab_page_design, "Design")
+        self.tab_control_main.addTab(self.tab_page_code, "Code")
 
         # layout
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.tabControlMain)
+        layout.addWidget(self.tab_control_main)
 
         # ArchitectureForm
         self.setLayout(layout)
         self.setMinimumWidth(300)
         self.setMinimumHeight(300)
         self.setWindowTitle("Network Architecture")
-        self.setWindowIcon(QtGui.QIcon(Global.appPath + '/images/logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
 
     def updateCode(self):
         """
         Update the source code of the network.
         """
-
         code = Global.project.network.getSourceCode()
-        self.textBoxCode.setText(code)
+        self.textbox_code.setText(code)
+
 
 class DesignPanel(QtWidgets.QWidget):
 
@@ -75,53 +74,52 @@ class DesignPanel(QtWidgets.QWidget):
         """
         Initializes a new instance of this class.
         """
-
         QtWidgets.QWidget.__init__(self)
 
         # Node that is on top of the hierarchy.
-        self.topRegion = Region("TopRegion")
+        self.top_region = Region("TopRegion")
 
         # Node that is selected for visualization of its details.
-        self.selectedNode = None
+        self.selected_node = None
 
         # Node that is highlighted due to mouse is on it.
-        self.underMouseNode = None
+        self.under_mouse_node = None
 
         # Space to skip horizontally between siblings
         # and vertically between generations
-        self._offsetHorizontal = 15
-        self._offsetVertical = 30
+        self.offset_horizontal = 15
+        self.offset_vertical = 30
 
         self.initUI()
 
     def initUI(self):
 
-        # menuNodeProperties
-        self.menuNodeProperties = QtWidgets.QAction(self)
-        self.menuNodeProperties.setText("&Properties")
-        self.menuNodeProperties.triggered.connect(self.__menuNodeProperties_click)
+        # menu_node_properties
+        self.menu_node_properties = QtWidgets.QAction(self)
+        self.menu_node_properties.setText("&Properties")
+        self.menu_node_properties.triggered.connect(self.menuNodeProperties_click)
 
-        # menuNodeAddRegion
-        self.menuNodeAddRegion = QtWidgets.QAction(self)
-        self.menuNodeAddRegion.setText("&Add region under this node...")
-        self.menuNodeAddRegion.triggered.connect(self.__menuNodeAddRegion_click)
+        # menu_node_add_region
+        self.menu_node_add_region = QtWidgets.QAction(self)
+        self.menu_node_add_region.setText("&Add region under this node...")
+        self.menu_node_add_region.triggered.connect(self.menuNodeAddRegion_click)
 
-        # menuNodeAddSensor
-        self.menuNodeAddSensor = QtWidgets.QAction(self)
-        self.menuNodeAddSensor.setText("&Add sensor under this node...")
-        self.menuNodeAddSensor.triggered.connect(self.__menuNodeAddSensor_click)
+        # menu_node_add_sensor
+        self.menu_node_add_sensor = QtWidgets.QAction(self)
+        self.menu_node_add_sensor.setText("&Add sensor under this node...")
+        self.menu_node_add_sensor.triggered.connect(self.menuNodeAddSensor_click)
 
-        # menuNodeDelete
-        self.menuNodeDelete = QtWidgets.QAction(self)
-        self.menuNodeDelete.setText("&Delete this node...")
-        self.menuNodeDelete.triggered.connect(self.__menuNodeDelete_click)
+        # menu_node_delete
+        self.menu_node_delete = QtWidgets.QAction(self)
+        self.menu_node_delete.setText("&Delete this node...")
+        self.menu_node_delete.triggered.connect(self.menuNodeDelete_click)
 
-        # menuNode
-        self.menuNode = QtWidgets.QMenu()
-        self.menuNode.addAction(self.menuNodeProperties)
-        self.menuNode.addAction(self.menuNodeAddRegion)
-        self.menuNode.addAction(self.menuNodeAddSensor)
-        self.menuNode.addAction(self.menuNodeDelete)
+        # menu_node
+        self.menu_node = QtWidgets.QMenu()
+        self.menu_node.addAction(self.menu_node_properties)
+        self.menu_node.addAction(self.menu_node_add_region)
+        self.menu_node.addAction(self.menu_node_add_sensor)
+        self.menu_node.addAction(self.menu_node_delete)
 
         # layout
         layout = QtWidgets.QHBoxLayout()
@@ -131,89 +129,87 @@ class DesignPanel(QtWidgets.QWidget):
         self.setToolTip("Left button click: Select region.\r\nRight button click: Show options for region or sensor.")
 
         # Set center position of the top region
-        self.topRegion.tree2d_x = self.minimumWidth() / 2
-        self.topRegion.tree2d_y = 30
+        self.top_region.tree2d_x = self.minimumWidth() / 2
+        self.top_region.tree2d_y = 30
 
         # Painter to draw the tree
         self.painter = QtGui.QPainter()
 
-    def __arrangeNode(self, node, minX, minY):
+    def arrangeNode(self, node, min_x, minY):
         """
         Arrange the node and the lower nodes that feed it in the allowed area.
-        Set minX to indicate the right edge of our subtree.
+        Set min_x to indicate the right edge of our subtree.
         Set minY to indicate the bottom edge of our subtree.
         """
 
         # See how big this node is.
-        size = self.__getNodeSize(node)
+        size = self.getNodeSize(node)
 
         # Recursively arrange the lower nodes that feed this node,
         # allowing room for this node.
-        x = minX
+        x = min_x
         width = size.width()
         height = size.height()
-        biggestMinY = minY + height
-        subtreeMinY = minY + height + self._offsetVertical
-        numFeeders = 0
+        biggest_min_y = minY + height
+        subtree_min_y = minY + height + self.offset_vertical
+        feeders_count = 0
         for feeder in Global.project.network.getFeederNodes(node):
 
             # Arrange this feeder's subtree.
-            feederMinY = subtreeMinY
-            x, feederMinY = self.__arrangeNode(feeder, x, feederMinY)
+            feeder_min_y = subtree_min_y
+            x, feeder_min_y = self.arrangeNode(feeder, x, feeder_min_y)
 
             # See if this increases the biggest minY value.
-            if biggestMinY < feederMinY:
-                biggestMinY = feederMinY
+            if biggest_min_y < feeder_min_y:
+                biggest_min_y = feeder_min_y
 
             # Allow room before the next sibling.
-            x += self._offsetHorizontal
+            x += self.offset_horizontal
 
-            numFeeders += 1
+            feeders_count += 1
 
         # Remove the spacing after the last feeder.
-        if numFeeders > 0:
-            x -= self._offsetHorizontal
+        if feeders_count > 0:
+            x -= self.offset_horizontal
 
         # See if this node is wider than the subtree under it.
-        subtreeWidth = x - minX
-        if width > subtreeWidth:
+        subtree_width = x - min_x
+        if width > subtree_width:
             # Center the subtree under this node.
             # Make the lower nodes that feed this node rearrange themselves
             # moved to center their subtrees.
-            x = minX + (width - subtreeWidth) / 2
+            x = min_x + (width - subtree_width) / 2
             for feeder in Global.project.network.getFeederNodes(node):
                 # Arrange this feeder's subtree.
-                x, subtreeMinY = self.__arrangeNode(feeder, x, subtreeMinY)
+                x, subtree_min_y = self.arrangeNode(feeder, x, subtree_min_y)
 
                 # Allow room before the next sibling.
-                x += self._offsetHorizontal
+                x += self.offset_horizontal
 
             # The subtree's width is this node's width.
-            subtreeWidth = width
+            subtree_width = width
 
         # Set this node's center position.
-        node.tree2d_x = minX + subtreeWidth / 2
+        node.tree2d_x = min_x + subtree_width / 2
         node.tree2d_y = minY + height / 2
 
-        # Increase minX to allow room for the subtree before returning.
-        minX += subtreeWidth
+        # Increase min_x to allow room for the subtree before returning.
+        min_x += subtree_width
 
         # Set the return value for minY.
-        minY = biggestMinY
+        minY = biggest_min_y
 
-        return minX, minY
+        return min_x, minY
 
-    def __getNodeSize(self, node):
+    def getNodeSize(self, node):
         """
         Return the size of the string plus a 10 pixel margin.
         """
-
-        fontMetrics = self.painter.fontMetrics()
-        width = fontMetrics.width(node.name)
-
+        font_metrics = self.painter.fontMetrics()
+        width = font_metrics.width(node.name)
         return QtCore.QSizeF(30 + width, 30)
 
-    def __drawNode(self, node):
+    def drawNode(self, node):
         """
         Draw the nodes for the subtree rooted at this node.
         """
@@ -224,25 +220,25 @@ class DesignPanel(QtWidgets.QWidget):
             self.painter.drawLine(node.tree2d_x, node.tree2d_y, feeder.tree2d_x, feeder.tree2d_y)
 
             # Recursively make the node draw its feeders.
-            self.__drawNode(feeder)
+            self.drawNode(feeder)
 
         # Draw this node centered at (x, y).
         brush = QtGui.QBrush()
-        if node == self.selectedNode:
+        if node == self.selected_node:
             brush = QtGui.QColor(0, 200, 250)
         else:
             brush = QtGui.QColor(0, 150, 200)
 
         # Fill and draw a polygon at our location.
-        size = self.__getNodeSize(node)
+        size = self.getNodeSize(node)
         x = node.tree2d_x
         y = node.tree2d_y
         width = size.width()
         height = size.height()
-        if node.type == NodeType.region:
+        if node.type == NodeType.REGION:
             point1 = QtCore.QPoint((x - width / 2) + 10, (y - height / 2))
             point2 = QtCore.QPoint((x + width / 2) - 10, (y - height / 2))
-        elif (node.type == NodeType.sensor):
+        elif (node.type == NodeType.SENSOR):
             point1 = QtCore.QPoint((x - width / 2), (y - height / 2))
             point2 = QtCore.QPoint((x + width / 2), (y - height / 2))
         point3 = QtCore.QPoint((x + width / 2), (y + height / 2))
@@ -255,20 +251,20 @@ class DesignPanel(QtWidgets.QWidget):
         # Draw the text.
         self.painter.drawText(polygon.boundingRect(), QtCore.Qt.AlignCenter, node.name)
 
-    def __nodeAtPoint(self, node, mousePoint):
+    def nodeAtPoint(self, node, mouse_point):
         """
         Return the node at this point (or None if there isn't one there).
         """
 
         # See if the point is under this node.
-        if node.tree2d_polygon.boundingRect().contains(mousePoint):
+        if node.tree2d_polygon.boundingRect().contains(mouse_point):
             return node
 
         # See if the point is under a node in the subtree.
         for feeder in Global.project.network.getFeederNodes(node):
-            hitNode = self.__nodeAtPoint(feeder, mousePoint)
-            if hitNode != None:
-                return hitNode
+            hit_node = self.nodeAtPoint(feeder, mouse_point)
+            if hit_node != None:
+                return hit_node
 
         return None
 
@@ -283,17 +279,17 @@ class DesignPanel(QtWidgets.QWidget):
         self.painter.fillRect(self.rect(), QtCore.Qt.white)
 
         # Arrange the tree once to see how big it is.
-        minX = 0
-        minY = 0
-        minX, minY = self.__arrangeNode(self.topRegion, minX, minY)
+        min_x = 0
+        min_y = 0
+        min_x, min_y = self.arrangeNode(self.top_region, min_x, min_y)
 
         # Rearrange the tree again to center it horizontally.
-        minX = (self.width() - minX) / 2
-        minY = 10
-        minX, minY = self.__arrangeNode(self.topRegion, minX, minY)
+        min_x = (self.width() - min_x) / 2
+        min_y = 10
+        min_x, min_y = self.arrangeNode(self.top_region, min_x, min_y)
 
         # Draw the tree recursively from top region.
-        self.__drawNode(self.topRegion)
+        self.drawNode(self.top_region)
 
         # End painter
         self.painter.end()
@@ -302,111 +298,108 @@ class DesignPanel(QtWidgets.QWidget):
         """
         If this is a right button down and the mouse is over a node, display a context menu.
         """
-
         if event.buttons() == QtCore.Qt.LeftButton:
-            self.underMouseNode = self.__nodeAtPoint(self.topRegion, event.pos())
-            if self.underMouseNode != None:
+            self.under_mouse_node = self.nodeAtPoint(self.top_region, event.pos())
+            if self.under_mouse_node != None:
                 # Select the node and updates any related information.
-                self.selectedNode = self.underMouseNode
+                self.selected_node = self.under_mouse_node
 
                 # Redraw the tree to show the updates.
                 self.repaint()
 
                 # Refresh dependents tools
-                Global.simulationForm.refreshControls()
-                Global.nodeInformationForm.refreshControls()
+                Global.simulation_form.refreshControls()
+                Global.node_information_form.refreshControls()
         elif event.buttons() == QtCore.Qt.RightButton:
-            self.underMouseNode = self.__nodeAtPoint(self.topRegion, event.pos())
-            if self.underMouseNode != None:
+            self.under_mouse_node = self.nodeAtPoint(self.top_region, event.pos())
+            if self.under_mouse_node != None:
                 # Don't let the user delete the top node.
-                self.menuNodeAddRegion.setEnabled(not Global.simulationInitialized and self.underMouseNode.type != NodeType.sensor)
-                self.menuNodeAddSensor.setEnabled(not Global.simulationInitialized and self.underMouseNode.type != NodeType.sensor)
-                self.menuNodeDelete.setEnabled(not Global.simulationInitialized and self.underMouseNode != self.topRegion)
+                self.menu_node_add_region.setEnabled(not Global.simulation_initialized and self.under_mouse_node.type != NodeType.SENSOR)
+                self.menu_node_add_sensor.setEnabled(not Global.simulation_initialized and self.under_mouse_node.type != NodeType.SENSOR)
+                self.menu_node_delete.setEnabled(not Global.simulation_initialized and self.under_mouse_node != self.top_region)
 
                 # Display the context menu.
-                self.menuNode.exec_(self.mapToGlobal(event.pos()))
+                self.menu_node.exec_(self.mapToGlobal(event.pos()))
 
-    def __menuNodeProperties_click(self, event):
+    def menuNodeProperties_click(self, event):
         """
         View node propeerties.
         """
-
-        if self.underMouseNode.type == NodeType.region:
-            regionForm = RegionForm()
-            regionForm.setControlsValues()
-            dialogResult = regionForm.exec_()
-
-            # Update controls with the new changes
-            if dialogResult == QtWidgets.QDialog.Accepted:
-                Global.mainForm.markProjectChanges(True)
-                Global.architectureForm.updateCode()
-        elif self.underMouseNode.type == NodeType.sensor:
-            sensorForm = SensorForm()
-            sensorForm.setControlsValues()
-            dialogResult = sensorForm.exec_()
+        if self.under_mouse_node.type == NodeType.REGION:
+            region_form = RegionForm()
+            region_form.setControlsValues()
+            dialog_result = region_form.exec_()
 
             # Update controls with the new changes
-            if dialogResult == QtWidgets.QDialog.Accepted:
-                Global.mainForm.markProjectChanges(True)
-                Global.architectureForm.updateCode()
+            if dialog_result == QtWidgets.QDialog.Accepted:
+                Global.main_form.markProjectChanges(True)
+                Global.architecture_form.updateCode()
+        elif self.under_mouse_node.type == NodeType.SENSOR:
+            sensor_form = SensorForm()
+            sensor_form.setControlsValues()
+            dialog_result = sensor_form.exec_()
 
-    def __menuNodeAddRegion_click(self, event):
+            # Update controls with the new changes
+            if dialog_result == QtWidgets.QDialog.Accepted:
+                Global.main_form.markProjectChanges(True)
+                Global.architecture_form.updateCode()
+
+    def menuNodeAddRegion_click(self, event):
         """
         Add a feeder region to the selected region.
         """
 
         # Ask for region's name
-        enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter region's name:")
+        entered_text, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter region's name:")
         if ok:
-            validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
-            if not validExpr.exactMatch(enteredText):
-                QtWidgets.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+            valid_expr = QtCore.QRegExp('[a-zA-Z0-9_]+')
+            if not valid_expr.exactMatch(entered_text):
+                QtWidgets.QMessageBox.warning(self, "Warning", "'" + entered_text + "' is not a valid name. Only characters, numbers and _ are accepted.")
                 return
 
-            Global.mainForm.markProjectChanges(True)
+            Global.main_form.markProjectChanges(True)
 
             # Add new region below highlighted region
-            newRegion = Region(enteredText)
-            Global.project.network.addFeederNode(newRegion, self.underMouseNode)
+            new_region = Region(entered_text)
+            Global.project.network.addFeederNode(new_region, self.under_mouse_node)
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architectureForm.updateCode()
+            Global.architecture_form.updateCode()
 
-    def __menuNodeAddSensor_click(self, event):
+    def menuNodeAddSensor_click(self, event):
         """
         Add a feeder sensor to the selected region.
         """
 
         # Ask for sensor's name
-        enteredText, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter sensor's name:")
+        entered_text, ok = QtWidgets.QInputDialog.getText(self, "Input Dialog", "Enter sensor's name:")
         if ok:
-            validExpr = QtCore.QRegExp('[a-zA-Z0-9_]+')
-            if not validExpr.exactMatch(enteredText):
-                QtWidgets.QMessageBox.warning(self, "Warning", "'" + enteredText + "' is not a valid name. Only characters, numbers and _ are accepted.")
+            valid_expr = QtCore.QRegExp('[a-zA-Z0-9_]+')
+            if not valid_expr.exactMatch(entered_text):
+                QtWidgets.QMessageBox.warning(self, "Warning", "'" + entered_text + "' is not a valid name. Only characters, numbers and _ are accepted.")
                 return
 
-            Global.mainForm.markProjectChanges(True)
+            Global.main_form.markProjectChanges(True)
 
             # Add new sensor below highlighted region
-            newSensor = Sensor(enteredText)
-            Global.project.network.addFeederNode(newSensor, self.underMouseNode)
+            new_sensor = Sensor(entered_text)
+            Global.project.network.addFeederNode(new_sensor, self.under_mouse_node)
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architectureForm.updateCode()
+            Global.architecture_form.updateCode()
 
-    def __menuNodeDelete_click(self, event):
+    def menuNodeDelete_click(self, event):
         """
         Delete this node from the tree.
         """
-
         if QtWidgets.QMessageBox.question(self, "Question", "Are you sure you want to delete this node?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No) == QtWidgets.QMessageBox.Yes:
-            Global.mainForm.markProjectChanges(True)
+            Global.main_form.markProjectChanges(True)
 
             # Delete the node and its subtree.
-            Global.project.network.deleteFeederNode(self.underMouseNode)
+            Global.project.network.deleteFeederNode(self.under_mouse_node)
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architectureForm.updateCode()
+            Global.architecture_form.updateCode()

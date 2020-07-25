@@ -1,17 +1,18 @@
 from nupic_studio import MachineState
-from nupic_studio.htm import maxPreviousSteps, maxFutureSteps, maxPreviousStepsWithInference
+from nupic_studio.htm import MAX_PREVIOUS_STEPS, MAX_FUTURE_STEPS, MAX_PREVIOUS_STEPS_WITH_INFERENCE
 from nupic.algorithms.CLAClassifier import CLAClassifier
+
 
 class FieldDataType:
     """
     Types of data which a raw input is composed.
     """
+    BOOLEAN = "Boolean"
+    INTEGER = "Integer"
+    DECIMAL = "Decimal"
+    DATE_TIME = "DateTime"
+    STRING = "String"
 
-    boolean = "Boolean"
-    integer = "Integer"
-    decimal = "Decimal"
-    dateTime = "DateTime"
-    string = "String"
 
 class Encoding:
     """
@@ -24,40 +25,40 @@ class Encoding:
         """
 
         # Target field of the database table or file.
-        self.dataSourceFieldName = ''
+        self.data_source_field_name = ''
 
         # Data type of the field returned by database table or file.
-        self.dataSourceFieldDataType = FieldDataType.string
+        self.data_source_field_data_type = FieldDataType.STRING
 
         # Optional encoder to convert raw data to htm input and vice-versa.
         self.encoder = None
 
         # Module name which encoder class is imported.
-        self.encoderModule = ""
+        self.encoder_module = ""
 
         # Class name which encode or decode values.
-        self.encoderClass = ""
+        self.encoder_class = ""
 
         # Parameters passed to the encoder class constructor.
-        self.encoderParams = ""
+        self.encoder_params = ""
 
         # Field name returned by encoder when decode() function.
-        self.encoderFieldName = ""
+        self.encoder_field_name = ""
 
         # Data type of the field returned by encoder.
-        self.encoderFieldDataType = FieldDataType.string
+        self.encoder_field_data_type = FieldDataType.STRING
 
         # Enable inference for this field.
-        self.enableInference = False
+        self.enable_inference = False
 
         # Value read currently from database.
-        self.currentValue = MachineState(None, maxPreviousSteps)
+        self.current_value = MachineState(None, MAX_PREVIOUS_STEPS)
 
         # Best value predicted by network. This is need to build predictions chart.
-        self.bestPredictedValue = MachineState(None, maxPreviousSteps)
+        self.best_predicted_value = MachineState(None, MAX_PREVIOUS_STEPS)
 
         # Values predicted by network.
-        self.predictedValues = MachineState(None, maxPreviousSteps)
+        self.predicted_values = MachineState(None, MAX_PREVIOUS_STEPS)
 
     def initialize(self):
         """
@@ -65,14 +66,14 @@ class Encoding:
         """
 
         # Create Classifier instance with appropriate parameters
-        self.minProbabilityThreshold = 0.0001
-        self.steps = [step+1 for step in range(maxFutureSteps)]
+        self.min_probability_threshold = 0.0001
+        self.steps = [step + 1 for step in range(MAX_FUTURE_STEPS)]
         self.classifier = CLAClassifier(steps=self.steps)
 
         # Increase history according to inference flag
-        if self.enableInference:
-            maxLen = maxPreviousStepsWithInference
-            self.bestPredictedValue = MachineState(0, maxLen)
+        if self.enable_inference:
+            max_len = MAX_PREVIOUS_STEPS_WITH_INFERENCE
+            self.best_predicted_value = MachineState(0, max_len)
         else:
-            maxLen = maxPreviousSteps
-        self.currentValue = MachineState(0, maxLen)
+            max_len = MAX_PREVIOUS_STEPS
+        self.current_value = MachineState(0, max_len)

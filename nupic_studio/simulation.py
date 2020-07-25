@@ -180,6 +180,7 @@ class Simulation(ShowBase):
         # Create the coords widget for indicating axes directions
         self.coords_np, self.axis_x_np, self.axis_y_np, self.axis_z_np, self.cam_label_np, self.cam_pos_np, self.cam_hpr_np, \
         self.touched_label_np, self.touched_object_np, self.touched_pos_np = self.createScreenWidgets()
+        self.hideScreenWidgets()
 
         self.is_simulating = True
         print("Simulation running!")
@@ -232,12 +233,7 @@ class Simulation(ShowBase):
         self.mouse_feature = feature
         self.start_mouse_work_fn = start_mouse_work_fn
         self.stop_mouse_work_fn = stop_mouse_work_fn
-        self.cam_label_np.show()
-        self.cam_pos_np.show()
-        self.cam_hpr_np.show()
-        self.touched_label_np.show()
-        self.touched_object_np.show()
-        self.touched_pos_np.show()
+        self.showScreenWidgets()
 
         # Pick a position to act as pivot to the camera
         if self.mouse_feature == "zoom":
@@ -262,13 +258,7 @@ class Simulation(ShowBase):
         self.mouse_feature = ""
         self.last_mouse_x = None
         self.last_mouse_y = None
-        self.cam_label_np.hide()
-        self.cam_pos_np.hide()
-        self.cam_hpr_np.hide()
-        self.touched_label_np.hide()
-        self.touched_object_np.hide()
-        self.touched_pos_np.hide()
-
+        self.hideScreenWidgets()
         self.stop_mouse_work_fn()
 
     def resetCamera(self):
@@ -397,6 +387,24 @@ class Simulation(ShowBase):
         touched_object_np.setScale(0.07)
 
         return coords_np, axis_x_np, axis_y_np, axis_z_np, cam_label_np, cam_pos_np, cam_hpr_np, touched_label_np, touched_object_np, touched_object_np
+
+    def showScreenWidgets(self):
+        self.coords_np.show()
+        self.cam_label_np.show()
+        self.cam_pos_np.show()
+        self.cam_hpr_np.show()
+        self.touched_label_np.show()
+        self.touched_object_np.show()
+        self.touched_pos_np.show()
+
+    def hideScreenWidgets(self):
+        self.coords_np.hide()
+        self.cam_label_np.hide()
+        self.cam_pos_np.hide()
+        self.cam_hpr_np.hide()
+        self.touched_label_np.hide()
+        self.touched_object_np.hide()
+        self.touched_pos_np.hide()
 
     def createElement(self, name, type, start, end=None):
         if type == "cell":

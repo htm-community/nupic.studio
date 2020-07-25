@@ -4,12 +4,12 @@ import time
 from PyQt5 import QtGui, QtCore, QtWidgets, QtOpenGL
 from nupic_studio.project import Project
 from nupic_studio.ui import Global
-from nupic_studio.ui.start_form import StartForm
-from nupic_studio.ui.main_form import MainForm
-from nupic_studio.ui.architecture_form import ArchitectureForm
-from nupic_studio.ui.node_information_form import NodeInformationForm
-from nupic_studio.ui.simulation_form import SimulationForm
-from nupic_studio.ui.output_form import OutputForm
+from nupic_studio.ui.start_window import StartWindow
+from nupic_studio.ui.main_window import MainWindow
+from nupic_studio.ui.architecture_window import ArchitectureWindow
+from nupic_studio.ui.node_information_window import NodeInformationWindow
+from nupic_studio.ui.simulation_window import SimulationWindow
+from nupic_studio.ui.output_window import OutputWindow
 
 
 def main():
@@ -20,11 +20,11 @@ def main():
     Global.loadConfig()
 
     Global.project = Project()
-    Global.simulation_form = SimulationForm()
-    Global.architecture_form = ArchitectureForm()
-    Global.node_information_form = NodeInformationForm()
-    Global.output_form = OutputForm()
-    Global.main_form = MainForm()
+    Global.simulation_window = SimulationWindow()
+    Global.architecture_window = ArchitectureWindow()
+    Global.node_information_window = NodeInformationWindow()
+    Global.output_window = OutputWindow()
+    Global.main_window = MainWindow()
 
     # Create and display the splash screen
     start = time.time()
@@ -38,8 +38,8 @@ def main():
     splash.close()
 
     # Show start form
-    start_form = StartForm()
-    start_form.show()
+    start_window = StartWindow()
+    start_window.show()
 
     deployment_build = os.getenv("NUPIC_STUDIO_DEPLOYMENT_BUILD", False)
     if deployment_build:

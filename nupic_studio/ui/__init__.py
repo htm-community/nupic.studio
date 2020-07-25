@@ -63,11 +63,11 @@ class Global:
     views = []
 
     project = None
-    architecture_form = None
-    node_information_form = None
-    simulation_form = None
-    output_form = None
-    main_form = None
+    architecture_window = None
+    node_information_window = None
+    simulation_window = None
+    output_window = None
+    main_window = None
 
     @staticmethod
     def loadConfig():

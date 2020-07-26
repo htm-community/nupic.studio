@@ -1,5 +1,5 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, Global
 
 
 class ProjectPropertiesWindow(QtWidgets.QDialog):
@@ -64,7 +64,7 @@ class ProjectPropertiesWindow(QtWidgets.QDialog):
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Project Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.resize(450, 200)
 
     def setControlsValues(self):

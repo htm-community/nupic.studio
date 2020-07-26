@@ -1,7 +1,7 @@
 ﻿import pyqtgraph as pg
 from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import ArrayTableModel
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, State, Global
 from nupic_studio.htm import MAX_PREVIOUS_STEPS, MAX_FUTURE_STEPS, MAX_PREVIOUS_STEPS_WITH_INFERENCE
 from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_sensor import PredictionsMethod
@@ -10,12 +10,12 @@ from nupic_studio.htm.encoding import FieldDataType
 
 class NodeInformationWindow(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QWidget.__init__(self)
-
+        self.main_window = main_window
         self.previous_selected_node = None
         self.selected_sensor = None
         self.selected_encoding = None
@@ -310,7 +310,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
         # self
         self.setLayout(layout)
         self.setWindowTitle("Node Information")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.setMinimumHeight(200)
         self.setMaximumHeight(300)
 
@@ -327,7 +327,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
         """
         Refresh controls for each time step.
         """
-        selected_node = Global.architecture_window.design_panel.selected_node
+        selected_node = self.main_window.architecture_window.design_panel.selected_node
 
         # Show information according to note type
         if selected_node != self.previous_selected_node:
@@ -372,7 +372,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
 
             self.previous_selected_node = selected_node
 
-        if Global.simulation_initialized:
+        if self.main_window.isRunning():
             if selected_node.type == NodeType.REGION:
                 self.text_box_region_precision_rate.setText("{0:.3f}".format(self.selected_region.stats_precision_rate))
 
@@ -441,7 +441,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
         self.label_predicted_values.setVisible(self.selected_encoding.enable_inference)
         self.data_grid_predicted_values.setVisible(self.selected_encoding.enable_inference)
         self.predictions_chart.setVisible(False)
-        if Global.simulation_initialized and self.selected_encoding.enable_inference:
+        if self.main_window.isRunning() and self.selected_encoding.enable_inference:
             self.updatePredictedValuesGrid()
             if self.selected_encoding.encoder_field_data_type == FieldDataType.INTEGER or self.selected_encoding.encoder_field_data_type == FieldDataType.DECIMAL:
                 self.updatePredictionsChart()
@@ -570,7 +570,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
         self.updatePredictedValuesGrid()
 
     def comboBoxEncoding_currentIndexChanged(self, event):
-        if Global.simulation_initialized:
+        if self.main_window.isRunning():
             idx = self.combo_box_encoding.currentIndex()
             self.selected_encoding = self.selected_sensor.encodings[idx]
             self.updateEncodingControls()
@@ -612,7 +612,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
             self.data_grid_cells.model().update(header, data)
             self.data_grid_cells.resizeColumnsToContents()
 
-        Global.simulation_window.refreshControls()
+        self.main_window.simulation_window.refreshControls()
 
     def dataGridProximalSynapses_selectionChanged(self, event):
         if self.selected_proximal_synapse != None:
@@ -624,7 +624,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
             self.selected_proximal_synapse = self.selected_column.segment.synapses[index]
             self.selected_proximal_synapse.tree3d_selected = True
 
-        Global.simulation_window.refreshControls()
+        self.main_window.simulation_window.refreshControls()
 
     def dataGridCells_selectionChanged(self, event):
         if self.selected_cell != None:
@@ -644,7 +644,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
             self.data_grid_distal_segments.model().update(header, data)
             self.data_grid_distal_segments.resizeColumnsToContents()
 
-        Global.simulation_window.refreshControls()
+        self.main_window.simulation_window.refreshControls()
 
     def dataGridDistalSegments_selectionChanged(self, event):
         if self.selected_distal_segment != None:
@@ -663,7 +663,7 @@ class NodeInformationWindow(QtWidgets.QWidget):
             self.data_grid_distal_synapses.model().update(header, data)
             self.data_grid_distal_synapses.resizeColumnsToContents()
 
-        Global.simulation_window.refreshControls()
+        self.main_window.simulation_window.refreshControls()
 
     def dataGridDistalSynapses_selectionChanged(self, event):
         if self.selected_distal_synapse != None:
@@ -675,4 +675,4 @@ class NodeInformationWindow(QtWidgets.QWidget):
             self.selected_distal_synapse = self.selected_distal_segment.synapses[index]
             self.selected_distal_synapse.tree3d_selected = True
 
-        Global.simulation_window.refreshControls()
+        self.main_window.simulation_window.refreshControls()

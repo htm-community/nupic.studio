@@ -1,5 +1,5 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON
 
 
 class SimulationLegendWindow(QtWidgets.QDialog):
@@ -86,6 +86,6 @@ class SimulationLegendWindow(QtWidgets.QDialog):
         # self
         self.setLayout(layout)
         self.setWindowTitle("Simulation Legend")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.setMinimumWidth(100)
         self.setMinimumHeight(150)

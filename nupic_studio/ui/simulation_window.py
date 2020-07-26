@@ -1,27 +1,29 @@
-﻿import numpy
+﻿import copy
 import os
 from PIL import Image
 from PyQt5 import QtGui, QtCore, QtWidgets
+from nupic_studio import REPO_DIR
 from nupic_studio.htm.node import Node, NodeType
 from nupic_studio.htm.segment import SegmentType
-from nupic_studio.ui import Global, State, NEW_VIEW
+from nupic_studio.ui import ICON, Global, State, NEW_VIEW
 from nupic_studio.ui.simulation_legend_window import SimulationLegendWindow
 from nupic_studio.util import Texture3D
 
 
 class SimulationWindow(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QWidget.__init__(self)
+        self.main_window = main_window
         self.initUI()
 
     def initUI(self):
 
         # viewer_3d
-        self.viewer_3d = Viewer3D()
+        self.viewer_3d = Viewer3D(self.main_window)
         self.viewer_3d.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
         # layout
@@ -31,7 +33,7 @@ class SimulationWindow(QtWidgets.QWidget):
         # self
         self.setLayout(layout)
         self.setWindowTitle("Simulation")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.setMinimumSize(300, 300)
         self.setToolTip("Left-Button-Pressed: Rotate\r\nLeft-Button-DoubleClick: Reset observer camera\r\nRight-Button-Pressed: Shows menu\r\nMiddle-Button-Pressed: Pan\r\nWheel: Zoom in/out")
 
@@ -56,9 +58,9 @@ class SimulationWindow(QtWidgets.QWidget):
 
 class Viewer3D(QtWidgets.QLabel):
 
-    def __init__(self):
+    def __init__(self, main_window):
         QtWidgets.QWidget.__init__(self)
-
+        self.main_window = main_window
         self.mouse_working_area = None
 
         # Views
@@ -83,7 +85,8 @@ class Viewer3D(QtWidgets.QLabel):
         self.initUI()
 
         # Create views menus
-        for view in Global.views:
+        self.views = self.main_window.config['views']
+        for view in self.views:
             menu = QtWidgets.QAction(self)
             menu.setText(view['name'])
             menu.setCheckable(True)
@@ -348,7 +351,7 @@ class Viewer3D(QtWidgets.QLabel):
         self.menu_simulation.setTitle("&Simulation")
 
         # image
-        self.pivot_image = QtGui.QImage(os.path.join(Global.app_path + '/images', 'cross.png'))
+        self.pivot_image = QtGui.QImage(os.path.join(REPO_DIR, 'images', 'cross.png'))
 
         # pivot
         self.pivot = QtWidgets.QLabel(self)
@@ -416,20 +419,20 @@ class Viewer3D(QtWidgets.QLabel):
         """
         Refresh controls for each time step.
         """
-        if Global.main_window.isRunning():
+        if self.main_window.isRunning():
 
             # Get the image to be draw on this viewer.
             image = None
-            if Global.main_window.state == State.SIMULATING:
-                texture = Global.main_window.simulation.screen_texture
+            if self.main_window.state == State.SIMULATING:
+                texture = self.main_window.simulation.screen_texture
                 size = (texture.getXSize(), texture.getYSize())
                 format = "RGBA"
                 if texture.mightHaveRamImage():
                     image = Image.frombuffer(format, size, texture.getRamImageAs(format), "raw", format, 0, 0)
                 else:
                     image = Image.new(format, size)
-            elif Global.main_window.state == State.PLAYBACKING:
-                playback_file = os.path.join(Global.main_window.getRecordPath(), "main_camera_" + "{:08d}".format(Global.main_window.get_step()) + ".png")
+            elif self.main_window.state == State.PLAYBACKING:
+                playback_file = os.path.join(self.main_window.getRecordPath(), "main_camera_" + "{:08d}".format(self.main_window.get_step()) + ".png")
                 if os.path.isfile(playback_file):
                     image = Image.open(playback_file)
 
@@ -442,7 +445,7 @@ class Viewer3D(QtWidgets.QLabel):
         """
         Event handling right-click contextMenu
         """
-        if Global.simulation_initialized:
+        if self.main_window.isRunning():
             self.menu_simulation.exec_(self.mapToGlobal(pos))
         else:
             QtWidgets.QMessageBox.information(self, "Information", "Context menu available only during the simulation.")
@@ -465,7 +468,7 @@ class Viewer3D(QtWidgets.QLabel):
         key_pressed = event.key()
 
         # Check if key is in the user's key map an then call associated function
-        for k, value in Global.main_window.simulation.key_map.items():
+        for k, value in self.main_window.simulation.key_map.items():
             if "-" in k:
                 [key_ascii, key_state] = k.split("-")
             else:
@@ -477,7 +480,7 @@ class Viewer3D(QtWidgets.QLabel):
                 break
 
     def isSimulating(self):
-        return (Global.main_window.state == State.SIMULATING and not Global.main_window.paused) and Global.main_window.simulation is not None
+        return (self.main_window.state == State.SIMULATING and not self.main_window.paused) and self.main_window.simulation is not None
 
     def keyPressEvent(self, event):
         if self.isSimulating():
@@ -502,7 +505,7 @@ class Viewer3D(QtWidgets.QLabel):
 
     def mouseDoubleClickEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.LeftButton:
-            Global.main_window.simulation.resetCamera()
+            self.main_window.simulation.resetCamera()
 
     def mouseMoveEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None:
@@ -526,11 +529,11 @@ class Viewer3D(QtWidgets.QLabel):
             height = yn - y0
 
             # Transform coordinates from PyQt (0, n) to Panda (-1, 1)
-            Global.main_window.simulation.mouse_x = pyqtToPanda(x, width)
-            Global.main_window.simulation.mouse_y = pyqtToPanda(y, height) * (-1)
+            self.main_window.simulation.mouse_x = pyqtToPanda(x, width)
+            self.main_window.simulation.mouse_y = pyqtToPanda(y, height) * (-1)
 
             # Pass the movement commands to Panda
-            if self.mouse_inside_working_area and Global.main_window.simulation.mouse_feature == "":
+            if self.mouse_inside_working_area and self.main_window.simulation.mouse_feature == "":
                 feature = ""
                 if event.buttons() == QtCore.Qt.LeftButton:
                     feature = "rotate"
@@ -539,29 +542,29 @@ class Viewer3D(QtWidgets.QLabel):
                 if feature != "":
                     start_fn = self.createStartMouseWorkFn(self.width() / 2, self.height() / 2)
                     stop_fn = self.createStopMouseWorkFn()
-                    Global.main_window.simulation.startMouseWork(feature, start_fn, stop_fn)
+                    self.main_window.simulation.startMouseWork(feature, start_fn, stop_fn)
 
     def mousePressEvent(self, event):
         if self.isSimulating() and self.mouse_working_area is not None and event.buttons() == QtCore.Qt.RightButton:
             self.showContextMenu(event.pos())
 
     def mouseReleaseEvent(self, event):
-        if self.isSimulating() and Global.main_window.simulation.mouse_feature != "":
-            Global.main_window.simulation.stopMouseWork()
+        if self.isSimulating() and self.main_window.simulation.mouse_feature != "":
+            self.main_window.simulation.stopMouseWork()
 
     def wheelEvent(self, event):
         if self.isSimulating()and self.mouse_inside_working_area:
             mouse_pos = event.pos()
             start_fn = self.createStartMouseWorkFn(mouse_pos.x(), mouse_pos.y())
             stop_fn = self.createStopMouseWorkFn()
-            Global.main_window.simulation.startMouseWork("zoom", start_fn, stop_fn)
-            Global.main_window.simulation.mouse_steps = event.angleDelta().y()
+            self.main_window.simulation.startMouseWork("zoom", start_fn, stop_fn)
+            self.main_window.simulation.mouse_steps = event.angleDelta().y()
 
     def updateElements3d(self):
         """
         Refresh controls for each time step.
         """
-        if Global.simulation_initialized:
+        if self.main_window.isRunning():
             # Draw the tree recursively from top region.
             self.drawNode(self.top_region, False)
 
@@ -743,7 +746,7 @@ class Viewer3D(QtWidgets.QLabel):
         if is_visible:
             # Draw the input bit
             if not bit.tree3d_initialized:
-                bit.tree3d_item_np = Global.main_window.simulation.createBit(bit.tree3d_pos)
+                bit.tree3d_item_np = self.main_window.simulation.createBit(bit.tree3d_pos)
                 bit.tree3d_initialized = True
 
             # Update the color
@@ -783,7 +786,7 @@ class Viewer3D(QtWidgets.QLabel):
         if is_visible:
             # Draw the cell
             if not cell.tree3d_initialized:
-                cell.tree3d_item_np = Global.main_window.simulation.createCell(cell.tree3d_pos)
+                cell.tree3d_item_np = self.main_window.simulation.createCell(cell.tree3d_pos)
                 cell.tree3d_initialized = True
 
             # Update the color
@@ -888,7 +891,7 @@ class Viewer3D(QtWidgets.QLabel):
         if is_visible:
             # Draw the segment
             if not segment.tree3d_initialized:
-                segment.tree3d_item_np = Global.main_window.simulation.createSegment(segment.tree3d_start_pos, segment.tree3d_end_pos)
+                segment.tree3d_item_np = self.main_window.simulation.createSegment(segment.tree3d_start_pos, segment.tree3d_end_pos)
                 segment.tree3d_initialized = True
 
             # Update the color
@@ -898,7 +901,7 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             segment.tree3d_initialized = False
             if segment.tree3d_item_np is not None:
-                Global.main_window.simulation.removeElement(segment.tree3d_item_np)
+                self.main_window.simulation.removeElement(segment.tree3d_item_np)
 
         # Draw/update all synapses of this segment
         for synapse in segment.synapses:
@@ -935,7 +938,7 @@ class Viewer3D(QtWidgets.QLabel):
         if is_visible and segment_is_visible:
             # Draw the synapse
             if not synapse.tree3d_initialized:
-                synapse.tree3d_item_np = Global.main_window.simulation.createSynapse(segment.tree3d_end_pos, synapse.input_elem.tree3d_pos)
+                synapse.tree3d_item_np = self.main_window.simulation.createSynapse(segment.tree3d_end_pos, synapse.input_elem.tree3d_pos)
                 synapse.tree3d_initialized = True
 
             # Update the color
@@ -945,7 +948,7 @@ class Viewer3D(QtWidgets.QLabel):
         else:
             synapse.tree3d_initialized = False
             if synapse.tree3d_item_np is not None:
-                Global.main_window.simulation.removeElement(synapse.tree3d_item_np)
+                self.main_window.simulation.removeElement(synapse.tree3d_item_np)
 
     def selectView(self, view):
         """
@@ -1065,7 +1068,7 @@ class Viewer3D(QtWidgets.QLabel):
 
     def menuView_click(self, event):
         menu_clicked = self.sender()
-        for view in Global.views:
+        for view in self.views:
             if view['menu'] == menu_clicked:
                 self.selectView(view)
                 break
@@ -1083,7 +1086,7 @@ class Viewer3D(QtWidgets.QLabel):
             view = NEW_VIEW
             view['name'] = entered_text
             view['menu'] = menu
-            Global.views.append(view)
+            self.views.append(view)
             self.menu_views.addAction(menu)
 
             self.selectView(view)
@@ -1113,11 +1116,16 @@ class Viewer3D(QtWidgets.QLabel):
         self.selected_view['show_distal_synapses_none'] = self.menu_show_distal_synapses_none.isChecked()
         self.selected_view['show_distal_synapses_connected'] = self.menu_show_distal_synapses_connected.isChecked()
         self.selected_view['show_distal_synapses_active'] = self.menu_show_distal_synapses_active.isChecked()
-        Global.saveConfig()
+
+        views = copy.deepcopy(self.views)
+        for view in views:
+            view['menu'] = None
+        self.main_window.config['views'] = views
+        self.main_window.saveConfig()
 
     def menuViewsDelete_click(self, event):
         self.menu_views.removeAction(self.selected_view['menu'])
-        Global.views.remove(self.selected_view)
+        self.views.remove(self.selected_view)
 
         # Set 'Default' view as initial view
         self.selectView(self.default_view)

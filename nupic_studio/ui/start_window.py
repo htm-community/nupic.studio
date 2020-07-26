@@ -1,15 +1,15 @@
 ﻿import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
 
 
 class StartWindow(QtWidgets.QDialog):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QDialog.__init__(self)
+        self.main_window = main_window
         self.initUI()
 
     def initUI(self):
@@ -38,17 +38,16 @@ class StartWindow(QtWidgets.QDialog):
         # self
         self.setLayout(layout)
         self.setWindowTitle("NuPIC Studio")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
         self.resize(350, 50)
 
     def buttonNew_click(self, event):
-        if Global.main_window.newProject():
-            Global.main_window.showMaximized()
+        if self.main_window.newProject():
+            self.main_window.showMaximized()
             self.close()
 
     def buttonOpen_click(self, event):
-        if Global.main_window.openProject():
-            Global.main_window.showMaximized()
+        if self.main_window.openProject():
+            self.main_window.showMaximized()
             self.close()
 
     def buttonClose_click(self, event):

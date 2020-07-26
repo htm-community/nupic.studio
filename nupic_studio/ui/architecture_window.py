@@ -1,5 +1,5 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, State, Global
 from nupic_studio.htm.node import NodeType, Node
 from nupic_studio.htm.node_region import Region
 from nupic_studio.htm.node_sensor import Sensor
@@ -9,17 +9,18 @@ from nupic_studio.ui.node_sensor_window import SensorWindow
 
 class ArchitectureWindow(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QWidget.__init__(self)
+        self.main_window = main_window
         self.initUI()
 
     def initUI(self):
 
         # design_panel
-        self.design_panel = DesignPanel()
+        self.design_panel = DesignPanel(self.main_window)
 
         # tab_page_design_layout
         tab_page_design_layout = QtWidgets.QHBoxLayout()
@@ -58,7 +59,7 @@ class ArchitectureWindow(QtWidgets.QWidget):
         self.setMinimumWidth(300)
         self.setMinimumHeight(300)
         self.setWindowTitle("Network Architecture")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
 
     def updateCode(self):
         """
@@ -70,11 +71,12 @@ class ArchitectureWindow(QtWidgets.QWidget):
 
 class DesignPanel(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QWidget.__init__(self)
+        self.main_window = main_window
 
         # Node that is on top of the hierarchy.
         self.top_region = Region("TopRegion")
@@ -308,15 +310,15 @@ class DesignPanel(QtWidgets.QWidget):
                 self.repaint()
 
                 # Refresh dependents tools
-                Global.simulation_window.refreshControls()
-                Global.node_information_window.refreshControls()
+                self.main_window.simulation_window.refreshControls()
+                self.main_window.node_information_window.refreshControls()
         elif event.buttons() == QtCore.Qt.RightButton:
             self.under_mouse_node = self.nodeAtPoint(self.top_region, event.pos())
             if self.under_mouse_node != None:
                 # Don't let the user delete the top node.
-                self.menu_node_add_region.setEnabled(not Global.simulation_initialized and self.under_mouse_node.type != NodeType.SENSOR)
-                self.menu_node_add_sensor.setEnabled(not Global.simulation_initialized and self.under_mouse_node.type != NodeType.SENSOR)
-                self.menu_node_delete.setEnabled(not Global.simulation_initialized and self.under_mouse_node != self.top_region)
+                self.menu_node_add_region.setEnabled(not self.main_window.isRunning() and self.under_mouse_node.type != NodeType.SENSOR)
+                self.menu_node_add_sensor.setEnabled(not self.main_window.isRunning() and self.under_mouse_node.type != NodeType.SENSOR)
+                self.menu_node_delete.setEnabled(not self.main_window.isRunning() and self.under_mouse_node != self.top_region)
 
                 # Display the context menu.
                 self.menu_node.exec_(self.mapToGlobal(event.pos()))
@@ -326,23 +328,23 @@ class DesignPanel(QtWidgets.QWidget):
         View node propeerties.
         """
         if self.under_mouse_node.type == NodeType.REGION:
-            region_window = RegionWindow()
+            region_window = RegionWindow(self.main_window)
             region_window.setControlsValues()
             dialog_result = region_window.exec_()
 
             # Update controls with the new changes
             if dialog_result == QtWidgets.QDialog.Accepted:
-                Global.main_window.markProjectChanges(True)
-                Global.architecture_window.updateCode()
+                self.main_window.markProjectChanges(True)
+                self.updateCode()
         elif self.under_mouse_node.type == NodeType.SENSOR:
-            sensor_window = SensorWindow()
+            sensor_window = SensorWindow(self.main_window)
             sensor_window.setControlsValues()
             dialog_result = sensor_window.exec_()
 
             # Update controls with the new changes
             if dialog_result == QtWidgets.QDialog.Accepted:
-                Global.main_window.markProjectChanges(True)
-                Global.architecture_window.updateCode()
+                self.main_window.markProjectChanges(True)
+                self.updateCode()
 
     def menuNodeAddRegion_click(self, event):
         """
@@ -357,7 +359,7 @@ class DesignPanel(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.warning(self, "Warning", "'" + entered_text + "' is not a valid name. Only characters, numbers and _ are accepted.")
                 return
 
-            Global.main_window.markProjectChanges(True)
+            self.main_window.markProjectChanges(True)
 
             # Add new region below highlighted region
             new_region = Region(entered_text)
@@ -365,7 +367,7 @@ class DesignPanel(QtWidgets.QWidget):
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architecture_window.updateCode()
+            self.updateCode()
 
     def menuNodeAddSensor_click(self, event):
         """
@@ -380,7 +382,7 @@ class DesignPanel(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.warning(self, "Warning", "'" + entered_text + "' is not a valid name. Only characters, numbers and _ are accepted.")
                 return
 
-            Global.main_window.markProjectChanges(True)
+            self.main_window.markProjectChanges(True)
 
             # Add new sensor below highlighted region
             new_sensor = Sensor(entered_text)
@@ -388,18 +390,18 @@ class DesignPanel(QtWidgets.QWidget):
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architecture_window.updateCode()
+            self.updateCode()
 
     def menuNodeDelete_click(self, event):
         """
         Delete this node from the tree.
         """
         if QtWidgets.QMessageBox.question(self, "Question", "Are you sure you want to delete this node?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No) == QtWidgets.QMessageBox.Yes:
-            Global.main_window.markProjectChanges(True)
+            self.main_window.markProjectChanges(True)
 
             # Delete the node and its subtree.
             Global.project.network.deleteFeederNode(self.under_mouse_node)
 
             # Redraw the tree to show the updates.
             self.repaint()
-            Global.architecture_window.updateCode()
+            self.updateCode()

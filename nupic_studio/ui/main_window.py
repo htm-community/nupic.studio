@@ -3,10 +3,14 @@ import os
 import time
 import webbrowser
 from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio import MachineState
+from nupic_studio import __version__, REPO_DIR, MachineState
 from nupic_studio.simulation import Simulation
 from nupic_studio.htm import MAX_PREVIOUS_STEPS, MAX_PREVIOUS_STEPS_WITH_INFERENCE
-from nupic_studio.ui import Global, State
+from nupic_studio.ui import ICON, Global, State, DEFAULT_CONFIGURATION
+from nupic_studio.ui.architecture_window import ArchitectureWindow
+from nupic_studio.ui.node_information_window import NodeInformationWindow
+from nupic_studio.ui.simulation_window import SimulationWindow
+from nupic_studio.ui.output_window import OutputWindow
 from nupic_studio.ui.project_properties_window import ProjectPropertiesWindow
 
 
@@ -17,13 +21,12 @@ class MainWindow(QtWidgets.QMainWindow):
         Initializes a new instance of this class.
         """
         QtWidgets.QMainWindow.__init__(self)
-
         self.state = State.NO_STARTED
         self.paused = False
         self.simulation = None
         self.pending_project_changes = False
         self.num_steps_pending = 0
-
+        self.loadConfig()
         self.initUI()
 
     def initUI(self):
@@ -148,28 +151,28 @@ class MainWindow(QtWidgets.QMainWindow):
         # button_init
         self.button_init = QtWidgets.QAction(self)
         self.button_init.setEnabled(False)
-        self.button_init.setIcon(QtGui.QIcon(Global.app_path + '/images/button_initialize.png'))
+        self.button_init.setIcon(QtGui.QIcon(os.path.join(REPO_DIR, 'images', 'button_initialize.png')))
         self.button_init.setToolTip("Initialize simulation")
         self.button_init.triggered.connect(self.buttonInit_click)
 
         # button_step
         self.button_step = QtWidgets.QAction(self)
         self.button_step.setEnabled(False)
-        self.button_step.setIcon(QtGui.QIcon(Global.app_path + '/images/button_step.png'))
+        self.button_step.setIcon(QtGui.QIcon(os.path.join(REPO_DIR, 'images', 'button_step.png')))
         self.button_step.setToolTip("Forward one time step")
         self.button_step.triggered.connect(self.buttonStep_click)
 
         # button_multiple_steps
         self.button_multiple_steps = QtWidgets.QAction(self)
         self.button_multiple_steps.setEnabled(False)
-        self.button_multiple_steps.setIcon(QtGui.QIcon(Global.app_path + '/images/button_multiple_steps.png'))
+        self.button_multiple_steps.setIcon(QtGui.QIcon(os.path.join(REPO_DIR, 'images', 'button_multiple_steps.png')))
         self.button_multiple_steps.setToolTip("Forward a specific number of time steps")
         self.button_multiple_steps.triggered.connect(self.buttonMultipleSteps_click)
 
         # button_stop
         self.button_stop = QtWidgets.QAction(self)
         self.button_stop.setEnabled(False)
-        self.button_stop.setIcon(QtGui.QIcon(Global.app_path + '/images/button_stop.png'))
+        self.button_stop.setIcon(QtGui.QIcon(os.path.join(REPO_DIR, 'images', 'button_stop.png')))
         self.button_stop.setToolTip("Stop simulation")
         self.button_stop.triggered.connect(self.buttonStop_click)
 
@@ -197,25 +200,45 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tool_bar.addWidget(self.text_box_step)
         self.tool_bar.addWidget(self.slider_step)
 
+        # output_window
+        self.architecture_window = ArchitectureWindow(self)
+        self.architecture_window.setFocusPolicy(QtCore.Qt.StrongFocus)
+
         # dock_architecture
         self.dock_architecture = QtWidgets.QDockWidget()
-        self.dock_architecture.setWidget(Global.architecture_window)
-        self.dock_architecture.setWindowTitle(Global.architecture_window.windowTitle())
+        self.dock_architecture.setWidget(self.architecture_window)
+        self.dock_architecture.setWindowTitle(self.architecture_window.windowTitle())
+        self.dock_architecture.setObjectName(self.architecture_window.windowTitle())
+
+        # simulation_window
+        self.simulation_window = SimulationWindow(self)
+        self.simulation_window.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # dock_simulation
         self.dock_simulation = QtWidgets.QDockWidget()
-        self.dock_simulation.setWidget(Global.simulation_window)
-        self.dock_simulation.setWindowTitle(Global.simulation_window.windowTitle())
+        self.dock_simulation.setWidget(self.simulation_window)
+        self.dock_simulation.setWindowTitle(self.simulation_window.windowTitle())
+        self.dock_simulation.setObjectName(self.simulation_window.windowTitle())
+
+        # node_information_window
+        self.node_information_window = NodeInformationWindow(self)
+        self.node_information_window.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # dock_node_information
         self.dock_node_information = QtWidgets.QDockWidget()
-        self.dock_node_information.setWidget(Global.node_information_window)
-        self.dock_node_information.setWindowTitle(Global.node_information_window.windowTitle())
+        self.dock_node_information.setWidget(self.node_information_window)
+        self.dock_node_information.setWindowTitle(self.node_information_window.windowTitle())
+        self.dock_node_information.setObjectName(self.node_information_window.windowTitle())
+
+        # output_window
+        self.output_window = OutputWindow()
+        self.output_window.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # dock_output
         self.dock_output = QtWidgets.QDockWidget()
-        self.dock_output.setWidget(Global.output_window)
-        self.dock_output.setWindowTitle(Global.output_window.windowTitle())
+        self.dock_output.setWidget(self.output_window)
+        self.dock_output.setWindowTitle(self.output_window.windowTitle())
+        self.dock_output.setObjectName(self.output_window.windowTitle())
 
         # self
         self.addToolBar(self.tool_bar)
@@ -227,7 +250,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabifyDockWidget(self.dock_node_information, self.dock_architecture)
         #self.setCentralWidget(self.dock_simulation)
         self.setWindowTitle("NuPIC Studio")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
 
     def cleanUp(self):
         """
@@ -237,10 +260,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.enableSteeringButtons(False)
 
         # Update architecture controls
-        Global.architecture_window.design_panel.top_region = Global.project.network.nodes[0]
-        Global.architecture_window.design_panel.selected_node = Global.project.network.nodes[0]
-        Global.architecture_window.design_panel.repaint()
-        Global.architecture_window.updateCode()
+        self.architecture_window.design_panel.top_region = Global.project.network.nodes[0]
+        self.architecture_window.design_panel.selected_node = Global.project.network.nodes[0]
+        self.architecture_window.design_panel.repaint()
+        self.architecture_window.updateCode()
 
         # Reset the controls
         self.clearControls()
@@ -249,7 +272,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Enables or disables controls related to simulation.
         """
-        Global.simulation_initialized = enable
         self.button_init.setEnabled(not enable)
         if not enable:
             self.text_box_step.setText("")
@@ -268,14 +290,14 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Reset the controls.
         """
-        Global.simulation_window.clearControls()
-        Global.output_window.clearControls()
-        Global.node_information_window.clearControls()
+        self.simulation_window.clearControls()
+        self.output_window.clearControls()
+        self.node_information_window.clearControls()
 
     def update(self):
         if self.state == State.SIMULATING:
             self.simulation.taskMgr.step()
-            Global.simulation_window.update()
+            self.simulation_window.update()
 
     def getProjectPath(self):
         return os.path.dirname(Global.project.file_name)
@@ -287,16 +309,34 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Refresh controls for each time step.
         """
-        if Global.simulation_initialized :
+        if self.state == State.SIMULATING:
             max_time = Global.curr_step + 1
             sel_step = max_time - (self.slider_step.maximum() - self.slider_step.value())
             self.text_box_step.setText(str(sel_step) + "/" + str(max_time))
         else:
             self.text_box_step.setText("")
         if self.dock_simulation.isVisible():
-            Global.simulation_window.refreshControls()
+            self.simulation_window.refreshControls()
         if self.dock_node_information.isVisible():
-            Global.node_information_window.refreshControls()
+            self.node_information_window.refreshControls()
+
+    def loadConfig(self):
+        """
+        Loads the content from XML file to config the program.
+        """
+        file_name = os.path.join(REPO_DIR, "config.json")
+        try:
+            self.config = eval(open(file_name, 'r').read())
+        except:
+            QtWidgets.QMessageBox.warning(None, "Warning", "Cannot read the config file (" + file_name + ")! Configuration was reseted!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
+            self.config = DEFAULT_CONFIGURATION
+
+    def saveConfig(self):
+        """
+        Saves the content from current program's configuration.
+        """
+        file_name = os.path.join(REPO_DIR, "config.json")
+        open(file_name, 'w').write(str(self.config))
 
     def markProjectChanges(self, has_changes):
         """
@@ -349,7 +389,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.checkCurrentConfigChanges() != QtWidgets.QMessageBox.Cancel:
 
             # Ask user for an existing file
-            selected_file = QtWidgets.QFileDialog().getOpenFileName(self, "Open Project", Global.app_path + '/projects', "NuPIC project files (*.nuproj)")[0]
+            selected_file = QtWidgets.QFileDialog().getOpenFileName(self, "Open Project", os.path.join(REPO_DIR, 'projects'), "NuPIC project files (*.nuproj)")[0]
 
             # If file exists, continue operation
             if selected_file != '':
@@ -374,7 +414,7 @@ class MainWindow(QtWidgets.QMainWindow):
         file_name = Global.project.file_name
         if file_name == '':
             # Ask user for valid file
-            selected_file = QtWidgets.QFileDialog().getSaveFileName(self, "Save Project", Global.app_path + '/projects', "NuPIC project files (*.nuproj)")[0]
+            selected_file = QtWidgets.QFileDialog().getSaveFileName(self, "Save Project", os.path.join(REPO_DIR, 'projects'), "NuPIC project files (*.nuproj)")[0]
 
             # If file exists, continue operation
             if selected_file != '':
@@ -430,18 +470,18 @@ class MainWindow(QtWidgets.QMainWindow):
         project_properties_window.setControlsValues()
         dialog_result = project_properties_window.exec_()
         if dialog_result == QtWidgets.QDialog.Accepted:
-            Global.main_window.markProjectChanges(True)
+            self.markProjectChanges(True)
 
     def menuViewArchitecture_click(self, event):
         self.dock_architecture.show()
 
     def menuViewSimulation_click(self, event):
         self.dock_simulation.show()
-        Global.simulation_window.refreshControls()
+        self.simulation_window.refreshControls()
 
     def menuViewNodeInformation_click(self, event):
         self.dock_node_information.show()
-        Global.node_information_window.refreshControls()
+        self.node_information_window.refreshControls()
 
     def menuViewOutput_click(self, event):
         self.dock_output.show()
@@ -453,7 +493,7 @@ class MainWindow(QtWidgets.QMainWindow):
         webbrowser.open('https://github.com/nupic-community/nupic.studio')
 
     def menuAbout_click(self, event):
-        QtWidgets.QMessageBox.information(self, "Information", "v. " + Global.version + "\nGet more info at our home page.")
+        QtWidgets.QMessageBox.information(self, "Information", "v. " + __version__ + "\nGet more info at our home page.")
 
     def buttonInit_click(self, event):
         """
@@ -477,23 +517,23 @@ class MainWindow(QtWidgets.QMainWindow):
             Global.sel_step = 0
             Global.time_steps_predictions_chart = MachineState(0, MAX_PREVIOUS_STEPS_WITH_INFERENCE)
 
-            Global.output_window.addText("Initialization: " + "{0:.3f}".format(end_time - start_time) + " secs")
-            Global.output_window.addText("")
-            Global.output_window.addText("Step\tTime (secs)\tAccuracy (%)")
+            self.output_window.addText("Initialization: " + "{0:.3f}".format(end_time - start_time) + " secs")
+            self.output_window.addText("")
+            self.output_window.addText("Step\tTime (secs)\tAccuracy (%)")
 
             # Perfoms actions related to time step progression.
             start_time = time.time()
             Global.project.network.nextStep()
             Global.project.network.calculateStatistics()
             end_time = time.time()
-            Global.output_window.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
+            self.output_window.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
 
             # Disable relevant buttons:
             self.enableSteeringButtons(True)
             self.enableSimulationButtons(True)
 
             # Update controls
-            Global.simulation_window.viewer_3d.initializeControls(Global.project.network.nodes[0])
+            self.simulation_window.viewer_3d.initializeControls(Global.project.network.nodes[0])
             self.refreshControls()
 
             self.update_timer.setInterval(1)
@@ -517,7 +557,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Global.project.network.nextStep()
         Global.project.network.calculateStatistics()
         end_time = time.time()
-        Global.output_window.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
+        self.output_window.addText(str(Global.curr_step + 1) + "\t{0:.3f}".format(end_time - start_time) + "\t{0:.3f}".format(Global.project.network.stats_precision_rate))
 
         # Update controls
         self.refreshControls()
@@ -538,7 +578,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         while self.num_steps_pending > 0:
             self.buttonStep_click(event)
-            Global.app.processEvents()
             self.num_steps_pending -= 1
 
     def buttonStop_click(self, event):

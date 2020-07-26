@@ -1,7 +1,6 @@
-import collections
-import json
 import pkg_resources
 from pathlib import Path
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 __version__ = "1.1.3"
 REPO_DIR = str(Path(__file__).parent)
@@ -32,17 +31,6 @@ version_required_min = "0.2.2"
 version_required_max = "99.99.99"
 if not (versionList(version_required_min) <= versionList(found_nupic.version) <= versionList(version_required_max)):
     raise Exception("Unexpected version of NuPIC Library! Expected between %s and %s, but detected %s in %s." % (version_required_min, version_required_max, found_nupic.version, found_nupic.location))
-
-
-try:
-    from PyQt5 import QtGui, QtCore, QtWidgets, QtOpenGL
-except ImportError:
-    msg = "PyQt4 library not found! Access http://pyqt.sourceforge.net/Docs/PyQt4/installation.html for get help on how install it" \
-        "...or use a package manager like apt, yum, or brew:\n" \
-        "    apt-get install python-qt4 python-qt4-gl\n" \
-        "    yum install PyQt4\n" \
-        "    brew install pyqt"
-    raise ImportError(msg)
 
 
 class MachineState(object):

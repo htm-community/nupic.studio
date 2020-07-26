@@ -1,17 +1,19 @@
 ﻿import copy
 from PyQt5 import QtGui, QtCore, QtWidgets
+from nupic_studio import REPO_DIR
 from nupic_studio.htm.node_sensor import DataSourceType, PredictionsMethod
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, Global
 from nupic_studio.ui.node_sensor_encoding_window import EncodingWindow
 
 
 class SensorWindow(QtWidgets.QDialog):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QDialog.__init__(self)
+        self.main_window = main_window
         self.initUI()
 
         # Temporary list of encodings that is being edited.
@@ -32,7 +34,7 @@ class SensorWindow(QtWidgets.QDialog):
         self.spinner_sensor_width.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_sensor_width.setToolTip("Number of output bits in the X direction for this sensor.")
         self.spinner_sensor_width.setMaximum(1000)
-        self.spinner_sensor_width.setEnabled(not Global.simulation_initialized)
+        self.spinner_sensor_width.setEnabled(not self.main_window.isRunning())
 
         # label_sensor_height
         self.label_sensor_height = QtWidgets.QLabel()
@@ -44,7 +46,7 @@ class SensorWindow(QtWidgets.QDialog):
         self.spinner_sensor_height.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_sensor_height.setToolTip("Number of output bits in the Y direction for this sensor.")
         self.spinner_sensor_height.setMaximum(1000)
-        self.spinner_sensor_height.setEnabled(not Global.simulation_initialized)
+        self.spinner_sensor_height.setEnabled(not self.main_window.isRunning())
 
         # radio_button_data_source_file
         self.radio_button_data_source_file = QtWidgets.QRadioButton()
@@ -101,7 +103,7 @@ class SensorWindow(QtWidgets.QDialog):
         self.group_box_data_source_type = QtWidgets.QGroupBox()
         self.group_box_data_source_type.setLayout(group_box_data_source_type_layout)
         self.group_box_data_source_type.setTitle("Data Source Type")
-        self.group_box_data_source_type.setEnabled(not Global.simulation_initialized)
+        self.group_box_data_source_type.setEnabled(not self.main_window.isRunning())
 
         # label_predictions_method
         self.label_predictions_method = QtWidgets.QLabel()
@@ -112,29 +114,29 @@ class SensorWindow(QtWidgets.QDialog):
         self.combo_box_predictions_method = QtWidgets.QComboBox()
         self.combo_box_predictions_method.addItem(PredictionsMethod.RECONSTRUCTION)
         self.combo_box_predictions_method.addItem(PredictionsMethod.CLASSIFICATION)
-        self.combo_box_predictions_method.setEnabled(not Global.simulation_initialized)
+        self.combo_box_predictions_method.setEnabled(not self.main_window.isRunning())
 
         # button_new_encoding
         self.button_new_encoding = QtWidgets.QPushButton()
         self.button_new_encoding.setText("New...")
         self.button_new_encoding.clicked.connect(self.buttonNewEncoding_click)
-        self.button_new_encoding.setEnabled(not Global.simulation_initialized)
+        self.button_new_encoding.setEnabled(not self.main_window.isRunning())
 
         # button_edit_encoding
         self.button_edit_encoding = QtWidgets.QPushButton()
         self.button_edit_encoding.setText("Edit...")
         self.button_edit_encoding.clicked.connect(self.buttonEditEncoding_click)
-        self.button_edit_encoding.setEnabled(not Global.simulation_initialized)
+        self.button_edit_encoding.setEnabled(not self.main_window.isRunning())
 
         # button_delete_encoding
         self.button_delete_encoding = QtWidgets.QPushButton()
         self.button_delete_encoding.setText("Delete")
         self.button_delete_encoding.clicked.connect(self.buttonDeleteEncoding_click)
-        self.button_delete_encoding.setEnabled(not Global.simulation_initialized)
+        self.button_delete_encoding.setEnabled(not self.main_window.isRunning())
 
         # list_box_encodings
         self.list_box_encodings = QtWidgets.QListWidget()
-        self.list_box_encodings.setEnabled(not Global.simulation_initialized)
+        self.list_box_encodings.setEnabled(not self.main_window.isRunning())
 
         # encodings_buttons_layout
         encodings_buttons_layout = QtWidgets.QHBoxLayout()
@@ -170,7 +172,7 @@ class SensorWindow(QtWidgets.QDialog):
         # button_box
         self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.buttonOk_click)
-        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulation_initialized)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not self.main_window.isRunning())
         self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.buttonCancel_click)
 
         # layout
@@ -182,7 +184,7 @@ class SensorWindow(QtWidgets.QDialog):
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Sensor Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.resize(400, 200)
 
     def setControlsValues(self):
@@ -191,7 +193,7 @@ class SensorWindow(QtWidgets.QDialog):
         """
 
         # Set controls value with sensor params
-        node = Global.architecture_window.design_panel.under_mouse_node
+        node = self.main_window.architecture_window.design_panel.under_mouse_node
         self.spinner_sensor_width.setValue(node.width)
         self.spinner_sensor_height.setValue(node.height)
 
@@ -220,8 +222,8 @@ class SensorWindow(QtWidgets.QDialog):
         if self.list_box_encodings.count() > 0:
             if self.list_box_encodings.currentRow() == -1:
                 self.list_box_encodings.setCurrentRow(0)
-            self.button_edit_encoding.setEnabled(not Global.simulation_initialized)
-            self.button_delete_encoding.setEnabled(not Global.simulation_initialized)
+            self.button_edit_encoding.setEnabled(not self.main_window.isRunning())
+            self.button_delete_encoding.setEnabled(not self.main_window.isRunning())
         else:
             self.button_edit_encoding.setEnabled(False)
             self.button_delete_encoding.setEnabled(False)
@@ -266,7 +268,7 @@ class SensorWindow(QtWidgets.QDialog):
         predictions_method = str(self.combo_box_predictions_method.currentText())
 
         # If anything has changed
-        node = Global.architecture_window.design_panel.under_mouse_node
+        node = self.main_window.architecture_window.design_panel.under_mouse_node
         if node.width != width or node.height != height or node.predictions_method != predictions_method or node.data_source_type != data_source_type or node.file_name != file_name or node.database_connection_string != database_connection_string or node.database_table != database_table or self.encodings_changed:
             # Set sensor params with controls values
             node.width = width
@@ -287,7 +289,7 @@ class SensorWindow(QtWidgets.QDialog):
 
     def buttonBrowseFile_click(self, event):
         # Ask user for an existing file
-        selected_file = QtWidgets.QFileDialog().getOpenFileName(self, "Open File", Global.app_path + '/projects', "Input files (*.csv)")[0]
+        selected_file = QtWidgets.QFileDialog().getOpenFileName(self, "Open File", os.path.join(REPO_DIR, 'projects'), "Input files (*.csv)")[0]
 
         # If file exists, set data source file
         if selected_file != '':
@@ -295,7 +297,7 @@ class SensorWindow(QtWidgets.QDialog):
             self.text_box_file.setText(selected_file)
 
     def radioButtonDataSource_click(self, event):
-        if not Global.simulation_initialized:
+        if not self.main_window.isRunning():
             flag = self.radio_button_data_source_file.isChecked()
             self.text_box_file.setEnabled(flag)
             self.button_browse_file.setEnabled(flag)

@@ -1,14 +1,15 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, State, Global
 
 
 class RegionWindow(QtWidgets.QDialog):
 
-    def __init__(self):
+    def __init__(self, main_window):
         """
         Initializes a new instance of this class.
         """
         QtWidgets.QDialog.__init__(self)
+        self.main_window = main_window
         self.initUI()
 
     def initUI(self):
@@ -22,7 +23,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_width = QtWidgets.QSpinBox()
         self.spinner_width.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_width.setMinimum(3)
-        self.spinner_width.setEnabled(not Global.simulation_initialized)
+        self.spinner_width.setEnabled(not self.main_window.isRunning())
         self.spinner_width.setToolTip("")
 
         # label_height
@@ -34,7 +35,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_height = QtWidgets.QSpinBox()
         self.spinner_height.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_height.setMinimum(3)
-        self.spinner_height.setEnabled(not Global.simulation_initialized)
+        self.spinner_height.setEnabled(not self.main_window.isRunning())
         self.spinner_height.setToolTip("")
 
         # main_layout
@@ -52,7 +53,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_potential_radius
         self.spinner_potential_radius = QtWidgets.QSpinBox()
         self.spinner_potential_radius.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_potential_radius.setEnabled(not Global.simulation_initialized)
+        self.spinner_potential_radius.setEnabled(not self.main_window.isRunning())
         self.spinner_potential_radius.setToolTip("This parameter determines the extent of the input that each column can potentially be connected to. This can be thought of as the input bits that are visible to each column, or a 'receptiveField' of the field of vision. A large enough value will result in 'global coverage', meaning that each column can potentially be connected to every input bit. This parameter defines a square (or hyper square) area: a column will have a max square potential pool with sides of length 2 * potential_radius + 1.")
 
         # label_potential_pct
@@ -66,13 +67,13 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_potential_pct.setMaximum(1)
         self.spinner_potential_pct.setDecimals(2)
         self.spinner_potential_pct.setSingleStep(0.01)
-        self.spinner_potential_pct.setEnabled(not Global.simulation_initialized)
+        self.spinner_potential_pct.setEnabled(not self.main_window.isRunning())
         self.spinner_potential_pct.setToolTip("The percent of the inputs, within a column's potential radius, that a column can be connected to. If set to 1, the column will be connected to every input within its potential radius. This parameter is used to give each column a unique potential pool when a large potential_radius causes overlap between the columns. At initialization time we choose ((2*potential_radius + 1)^(# inputDimensions) * potential_pct) input bits to comprise the column's potential pool.")
 
         # checkbox_global_inhibition
         self.checkbox_global_inhibition = QtWidgets.QCheckBox()
         self.checkbox_global_inhibition.setText("Global Inhibition")
-        self.checkbox_global_inhibition.setEnabled(not Global.simulation_initialized)
+        self.checkbox_global_inhibition.setEnabled(not self.main_window.isRunning())
         self.checkbox_global_inhibition.setToolTip("If true, then during inhibition phase the winning columns are selected as the most active columns from the region as a whole. Otherwise, the winning columns are selected with respect to their local neighborhoods. Using global inhibition boosts performance x60.")
 
         # label_local_area_density
@@ -86,7 +87,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_local_area_density.setMinimum(-1.0)
         self.spinner_local_area_density.setDecimals(2)
         self.spinner_local_area_density.setSingleStep(0.01)
-        self.spinner_local_area_density.setEnabled(not Global.simulation_initialized)
+        self.spinner_local_area_density.setEnabled(not self.main_window.isRunning())
         self.spinner_local_area_density.setToolTip("The desired density of active columns within a local inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn determined from the average size of the connected potential pools of all columns). The inhibition logic will insure that at most N columns remain ON within a local inhibition area, where N = local_area_density * (total number of columns in inhibition area).")
 
         # label_num_active_columns_per_inh_area
@@ -97,7 +98,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_num_active_columns_per_inh_area
         self.spinner_num_active_columns_per_inh_area = QtWidgets.QSpinBox()
         self.spinner_num_active_columns_per_inh_area.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_num_active_columns_per_inh_area.setEnabled(not Global.simulation_initialized)
+        self.spinner_num_active_columns_per_inh_area.setEnabled(not self.main_window.isRunning())
         self.spinner_num_active_columns_per_inh_area.setToolTip("An alternate way to control the density of the active columns. If num_active_columns_per_inh_area is specified then local_area_density must be less than 0, and vice versa. When using num_active_columns_per_inh_area, the inhibition logic will insure that at most 'num_active_columns_per_inh_area' columns remain ON within a local inhibition area (the size of which is set by the internally calculated inhibitionRadius, which is in turn determined from the average size of the connected receptive fields of all columns). When using this method, as columns learn and grow their effective receptive fields, the inhibitionRadius will grow, and hence the net density of the active columns will *decrease*. This is in contrast to the local_area_density method, which keeps the density of active columns the same regardless of the size of their receptive fields.")
 
         # label_stimulus_threshold
@@ -108,7 +109,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_stimulus_threshold
         self.spinner_stimulus_threshold = QtWidgets.QSpinBox()
         self.spinner_stimulus_threshold.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_stimulus_threshold.setEnabled(not Global.simulation_initialized)
+        self.spinner_stimulus_threshold.setEnabled(not self.main_window.isRunning())
         self.spinner_stimulus_threshold.setToolTip("This is a number specifying the minimum number of synapses that must be on in order for a columns to turn ON. The purpose of this is to prevent noise input from activating columns. Specified as a percent of a fully grown synapse.")
 
         # label_proximal_syn_connected_perm
@@ -121,7 +122,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_proximal_syn_connected_perm.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_proximal_syn_connected_perm.setDecimals(4)
         self.spinner_proximal_syn_connected_perm.setSingleStep(0.0001)
-        self.spinner_proximal_syn_connected_perm.setEnabled(not Global.simulation_initialized)
+        self.spinner_proximal_syn_connected_perm.setEnabled(not self.main_window.isRunning())
         self.spinner_proximal_syn_connected_perm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
         # label_proximal_syn_perm_increment
@@ -134,7 +135,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_proximal_syn_perm_increment.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_proximal_syn_perm_increment.setDecimals(4)
         self.spinner_proximal_syn_perm_increment.setSingleStep(0.0001)
-        self.spinner_proximal_syn_perm_increment.setEnabled(not Global.simulation_initialized)
+        self.spinner_proximal_syn_perm_increment.setEnabled(not self.main_window.isRunning())
         self.spinner_proximal_syn_perm_increment.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
         # label_proximal_syn_perm_decrement
@@ -147,7 +148,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_proximal_syn_perm_decrement.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_proximal_syn_perm_decrement.setDecimals(4)
         self.spinner_proximal_syn_perm_decrement.setSingleStep(0.0001)
-        self.spinner_proximal_syn_perm_decrement.setEnabled(not Global.simulation_initialized)
+        self.spinner_proximal_syn_perm_decrement.setEnabled(not self.main_window.isRunning())
         self.spinner_proximal_syn_perm_decrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
         # group_box_proximal_syn_perm
@@ -175,7 +176,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_min_pct_overlap_duty_cycle.setMaximum(100)
         self.spinner_min_pct_overlap_duty_cycle.setDecimals(3)
         self.spinner_min_pct_overlap_duty_cycle.setSingleStep(0.001)
-        self.spinner_min_pct_overlap_duty_cycle.setEnabled(not Global.simulation_initialized)
+        self.spinner_min_pct_overlap_duty_cycle.setEnabled(not self.main_window.isRunning())
         self.spinner_min_pct_overlap_duty_cycle.setToolTip("A number between 0 and 1.0, used to set a floor on how often a column should have at least stimulus_threshold active inputs. Periodically, each column looks at the overlap duty cycle of all other columns within its inhibition radius and sets its own internal minimal acceptable duty cycle to:\
             min_pct_duty_cycle_before_inh * max(other columns' duty cycles).\
             On each iteration, any column whose overlap duty cycle falls below this computed value will get all of its permanence values boosted up by synPermActiveInc. Raising all permanences in response to a sub-par duty cycle before inhibition allows a cell to search for new inputs when either its previously learned inputs are no longer ever active, or when the vast majority of them have been 'hijacked' by other columns.")
@@ -191,7 +192,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_min_pct_active_duty_cycle.setMaximum(100)
         self.spinner_min_pct_active_duty_cycle.setDecimals(3)
         self.spinner_min_pct_active_duty_cycle.setSingleStep(0.001)
-        self.spinner_min_pct_active_duty_cycle.setEnabled(not Global.simulation_initialized)
+        self.spinner_min_pct_active_duty_cycle.setEnabled(not self.main_window.isRunning())
         self.spinner_min_pct_active_duty_cycle.setToolTip("A number between 0 and 1.0, used to set a floor on how often a column should be activate. Periodically, each column looks at the activity duty cycle of all other columns within its inhibition radius and sets its own internal minimal acceptable duty cycle to:\
             min_pct_duty_cycle_after_inh * max(other columns' duty cycles).\
             On each iteration, any column whose duty cycle after inhibition falls below this computed value will get its internal boost factor increased.")
@@ -205,7 +206,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_duty_cycle_period = QtWidgets.QSpinBox()
         self.spinner_duty_cycle_period.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_duty_cycle_period.setMaximum(1000)
-        self.spinner_duty_cycle_period.setEnabled(not Global.simulation_initialized)
+        self.spinner_duty_cycle_period.setEnabled(not self.main_window.isRunning())
         self.spinner_duty_cycle_period.setToolTip("The period used to calculate duty cycles. Higher values make it take longer to respond to changes in boost or synPerConnectedCell. Shorter values make it more unstable and likely to oscillate.")
 
         # label_max_boost
@@ -218,7 +219,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_max_boost.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_max_boost.setDecimals(2)
         self.spinner_max_boost.setSingleStep(0.01)
-        self.spinner_max_boost.setEnabled(not Global.simulation_initialized)
+        self.spinner_max_boost.setEnabled(not self.main_window.isRunning())
         self.spinner_max_boost.setToolTip("The maximum overlap boost factor. Each column's overlap gets multiplied by a boost factor before it gets considered for inhibition. The actual boost factor for a column is number between 1.0 and max_boost. A boost factor of 1.0 is used if the duty cycle is >= minOverlapDutyCycle, max_boost is used if the duty cycle is 0, and any duty cycle in between is linearly extrapolated from these 2 endpoints.")
 
         # label_sp_seed
@@ -231,7 +232,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_sp_seed.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_sp_seed.setMinimum(-1)
         self.spinner_sp_seed.setMaximum(5000)
-        self.spinner_sp_seed.setEnabled(not Global.simulation_initialized)
+        self.spinner_sp_seed.setEnabled(not self.main_window.isRunning())
         self.spinner_sp_seed.setToolTip("Seed for random values.")
 
         # tab_page_spatial_layout
@@ -272,7 +273,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_cells_per_column = QtWidgets.QSpinBox()
         self.spinner_cells_per_column.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_cells_per_column.setMinimum(1)
-        self.spinner_cells_per_column.setEnabled(not Global.simulation_initialized)
+        self.spinner_cells_per_column.setEnabled(not self.main_window.isRunning())
         self.spinner_cells_per_column.setToolTip("Number of cells per column. More cells, more contextual information")
 
         # label_distal_syn_initial_perm
@@ -285,7 +286,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_distal_syn_initial_perm.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_distal_syn_initial_perm.setDecimals(4)
         self.spinner_distal_syn_initial_perm.setSingleStep(0.0001)
-        self.spinner_distal_syn_initial_perm.setEnabled(not Global.simulation_initialized)
+        self.spinner_distal_syn_initial_perm.setEnabled(not self.main_window.isRunning())
         self.spinner_distal_syn_initial_perm.setToolTip("The initial permanence of an distal synapse.")
 
         # label_distal_syn_connected_perm
@@ -298,7 +299,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_distal_syn_connected_perm.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_distal_syn_connected_perm.setDecimals(4)
         self.spinner_distal_syn_connected_perm.setSingleStep(0.0001)
-        self.spinner_distal_syn_connected_perm.setEnabled(not Global.simulation_initialized)
+        self.spinner_distal_syn_connected_perm.setEnabled(not self.main_window.isRunning())
         self.spinner_distal_syn_connected_perm.setToolTip("The default connected threshold. Any synapse whose permanence value is above the connected threshold is a 'connected synapse', meaning it can contribute to the cell's firing.")
 
         # label_distal_syn_perm_increment
@@ -311,7 +312,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_distal_syn_perm_increment.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_distal_syn_perm_increment.setDecimals(4)
         self.spinner_distal_syn_perm_increment.setSingleStep(0.0001)
-        self.spinner_distal_syn_perm_increment.setEnabled(not Global.simulation_initialized)
+        self.spinner_distal_syn_perm_increment.setEnabled(not self.main_window.isRunning())
         self.spinner_distal_syn_perm_increment.setToolTip("The amount by which an active synapse is incremented in each round. Specified as a percent of a fully grown synapse.")
 
         # label_distal_syn_perm_decrement
@@ -324,7 +325,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_distal_syn_perm_decrement.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_distal_syn_perm_decrement.setDecimals(4)
         self.spinner_distal_syn_perm_decrement.setSingleStep(0.0001)
-        self.spinner_distal_syn_perm_decrement.setEnabled(not Global.simulation_initialized)
+        self.spinner_distal_syn_perm_decrement.setEnabled(not self.main_window.isRunning())
         self.spinner_distal_syn_perm_decrement.setToolTip("The amount by which an inactive synapse is decremented in each round. Specified as a percent of a fully grown synapse.")
 
         # group_box_distal_syn_perm_layout
@@ -352,7 +353,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_min_threshold
         self.spinner_min_threshold = QtWidgets.QSpinBox()
         self.spinner_min_threshold.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_min_threshold.setEnabled(not Global.simulation_initialized)
+        self.spinner_min_threshold.setEnabled(not self.main_window.isRunning())
         self.spinner_min_threshold.setToolTip("")
 
         # label_activation_threshold
@@ -363,7 +364,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_activation_threshold
         self.spinner_activation_threshold = QtWidgets.QSpinBox()
         self.spinner_activation_threshold.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_activation_threshold.setEnabled(not Global.simulation_initialized)
+        self.spinner_activation_threshold.setEnabled(not self.main_window.isRunning())
         self.spinner_activation_threshold.setToolTip("If the number of active connected synapses on a segment is at least this threshold, the segment is said to be active")
 
         # label_max_new_synapses
@@ -374,7 +375,7 @@ class RegionWindow(QtWidgets.QDialog):
         # spinner_max_new_synapses
         self.spinner_max_new_synapses = QtWidgets.QSpinBox()
         self.spinner_max_new_synapses.setAlignment(QtCore.Qt.AlignRight)
-        self.spinner_max_new_synapses.setEnabled(not Global.simulation_initialized)
+        self.spinner_max_new_synapses.setEnabled(not self.main_window.isRunning())
         self.spinner_max_new_synapses.setToolTip("The maximum number of synapses added to a segment during learning")
 
         # label_tp_seed
@@ -387,7 +388,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.spinner_tp_seed.setAlignment(QtCore.Qt.AlignRight)
         self.spinner_tp_seed.setMinimum(-1)
         self.spinner_tp_seed.setMaximum(5000)
-        self.spinner_tp_seed.setEnabled(not Global.simulation_initialized)
+        self.spinner_tp_seed.setEnabled(not self.main_window.isRunning())
         self.spinner_tp_seed.setToolTip("Seed for random values.")
 
         # tab_page_temporal_layout
@@ -418,7 +419,7 @@ class RegionWindow(QtWidgets.QDialog):
         # button_box
         self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.buttonOk_click)
-        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulation_initialized)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not self.main_window.isRunning())
         self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.buttonCancel_click)
 
         # layout
@@ -431,7 +432,7 @@ class RegionWindow(QtWidgets.QDialog):
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Region Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
 
     def setControlsValues(self):
         """
@@ -439,7 +440,7 @@ class RegionWindow(QtWidgets.QDialog):
         """
 
         # Set controls value with region params
-        node = Global.architecture_window.design_panel.under_mouse_node
+        node = self.main_window.architecture_window.design_panel.under_mouse_node
         self.spinner_width.setValue(node.width)
         self.spinner_height.setValue(node.height)
         self.spinner_potential_radius.setValue(node.potential_radius)
@@ -498,7 +499,7 @@ class RegionWindow(QtWidgets.QDialog):
         tp_seed = self.spinner_tp_seed.value()
 
         # If anything has changed
-        node = Global.architecture_window.design_panel.under_mouse_node
+        node = self.main_window.architecture_window.design_panel.under_mouse_node
         if node.width != width or node.height != height or node.potential_radius != potential_radius or node.potential_pct != potential_pct or node.global_inhibition != global_inhibition or node.local_area_density != local_area_density or node.num_active_columns_per_inh_area != num_active_columns_per_inh_area or node.stimulus_threshold != stimulus_threshold\
             or node.proximal_syn_connected_perm != proximal_syn_connected_perm or node.proximal_syn_perm_increment != proximal_syn_perm_increment or node.proximal_syn_perm_decrement != proximal_syn_perm_decrement or node.min_pct_overlap_duty_cycle != min_pct_overlap_duty_cycle or node.min_pct_active_duty_cycle != min_pct_active_duty_cycle or node.duty_cycle_period != duty_cycle_period or node.max_boost != max_boost or node.sp_seed != sp_seed\
             or node.cells_per_column != cells_per_column or node.distal_syn_initial_perm != distal_syn_initial_perm or node.distal_syn_connected_perm != distal_syn_connected_perm or node.distal_syn_perm_increment != distal_syn_perm_increment or node.distal_syn_perm_decrement != distal_syn_perm_decrement or node.min_threshold != min_threshold or node.activation_threshold != activation_threshold or node.max_new_synapses != max_new_synapses or node.tp_seed != tp_seed:

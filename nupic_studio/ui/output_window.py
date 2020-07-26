@@ -1,5 +1,5 @@
 ﻿from PyQt5 import QtGui, QtCore, QtWidgets
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON
 
 
 class OutputWindow(QtWidgets.QWidget):
@@ -25,7 +25,7 @@ class OutputWindow(QtWidgets.QWidget):
         # self
         self.setLayout(layout)
         self.setWindowTitle("Output")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.setMinimumHeight(200)
         self.setMaximumHeight(300)
 

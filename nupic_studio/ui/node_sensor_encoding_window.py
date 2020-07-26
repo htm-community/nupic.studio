@@ -2,7 +2,7 @@
 import json
 from PyQt5 import QtGui, QtCore, QtWidgets
 from nupic_studio import ArrayTableModel
-from nupic_studio.ui import Global
+from nupic_studio.ui import ICON, Global
 from nupic_studio.htm.encoding import Encoding, FieldDataType
 
 
@@ -138,7 +138,7 @@ class EncodingWindow(QtWidgets.QDialog):
         # button_box
         self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.buttonOk_click)
-        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not Global.simulation_initialized)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(not self.main_window.isRunning())
         self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.buttonCancel_click)
 
         # layout
@@ -150,7 +150,7 @@ class EncodingWindow(QtWidgets.QDialog):
         self.setLayout(layout)
         self.setModal(True)
         self.setWindowTitle("Sensor Properties")
-        self.setWindowIcon(QtGui.QIcon(Global.app_path + '/images/logo.ico'))
+        self.setWindowIcon(ICON)
         self.resize(400, 200)
 
     def setControlsValues(self):

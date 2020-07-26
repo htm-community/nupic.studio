@@ -1,6 +1,8 @@
 import os
-import copy
 from PyQt5 import QtGui, QtCore, QtWidgets
+from nupic_studio import REPO_DIR
+
+ICON = QtGui.QIcon(os.path.join(REPO_DIR, 'images', 'logo.ico'))
 
 
 class State:
@@ -49,47 +51,8 @@ NEW_VIEW = {
     'show_distal_synapses_active': True,
 }
 
-
 class Global:
-    app_path = ''
-    version = '0.1.0'
-
-    simulation_initialized = False
     curr_step = 0
     sel_step = 0
     time_steps_predictions_chart = None
-    output = []
-
-    views = []
-
     project = None
-    architecture_window = None
-    node_information_window = None
-    simulation_window = None
-    output_window = None
-    main_window = None
-
-    @staticmethod
-    def loadConfig():
-        """
-        Loads the content from XML file to config the program.
-        """
-        file_name = os.path.join(Global.app_path, "nupic_studio.config")
-        try:
-            config = eval(open(file_name, 'r').read())
-        except:
-            QtWidgets.QMessageBox.warning(None, "Warning", "Cannot read the config file (" + file_name + ")! Configuration was reseted!", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.NoButton)
-            config = DEFAULT_CONFIGURATION
-        Global.views = config['views']
-
-    @staticmethod
-    def saveConfig():
-        """
-        Saves the content from current program's configuration.
-        """
-        file_name = os.path.join(Global.app_path, "nupic_studio.config")
-        views = copy.deepcopy(Global.views)
-        for view in views:
-            view['menu'] = None
-        config = {'views': views}
-        open(file_name, 'w').write(str(config))
